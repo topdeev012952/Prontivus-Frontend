@@ -33,7 +33,10 @@ export function NotificationDropdown() {
         ) : (
           <div className="divide-y">
             {notifications.map((notification) => {
-              const Icon = iconMap[notification.type];
+              const Icon = iconMap[notification.type] || Bell;
+              const timestamp = notification.timestamp ? new Date(notification.timestamp) : new Date();
+              const isValidDate = !isNaN(timestamp.getTime());
+              
               return (
                 <div
                   key={notification.id}
@@ -62,7 +65,7 @@ export function NotificationDropdown() {
                       {notification.message}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
+                      {isValidDate ? formatDistanceToNow(timestamp, { addSuffix: true }) : 'Just now'}
                     </p>
                   </div>
                 </div>

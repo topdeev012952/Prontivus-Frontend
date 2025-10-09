@@ -21,7 +21,8 @@ export const useWebSocket = () => {
     if (!isAuthenticated || !user) return;
 
     const token = localStorage.getItem('access_token');
-    const wsUrl = `ws://localhost:8000/ws/notifications?token=${token}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const wsUrl = `${apiUrl.replace('http', 'ws').replace('/api/v1', '')}/ws/notifications?token=${token}`;
     
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -34,6 +35,10 @@ export const useWebSocket = () => {
     ws.onmessage = (event) => {
       try {
         const notification: Notification = JSON.parse(event.data);
+        // Ensure notification has an id
+        if (!notification.id) {
+          notification.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        }
         setNotifications(prev => [notification, ...prev]);
         
         // Save to IndexedDB
