@@ -20,11 +20,11 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://prontivus-backend-wnw2.onrender.com"
+    "VITE_API_URL": "https://prontivus-backend-wnw2.onrender.com/api/v1"
   },
   "build": {
     "env": {
-      "VITE_API_URL": "https://prontivus-backend-wnw2.onrender.com"
+      "VITE_API_URL": "https://prontivus-backend-wnw2.onrender.com/api/v1"
     }
   }
 }
