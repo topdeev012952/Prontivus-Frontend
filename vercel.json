@@ -20,7 +20,12 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://your-backend-url.onrender.com"
+    "VITE_API_URL": "@vite_api_url"
+  },
+  "build": {
+    "env": {
+      "VITE_API_URL": "@vite_api_url"
+    }
   }
 }
 
