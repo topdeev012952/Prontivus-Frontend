@@ -1,0 +1,834 @@
+import { useState, useEffect } from "react";
+import { Plus, Search, Filter, Loader2, Users as UsersIcon, X, Edit, Trash2, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { apiClient } from "@/lib/api";
+
+interface Patient {
+  id: string;
+  name: string;
+  birthdate?: string;
+  gender: string;
+  cpf?: string;
+  address?: Record<string, any>;
+  phone?: string;
+  email?: string;
+  insurance_number?: string;
+  insurance_provider?: string;
+  clinic_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PaginatedResponse {
+  items: Patient[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+export default function Patients() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    birthdate: "",
+    gender: "unknown",
+    cpf: "",
+    phone: "",
+    email: "",
+    insurance_number: "",
+    insurance_provider: "",
+  });
+
+  useEffect(() => {
+    loadPatients();
+  }, [page]);
+
+  useEffect(() => {
+    // Debounce search
+    const timer = setTimeout(() => {
+      if (page === 1) {
+        loadPatients();
+      } else {
+        setPage(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const loadPatients = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: "20",
+      });
+
+      if (searchQuery) {
+        params.append("search", searchQuery);
+      }
+
+      const data = await apiClient.request<PaginatedResponse>(
+        `/patients?${params.toString()}`
+      );
+
+      setPatients(data.items);
+      setTotal(data.total);
+      setTotalPages(data.pages);
+    } catch (err) {
+      console.error("Error loading patients:", err);
+      setError("Failed to load patients. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreatePatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setSaving(true);
+      setError("");
+
+      await apiClient.request("/patients", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        birthdate: "",
+        gender: "unknown",
+        cpf: "",
+        phone: "",
+        email: "",
+        insurance_number: "",
+        insurance_provider: "",
+      });
+      
+      setShowAddDialog(false);
+      
+      // Reload patients
+      await loadPatients();
+    } catch (err: any) {
+      console.error("Error creating patient:", err);
+      setError(err.message || "Failed to create patient. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleViewPatient = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setShowViewDialog(true);
+  };
+
+  const handleEditPatient = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setFormData({
+      name: patient.name,
+      birthdate: patient.birthdate || "",
+      gender: patient.gender,
+      cpf: patient.cpf || "",
+      phone: patient.phone || "",
+      email: patient.email || "",
+      insurance_number: patient.insurance_number || "",
+      insurance_provider: patient.insurance_provider || "",
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleUpdatePatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedPatient) return;
+
+    try {
+      setSaving(true);
+      setError("");
+
+      await apiClient.request(`/patients/${selectedPatient.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(formData),
+      });
+
+      setShowEditDialog(false);
+      setSelectedPatient(null);
+      
+      // Reset form
+      setFormData({
+        name: "",
+        birthdate: "",
+        gender: "unknown",
+        cpf: "",
+        phone: "",
+        email: "",
+        insurance_number: "",
+        insurance_provider: "",
+      });
+      
+      // Reload patients
+      await loadPatients();
+    } catch (err: any) {
+      console.error("Error updating patient:", err);
+      setError(err.message || "Failed to update patient. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteClick = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeletePatient = async () => {
+    if (!selectedPatient) return;
+
+    try {
+      setDeleting(true);
+      setError("");
+
+      await apiClient.request(`/patients/${selectedPatient.id}`, {
+        method: "DELETE",
+      });
+
+      setShowDeleteDialog(false);
+      setSelectedPatient(null);
+      
+      // Reload patients
+      await loadPatients();
+    } catch (err: any) {
+      console.error("Error deleting patient:", err);
+      setError(err.message || "Failed to delete patient. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Patients</h1>
+          <p className="text-muted-foreground">
+            {total > 0 ? `Manage your ${total.toLocaleString()} patient records` : "Manage your patient records"}
+          </p>
+        </div>
+        <Button className="gap-2" onClick={() => setShowAddDialog(true)}>
+          <Plus className="h-4 w-4" />
+          Add Patient
+        </Button>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Search and Filters */}
+      <Card className="shadow-card">
+        <CardContent className="p-4">
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, CPF, or phone..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+                disabled={loading}
+              />
+            </div>
+            <Button variant="outline" className="gap-2">
+              <Filter className="h-4 w-4" />
+              Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && patients.length === 0 && (
+        <Card className="shadow-card">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <UsersIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No patients found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchQuery
+                ? "Try adjusting your search criteria"
+                : "Get started by adding your first patient"}
+            </p>
+            <Button className="gap-2" onClick={() => setShowAddDialog(true)}>
+              <Plus className="h-4 w-4" />
+              Add Patient
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Patient List */}
+      {!loading && patients.length > 0 && (
+        <>
+          <div className="space-y-3">
+            {patients.map((patient) => (
+              <Card key={patient.id} className="shadow-card hover:shadow-medical transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+                        {patient.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{patient.name}</h3>
+                          <Badge variant="default">Active</Badge>
+                        </div>
+                        <div className="mt-1 flex gap-4 text-sm text-muted-foreground">
+                          {patient.cpf && <span>CPF: {patient.cpf}</span>}
+                          {patient.phone && <span>Phone: {patient.phone}</span>}
+                          {patient.insurance_provider && <span>Insurance: {patient.insurance_provider}</span>}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-right text-sm text-muted-foreground mr-4">
+                        <div>Registered</div>
+                        <div className="font-medium text-foreground">
+                          {formatDate(patient.created_at)}
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewPatient(patient);
+                          }}
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditPatient(patient);
+                          }}
+                          title="Edit Patient"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(patient);
+                          }}
+                          title="Delete Patient"
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing page {page} of {totalPages} ({total.toLocaleString()} total patients)
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1 || loading}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages || loading}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Add Patient Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Patient</DialogTitle>
+            <DialogDescription>
+              Enter the patient's information below. Fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreatePatient}>
+            <div className="grid gap-4 py-4">
+              {/* Name */}
+              <div className="grid gap-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* CPF */}
+              <div className="grid gap-2">
+                <Label htmlFor="cpf">CPF</Label>
+                <Input
+                  id="cpf"
+                  placeholder="000.000.000-00"
+                  value={formData.cpf}
+                  onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Birthdate */}
+                <div className="grid gap-2">
+                  <Label htmlFor="birthdate">Birthdate</Label>
+                  <Input
+                    id="birthdate"
+                    type="date"
+                    value={formData.birthdate}
+                    onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+                  />
+                </div>
+
+                {/* Gender */}
+                <div className="grid gap-2">
+                  <Label htmlFor="gender">Gender</Label>
+                  <Select
+                    value={formData.gender}
+                    onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unknown">Prefer not to say</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Phone */}
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    placeholder="(00) 00000-0000"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="patient@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Insurance Number */}
+                <div className="grid gap-2">
+                  <Label htmlFor="insurance_number">Insurance Number</Label>
+                  <Input
+                    id="insurance_number"
+                    placeholder="0000000000"
+                    value={formData.insurance_number}
+                    onChange={(e) => setFormData({ ...formData, insurance_number: e.target.value })}
+                  />
+                </div>
+
+                {/* Insurance Provider */}
+                <div className="grid gap-2">
+                  <Label htmlFor="insurance_provider">Insurance Provider</Label>
+                  <Input
+                    id="insurance_provider"
+                    placeholder="Provider name"
+                    value={formData.insurance_provider}
+                    onChange={(e) => setFormData({ ...formData, insurance_provider: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowAddDialog(false)}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Patient"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Patient Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Patient Details</DialogTitle>
+            <DialogDescription>
+              Complete information for {selectedPatient?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPatient && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Full Name</Label>
+                  <p className="font-medium mt-1">{selectedPatient.name}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">CPF</Label>
+                  <p className="font-medium mt-1">{selectedPatient.cpf || "Not provided"}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Birthdate</Label>
+                  <p className="font-medium mt-1">
+                    {selectedPatient.birthdate ? formatDate(selectedPatient.birthdate) : "Not provided"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Gender</Label>
+                  <p className="font-medium mt-1 capitalize">{selectedPatient.gender}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Phone</Label>
+                  <p className="font-medium mt-1">{selectedPatient.phone || "Not provided"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Email</Label>
+                  <p className="font-medium mt-1">{selectedPatient.email || "Not provided"}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Insurance Number</Label>
+                  <p className="font-medium mt-1">{selectedPatient.insurance_number || "Not provided"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Insurance Provider</Label>
+                  <p className="font-medium mt-1">{selectedPatient.insurance_provider || "Not provided"}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Registered</Label>
+                  <p className="font-medium mt-1">{formatDate(selectedPatient.created_at)}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Last Updated</Label>
+                  <p className="font-medium mt-1">{formatDate(selectedPatient.updated_at)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button onClick={() => setShowViewDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Patient Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Patient</DialogTitle>
+            <DialogDescription>
+              Update patient information. Fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleUpdatePatient}>
+            <div className="grid gap-4 py-4">
+              {/* Name */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-name">Full Name *</Label>
+                <Input
+                  id="edit-name"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* CPF */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-cpf">CPF</Label>
+                <Input
+                  id="edit-cpf"
+                  placeholder="000.000.000-00"
+                  value={formData.cpf}
+                  onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Birthdate */}
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-birthdate">Birthdate</Label>
+                  <Input
+                    id="edit-birthdate"
+                    type="date"
+                    value={formData.birthdate}
+                    onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+                  />
+                </div>
+
+                {/* Gender */}
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-gender">Gender</Label>
+                  <Select
+                    value={formData.gender}
+                    onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unknown">Prefer not to say</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Phone */}
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Input
+                    id="edit-phone"
+                    placeholder="(00) 00000-0000"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    placeholder="patient@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Insurance Number */}
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-insurance_number">Insurance Number</Label>
+                  <Input
+                    id="edit-insurance_number"
+                    placeholder="0000000000"
+                    value={formData.insurance_number}
+                    onChange={(e) => setFormData({ ...formData, insurance_number: e.target.value })}
+                  />
+                </div>
+
+                {/* Insurance Provider */}
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-insurance_provider">Insurance Provider</Label>
+                  <Input
+                    id="edit-insurance_provider"
+                    placeholder="Provider name"
+                    value={formData.insurance_provider}
+                    onChange={(e) => setFormData({ ...formData, insurance_provider: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEditDialog(false)}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving || !formData.name}>
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Patient"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Patient</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this patient? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPatient && (
+            <div className="py-4">
+              <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+                <p className="font-medium">{selectedPatient.name}</p>
+                {selectedPatient.cpf && <p className="text-sm text-muted-foreground">CPF: {selectedPatient.cpf}</p>}
+                {selectedPatient.phone && <p className="text-sm text-muted-foreground">Phone: {selectedPatient.phone}</p>}
+              </div>
+              <p className="text-sm text-muted-foreground mt-4">
+                All related appointments, medical records, and invoices will remain in the system but will be orphaned.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeletePatient}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Patient
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

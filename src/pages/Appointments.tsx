@@ -1,0 +1,904 @@
+import { useState, useEffect } from "react";
+import { Calendar as CalendarIcon, Plus, Clock, User, Loader2, X, Edit, Trash2, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { apiClient } from "@/lib/api";
+
+interface Appointment {
+  id: string;
+  patient_id: string;
+  patient_name?: string;
+  doctor_id: string;
+  doctor_name?: string;
+  clinic_id: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PaginatedResponse {
+  items: Appointment[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+interface Patient {
+  id: string;
+  name: string;
+}
+
+interface Doctor {
+  id: string;
+  name: string;
+}
+
+export default function Appointments() {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [total, setTotal] = useState(0);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [formData, setFormData] = useState({
+    patient_id: "",
+    doctor_id: "",
+    date: "",
+    start_time: "",
+    duration: "30",
+    status: "scheduled"
+  });
+
+  useEffect(() => {
+    loadAppointments();
+  }, [selectedDate]);
+
+  useEffect(() => {
+    loadPatientsAndDoctors();
+  }, []);
+
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const params = new URLSearchParams({
+        day: dateStr,
+        page: "1",
+        size: "50",
+      });
+
+      const data = await apiClient.request<PaginatedResponse>(
+        `/appointments?${params.toString()}`
+      );
+
+      setAppointments(data.items);
+      setTotal(data.total);
+    } catch (err) {
+      console.error("Error loading appointments:", err);
+      setError("Failed to load appointments. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPatientsAndDoctors = async () => {
+    try {
+      // Load patients
+      const patientsData = await apiClient.request<PaginatedResponse>("/patients?page=1&size=100");
+      setPatients(patientsData.items as any);
+
+      // Load doctors (users with doctor role)
+      const usersData = await apiClient.request<any>("/users?page=1&size=100");
+      const doctorsList = usersData.items?.filter((u: any) => 
+        ['DOCTOR', 'doctor', 'ADMIN', 'admin'].includes(u.role)
+      ) || [];
+      setDoctors(doctorsList);
+    } catch (err) {
+      console.error("Error loading patients/doctors:", err);
+    }
+  };
+
+  const handleCreateAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setSaving(true);
+      setError("");
+
+      // Calculate start_time and end_time
+      const startDateTime = new Date(`${formData.date}T${formData.start_time}`);
+      const endDateTime = new Date(startDateTime.getTime() + parseInt(formData.duration) * 60000);
+
+      const appointmentData = {
+        patient_id: formData.patient_id,
+        doctor_id: formData.doctor_id,
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
+        status: formData.status
+      };
+
+      await apiClient.request("/appointments", {
+        method: "POST",
+        body: JSON.stringify(appointmentData),
+      });
+
+      // Reset form
+      setFormData({
+        patient_id: "",
+        doctor_id: "",
+        date: "",
+        start_time: "",
+        duration: "30",
+        status: "scheduled"
+      });
+      
+      setShowCreateDialog(false);
+      
+      // Reload appointments
+      await loadAppointments();
+    } catch (err: any) {
+      console.error("Error creating appointment:", err);
+      setError(err.response?.data?.detail || "Failed to create appointment. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleViewAppointment = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setShowViewDialog(true);
+  };
+
+  const handleEditAppointment = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    
+    // Parse the start_time to get date and time
+    const startDate = new Date(appointment.start_time);
+    const endDate = new Date(appointment.end_time);
+    const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000); // minutes
+    
+    setFormData({
+      patient_id: appointment.patient_id,
+      doctor_id: appointment.doctor_id,
+      date: startDate.toISOString().split('T')[0],
+      start_time: startDate.toTimeString().substring(0, 5),
+      duration: duration.toString(),
+      status: appointment.status
+    });
+    
+    setShowEditDialog(true);
+  };
+
+  const handleUpdateAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedAppointment) return;
+
+    try {
+      setSaving(true);
+      setError("");
+
+      // Calculate start_time and end_time
+      const startDateTime = new Date(`${formData.date}T${formData.start_time}`);
+      const endDateTime = new Date(startDateTime.getTime() + parseInt(formData.duration) * 60000);
+
+      const updateData = {
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
+        status: formData.status
+      };
+
+      await apiClient.request(`/appointments/${selectedAppointment.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(updateData),
+      });
+
+      setShowEditDialog(false);
+      setSelectedAppointment(null);
+      
+      // Reset form
+      setFormData({
+        patient_id: "",
+        doctor_id: "",
+        date: "",
+        start_time: "",
+        duration: "30",
+        status: "scheduled"
+      });
+      
+      // Reload appointments
+      await loadAppointments();
+    } catch (err: any) {
+      console.error("Error updating appointment:", err);
+      setError(err.message || "Failed to update appointment. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    try {
+      setDeleting(true);
+      setError("");
+
+      await apiClient.request(`/appointments/${selectedAppointment.id}`, {
+        method: "DELETE",
+      });
+
+      setShowDeleteDialog(false);
+      setSelectedAppointment(null);
+      
+      // Reload appointments
+      await loadAppointments();
+    } catch (err: any) {
+      console.error("Error deleting appointment:", err);
+      setError(err.message || "Failed to delete appointment. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "confirmed":
+        return "bg-accent/10 text-accent border-accent/20";
+      case "pending":
+        return "bg-yellow-500/10 text-yellow-700 border-yellow-500/20";
+      case "completed":
+        return "bg-green-500/10 text-green-700 border-green-500/20";
+      case "cancelled":
+        return "bg-red-500/10 text-red-700 border-red-500/20";
+      default:
+        return "bg-muted text-muted-foreground border-border";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const calculateDuration = (start: string, end: string) => {
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+    return Math.round((endTime.getTime() - startTime.getTime()) / 60000);
+  };
+
+  const changeDate = (days: number) => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + days);
+    setSelectedDate(newDate);
+  };
+
+  const confirmedCount = appointments.filter(a => a.status === 'confirmed').length;
+  const pendingCount = appointments.filter(a => a.status === 'pending').length;
+  const completedCount = appointments.filter(a => a.status === 'completed').length;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Appointments</h1>
+          <p className="text-muted-foreground">
+            {total > 0 ? `Managing ${total.toLocaleString()} appointments` : "Manage your schedule and appointments"}
+          </p>
+        </div>
+        <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+          <Plus className="h-4 w-4" />
+          New Appointment
+        </Button>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Calendar */}
+        <Card className="lg:col-span-1 shadow-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Calendar</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => changeDate(-1)}
+                    disabled={loading}
+                  >
+                    ← Prev
+                  </Button>
+                  <div className="flex items-center justify-center rounded-lg border p-2 bg-primary/5 flex-1">
+                    <CalendarIcon className="h-4 w-4 text-primary mr-2" />
+                    <span className="font-semibold text-sm">{selectedDate.toLocaleDateString('pt-BR')}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => changeDate(1)}
+                    disabled={loading}
+                  >
+                    Next →
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDate(new Date())}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  Today
+                </Button>
+              </div>
+              <div className="space-y-2 border-t pt-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Total Appointments</span>
+                  <span className="font-semibold">{appointments.length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Confirmed</span>
+                  <span className="font-semibold text-accent">{confirmedCount}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Pending</span>
+                  <span className="font-semibold text-yellow-600">{pendingCount}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Completed</span>
+                  <span className="font-semibold text-green-600">{completedCount}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Appointments List */}
+        <Card className="lg:col-span-2 shadow-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Schedule</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : appointments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <CalendarIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No appointments scheduled</h3>
+                <p className="text-muted-foreground mb-4">
+                  There are no appointments for {selectedDate.toLocaleDateString('pt-BR')}
+                </p>
+                <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+                  <Plus className="h-4 w-4" />
+                  Schedule Appointment
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                {appointments.map((appointment) => (
+                  <div
+                    key={appointment.id}
+                    className="rounded-lg border p-4 hover:shadow-md transition-all cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 text-primary font-semibold">
+                            <Clock className="h-4 w-4" />
+                            {formatTime(appointment.start_time)}
+                          </div>
+                          <Badge className={getStatusColor(appointment.status)}>
+                            {getStatusLabel(appointment.status)}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">
+                            {appointment.patient_name || `Patient #${appointment.patient_id.slice(0, 8)}`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>Type: Consulta</span>
+                          <span>Duration: {calculateDuration(appointment.start_time, appointment.end_time)} min</span>
+                          {appointment.doctor_name && <span>Dr: {appointment.doctor_name}</span>}
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewAppointment(appointment);
+                          }}
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditAppointment(appointment);
+                          }}
+                          title="Edit Appointment"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(appointment);
+                          }}
+                          title="Delete Appointment"
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Create Appointment Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>New Appointment</DialogTitle>
+            <DialogDescription>
+              Schedule a new appointment for a patient
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateAppointment}>
+            <div className="grid gap-4 py-4">
+              {/* Patient Selection */}
+              <div className="grid gap-2">
+                <Label htmlFor="patient">Patient *</Label>
+                <Select
+                  value={formData.patient_id}
+                  onValueChange={(value) => setFormData({ ...formData, patient_id: value })}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients.map((patient) => (
+                      <SelectItem key={patient.id} value={patient.id}>
+                        {patient.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Doctor Selection */}
+              <div className="grid gap-2">
+                <Label htmlFor="doctor">Doctor *</Label>
+                <Select
+                  value={formData.doctor_id}
+                  onValueChange={(value) => setFormData({ ...formData, doctor_id: value })}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select doctor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {doctors.map((doctor) => (
+                      <SelectItem key={doctor.id} value={doctor.id}>
+                        {doctor.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Date */}
+                <div className="grid gap-2">
+                  <Label htmlFor="date">Date *</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* Time */}
+                <div className="grid gap-2">
+                  <Label htmlFor="start_time">Time *</Label>
+                  <Input
+                    id="start_time"
+                    type="time"
+                    value={formData.start_time}
+                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Duration */}
+                <div className="grid gap-2">
+                  <Label htmlFor="duration">Duration (minutes)</Label>
+                  <Select
+                    value={formData.duration}
+                    onValueChange={(value) => setFormData({ ...formData, duration: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="45">45 minutes</SelectItem>
+                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="90">1.5 hours</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Status */}
+                <div className="grid gap-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => setFormData({ ...formData, status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving || !formData.patient_id || !formData.doctor_id}>
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Appointment"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Appointment Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Appointment Details</DialogTitle>
+          </DialogHeader>
+
+          {selectedAppointment && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Patient</Label>
+                  <p className="font-medium">
+                    {selectedAppointment.patient_name || `Patient #${selectedAppointment.patient_id.slice(0, 8)}`}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Doctor</Label>
+                  <p className="font-medium">
+                    {selectedAppointment.doctor_name || `Doctor #${selectedAppointment.doctor_id.slice(0, 8)}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Date</Label>
+                  <p className="font-medium">
+                    {new Date(selectedAppointment.start_time).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Time</Label>
+                  <p className="font-medium">
+                    {formatTime(selectedAppointment.start_time)} - {formatTime(selectedAppointment.end_time)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Duration</Label>
+                  <p className="font-medium">
+                    {calculateDuration(selectedAppointment.start_time, selectedAppointment.end_time)} minutes
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Status</Label>
+                  <Badge className={getStatusColor(selectedAppointment.status)}>
+                    {getStatusLabel(selectedAppointment.status)}
+                  </Badge>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Created</Label>
+                <p className="text-sm">
+                  {new Date(selectedAppointment.created_at).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowViewDialog(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Appointment Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Appointment</DialogTitle>
+            <DialogDescription>
+              Update appointment information. Patient and doctor cannot be changed.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleUpdateAppointment}>
+            <div className="space-y-4 py-4">
+              {/* Patient (Read-only) */}
+              <div className="space-y-2">
+                <Label>Patient (Cannot be changed)</Label>
+                <Input
+                  value={selectedAppointment?.patient_name || `Patient #${selectedAppointment?.patient_id.slice(0, 8)}`}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+
+              {/* Doctor (Read-only) */}
+              <div className="space-y-2">
+                <Label>Doctor (Cannot be changed)</Label>
+                <Input
+                  value={selectedAppointment?.doctor_name || `Doctor #${selectedAppointment?.doctor_id.slice(0, 8)}`}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+
+              {/* Date */}
+              <div className="space-y-2">
+                <Label htmlFor="edit-date">Date</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* Time and Duration */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-start-time">Start Time</Label>
+                  <Input
+                    id="edit-start-time"
+                    type="time"
+                    value={formData.start_time}
+                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-duration">Duration (minutes)</Label>
+                  <Select
+                    value={formData.duration}
+                    onValueChange={(value) => setFormData({ ...formData, duration: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="45">45 minutes</SelectItem>
+                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="90">1.5 hours</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="space-y-2">
+                <Label htmlFor="edit-status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData({ ...formData, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="checked_in">Checked In</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEditDialog(false)}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Appointment"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Appointment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this appointment? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedAppointment && (
+            <div className="py-4">
+              <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+                <p className="font-medium">
+                  {selectedAppointment.patient_name || `Patient #${selectedAppointment.patient_id.slice(0, 8)}`}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {formatDate(selectedAppointment.start_time)} at {formatTime(selectedAppointment.start_time)}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Status: {getStatusLabel(selectedAppointment.status)}
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground mt-4">
+                Related medical records and invoices will remain in the system but will be orphaned.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAppointment}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Appointment
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
