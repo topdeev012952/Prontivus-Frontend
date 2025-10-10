@@ -10,6 +10,9 @@ interface ShortcutConfig {
 export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if key is undefined (e.g., some special keys)
+      if (!e.key) return;
+      
       shortcuts.forEach(({ key, ctrl, action }) => {
         const ctrlMatch = ctrl ? e.ctrlKey || e.metaKey : !e.ctrlKey && !e.metaKey;
         if (e.key.toLowerCase() === key.toLowerCase() && ctrlMatch) {
