@@ -43,7 +43,7 @@ export default function AdminDashboard() {
       });
     } catch (err) {
       console.error("Error loading admin stats:", err);
-      setError("Failed to load admin dashboard");
+      setError("Falha ao carregar dashboard de administrador");
     } finally {
       setLoading(false);
     }
@@ -60,8 +60,8 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">System overview and management</p>
+        <h1 className="text-3xl font-bold">Dashboard Administrativo</h1>
+        <p className="text-muted-foreground">Visão geral e gestão do sistema</p>
       </div>
 
       {error && (
@@ -73,27 +73,27 @@ export default function AdminDashboard() {
       {stats && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="Clinics"
+            title="Clínicas"
             value={stats.total_clinics.toString()}
-            change="Active"
+            change="Ativa"
             icon={Building2}
           />
           <StatsCard
-            title="Staff Members"
+            title="Membros da Equipe"
             value={stats.total_staff.toString()}
-            change="All roles"
+            change="Todas as funções"
             icon={Users}
           />
           <StatsCard
-            title="Integrations"
+            title="Integrações"
             value={stats.active_integrations.toString()}
-            change="Active connections"
+            change="Conexões ativas"
             icon={Shield}
           />
           <StatsCard
-            title="Monthly Revenue"
+            title="Receita Mensal"
             value={`R$ ${(stats.monthly_revenue / 1000).toFixed(1)}K`}
-            change="This month"
+            change="Este mês"
             icon={TrendingUp}
           />
         </div>
@@ -105,18 +105,18 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Clinic Management
+              Gestão da Clínica
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline" onClick={() => navigate("/app/settings")}>
-              Configure Clinic Settings
+              Configurar Clínica
             </Button>
             <Button className="w-full justify-start" variant="outline" onClick={() => navigate("/app/settings")}>
-              Manage Staff & Roles
+              Gerenciar Equipe e Funções
             </Button>
             <Button className="w-full justify-start" variant="outline" onClick={() => navigate("/app/settings")}>
-              License & Billing
+              Licença e Faturamento
             </Button>
           </CardContent>
         </Card>
@@ -126,18 +126,18 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Integrations
+              Integrações
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline" onClick={() => navigate("/app/tiss")}>
-              TISS Module
+              Módulo TISS
             </Button>
             <Button className="w-full justify-start" variant="outline" onClick={() => navigate("/app/health-plans")}>
-              Health Plan APIs
+              APIs de Planos de Saúde
             </Button>
             <Button className="w-full justify-start" variant="outline">
-              AI Providers
+              Provedores de IA
             </Button>
           </CardContent>
         </Card>
@@ -147,24 +147,24 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              System Health
+              Saúde do Sistema
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm">Backend API</span>
-              <Badge className="bg-green-100 text-green-800">Healthy</Badge>
+              <Badge className="bg-green-100 text-green-800">Saudável</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm">Database</span>
-              <Badge className="bg-green-100 text-green-800">Connected</Badge>
+              <span className="text-sm">Banco de Dados</span>
+              <Badge className="bg-green-100 text-green-800">Conectado</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm">Background Workers</span>
-              <Badge className="bg-green-100 text-green-800">Running</Badge>
+              <span className="text-sm">Workers em Segundo Plano</span>
+              <Badge className="bg-green-100 text-green-800">Executando</Badge>
             </div>
             <Button className="w-full mt-2" variant="outline" onClick={() => window.open("https://prontivus-backend-wnw2.onrender.com/health", "_blank")}>
-              View Full Health Check
+              Ver Verificação Completa de Saúde
             </Button>
           </CardContent>
         </Card>
@@ -172,20 +172,20 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <Card className="shadow-card">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle>Ações Rápidas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <Button className="w-full justify-start gap-2" variant="outline" onClick={() => navigate("/app/patients")}>
               <Plus className="h-4 w-4" />
-              Add New Patient
+              Adicionar Novo Paciente
             </Button>
             <Button className="w-full justify-start gap-2" variant="outline" onClick={() => navigate("/app/appointments")}>
               <Plus className="h-4 w-4" />
-              Schedule Appointment
+              Agendar Consulta
             </Button>
             <Button className="w-full justify-start gap-2" variant="outline" onClick={() => navigate("/app/bi-dashboard")}>
               <Activity className="h-4 w-4" />
-              View Analytics
+              Ver Análises
             </Button>
           </CardContent>
         </Card>
