@@ -111,7 +111,7 @@ export default function Register() {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <img 
-              src="/Logo/Prontivus Horizontal.png" 
+              src="/Logo/Logotipo em Fundo Transparente.png" 
               alt="Prontivus" 
               className="h-32 w-auto"
             />

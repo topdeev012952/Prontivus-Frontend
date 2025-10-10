@@ -141,7 +141,7 @@ export default function Landing() {
             onClick={() => navigate("/")}
           >
             <img 
-              src="/Logo/Prontivus Horizontal.png" 
+              src="/Logo/Logotipo em Fundo Transparente.png" 
               alt="Prontivus Logo" 
               className="h-36 w-auto animate-float"
             />
@@ -448,7 +448,7 @@ export default function Landing() {
             <div className="animate-in fade-in duration-500">
               <div className="mb-4">
                 <img 
-                  src="/Logo/Prontivus Horizontal.png" 
+                  src="/Logo/Logotipo em Fundo Transparente.png" 
                   alt="Prontivus" 
                   className="h-30 w-auto"
                 />
