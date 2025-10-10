@@ -170,10 +170,16 @@ export default function DigitalPrescriptions() {
         throw new Error("Please add at least one medication with name and dosage");
       }
 
+      // Map frontend field names to backend field names
       const prescriptionData = {
         patient_id: selectedPatient,
         prescription_type: prescriptionType,
-        medications: validMedications,
+        medications: validMedications.map(med => ({
+          medication_name: med.name,  // Backend expects medication_name
+          dosage: med.dosage,
+          frequency: med.frequency,
+          duration: med.duration,
+        })),
         notes: prescriptionNotes || null,
       };
 
