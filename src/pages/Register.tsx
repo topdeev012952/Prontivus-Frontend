@@ -176,7 +176,7 @@ export default function Register() {
                     name="contactEmail"
                     type="email"
                     placeholder="contact@clinic.com"
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}"
                     value={formData.contactEmail}
                     onChange={handleChange}
                     disabled={isLoading}
@@ -225,7 +225,7 @@ export default function Register() {
                     name="adminEmail"
                     type="email"
                     placeholder="admin@clinic.com"
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}"
                     value={formData.adminEmail}
                     onChange={handleChange}
                     disabled={isLoading}
