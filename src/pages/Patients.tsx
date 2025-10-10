@@ -113,7 +113,7 @@ export default function Patients() {
       setTotalPages(data.pages);
     } catch (err) {
       console.error("Error loading patients:", err);
-      setError("Failed to load patients. Please try again.");
+      setError("Falha ao carregar pacientes. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -149,7 +149,7 @@ export default function Patients() {
       await loadPatients();
     } catch (err: any) {
       console.error("Error creating patient:", err);
-      setError(err.message || "Failed to create patient. Please try again.");
+      setError(err.message || "Falha ao criar paciente. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -208,7 +208,7 @@ export default function Patients() {
       await loadPatients();
     } catch (err: any) {
       console.error("Error updating patient:", err);
-      setError(err.message || "Failed to update patient. Please try again.");
+      setError(err.message || "Falha ao atualizar paciente. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -237,7 +237,7 @@ export default function Patients() {
       await loadPatients();
     } catch (err: any) {
       console.error("Error deleting patient:", err);
-      setError(err.message || "Failed to delete patient. Please try again.");
+      setError(err.message || "Falha ao excluir paciente. Tente novamente.");
     } finally {
       setDeleting(false);
     }
@@ -253,14 +253,14 @@ export default function Patients() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Patients</h1>
+          <h1 className="text-3xl font-bold">Pacientes</h1>
           <p className="text-muted-foreground">
-            {total > 0 ? `Manage your ${total.toLocaleString()} patient records` : "Manage your patient records"}
+            {total > 0 ? `Gerencie seus ${total.toLocaleString()} registros de pacientes` : "Gerencie seus registros de pacientes"}
           </p>
         </div>
         <Button className="gap-2" onClick={() => setShowAddDialog(true)}>
           <Plus className="h-4 w-4" />
-          Add Patient
+          Adicionar Paciente
         </Button>
       </div>
 
@@ -277,7 +277,7 @@ export default function Patients() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name, CPF, or phone..."
+                placeholder="Buscar por nome, CPF ou telefone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -286,7 +286,7 @@ export default function Patients() {
             </div>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              Filters
+              Filtros
             </Button>
           </div>
         </CardContent>
@@ -304,15 +304,15 @@ export default function Patients() {
         <Card className="shadow-card">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <UsersIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No patients found</h3>
+            <h3 className="text-lg font-semibold mb-2">Nenhum paciente encontrado</h3>
             <p className="text-muted-foreground mb-4">
               {searchQuery
-                ? "Try adjusting your search criteria"
-                : "Get started by adding your first patient"}
+                ? "Tente ajustar seus critérios de busca"
+                : "Comece adicionando seu primeiro paciente"}
             </p>
             <Button className="gap-2" onClick={() => setShowAddDialog(true)}>
               <Plus className="h-4 w-4" />
-              Add Patient
+              Adicionar Paciente
             </Button>
           </CardContent>
         </Card>
@@ -333,18 +333,18 @@ export default function Patients() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">{patient.name}</h3>
-                          <Badge variant="default">Active</Badge>
+                          <Badge variant="default">Ativo</Badge>
                         </div>
                         <div className="mt-1 flex gap-4 text-sm text-muted-foreground">
                           {patient.cpf && <span>CPF: {patient.cpf}</span>}
-                          {patient.phone && <span>Phone: {patient.phone}</span>}
-                          {patient.insurance_provider && <span>Insurance: {patient.insurance_provider}</span>}
+                          {patient.phone && <span>Telefone: {patient.phone}</span>}
+                          {patient.insurance_provider && <span>Convênio: {patient.insurance_provider}</span>}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="text-right text-sm text-muted-foreground mr-4">
-                        <div>Registered</div>
+                        <div>Cadastrado em</div>
                         <div className="font-medium text-foreground">
                           {formatDate(patient.created_at)}
                         </div>
@@ -357,7 +357,7 @@ export default function Patients() {
                             e.stopPropagation();
                             handleViewPatient(patient);
                           }}
-                          title="View Details"
+                          title="Ver Detalhes"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -368,7 +368,7 @@ export default function Patients() {
                             e.stopPropagation();
                             handleEditPatient(patient);
                           }}
-                          title="Edit Patient"
+                          title="Editar Paciente"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -379,7 +379,7 @@ export default function Patients() {
                             e.stopPropagation();
                             handleDeleteClick(patient);
                           }}
-                          title="Delete Patient"
+                          title="Excluir Paciente"
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -396,7 +396,7 @@ export default function Patients() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Showing page {page} of {totalPages} ({total.toLocaleString()} total patients)
+                Página {page} de {totalPages} ({total.toLocaleString()} pacientes no total)
               </p>
               <div className="flex gap-2">
                 <Button
@@ -404,14 +404,14 @@ export default function Patients() {
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1 || loading}
                 >
-                  Previous
+                  Anterior
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages || loading}
                 >
-                  Next
+                  Próxima
                 </Button>
               </div>
             </div>
@@ -423,9 +423,9 @@ export default function Patients() {
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New Patient</DialogTitle>
+            <DialogTitle>Adicionar Novo Paciente</DialogTitle>
             <DialogDescription>
-              Enter the patient's information below. Fields marked with * are required.
+              Preencha as informações do paciente. Campos marcados com * são obrigatórios.
             </DialogDescription>
           </DialogHeader>
 
@@ -433,10 +433,10 @@ export default function Patients() {
             <div className="grid gap-4 py-4">
               {/* Name */}
               <div className="grid gap-2">
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">Nome Completo *</Label>
                 <Input
                   id="name"
-                  placeholder="John Doe"
+                  placeholder="João Silva"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -457,7 +457,7 @@ export default function Patients() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Birthdate */}
                 <div className="grid gap-2">
-                  <Label htmlFor="birthdate">Birthdate</Label>
+                  <Label htmlFor="birthdate">Data de Nascimento</Label>
                   <Input
                     id="birthdate"
                     type="date"
@@ -468,19 +468,19 @@ export default function Patients() {
 
                 {/* Gender */}
                 <div className="grid gap-2">
-                  <Label htmlFor="gender">Gender</Label>
+                  <Label htmlFor="gender">Sexo</Label>
                   <Select
                     value={formData.gender}
                     onValueChange={(value) => setFormData({ ...formData, gender: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder="Selecione o sexo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="unknown">Prefer not to say</SelectItem>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="unknown">Prefiro não informar</SelectItem>
+                      <SelectItem value="male">Masculino</SelectItem>
+                      <SelectItem value="female">Feminino</SelectItem>
+                      <SelectItem value="other">Outro</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -489,10 +489,10 @@ export default function Patients() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Phone */}
                 <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">Telefone</Label>
                   <Input
                     id="phone"
-                    placeholder="(00) 00000-0000"
+                    placeholder="(11) 98765-4321"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
@@ -500,11 +500,11 @@ export default function Patients() {
 
                 {/* Email */}
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">E-mail</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="patient@example.com"
+                    placeholder="paciente@exemplo.com.br"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
@@ -514,7 +514,7 @@ export default function Patients() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Insurance Number */}
                 <div className="grid gap-2">
-                  <Label htmlFor="insurance_number">Insurance Number</Label>
+                  <Label htmlFor="insurance_number">Número do Convênio</Label>
                   <Input
                     id="insurance_number"
                     placeholder="0000000000"
@@ -525,10 +525,10 @@ export default function Patients() {
 
                 {/* Insurance Provider */}
                 <div className="grid gap-2">
-                  <Label htmlFor="insurance_provider">Insurance Provider</Label>
+                  <Label htmlFor="insurance_provider">Operadora do Convênio</Label>
                   <Input
                     id="insurance_provider"
-                    placeholder="Provider name"
+                    placeholder="Nome da operadora"
                     value={formData.insurance_provider}
                     onChange={(e) => setFormData({ ...formData, insurance_provider: e.target.value })}
                   />
@@ -543,16 +543,16 @@ export default function Patients() {
                 onClick={() => setShowAddDialog(false)}
                 disabled={saving}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" disabled={saving}>
                 {saving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
+                    Criando...
                   </>
                 ) : (
-                  "Create Patient"
+                  "Criar Paciente"
                 )}
               </Button>
             </DialogFooter>
@@ -564,9 +564,9 @@ export default function Patients() {
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Patient Details</DialogTitle>
+            <DialogTitle>Detalhes do Paciente</DialogTitle>
             <DialogDescription>
-              Complete information for {selectedPatient?.name}
+              Informações completas de {selectedPatient?.name}
             </DialogDescription>
           </DialogHeader>
 
@@ -574,57 +574,57 @@ export default function Patients() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Full Name</Label>
+                  <Label className="text-muted-foreground">Nome Completo</Label>
                   <p className="font-medium mt-1">{selectedPatient.name}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">CPF</Label>
-                  <p className="font-medium mt-1">{selectedPatient.cpf || "Not provided"}</p>
+                  <p className="font-medium mt-1">{selectedPatient.cpf || "Não informado"}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Birthdate</Label>
+                  <Label className="text-muted-foreground">Data de Nascimento</Label>
                   <p className="font-medium mt-1">
-                    {selectedPatient.birthdate ? formatDate(selectedPatient.birthdate) : "Not provided"}
+                    {selectedPatient.birthdate ? formatDate(selectedPatient.birthdate) : "Não informada"}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Gender</Label>
+                  <Label className="text-muted-foreground">Sexo</Label>
                   <p className="font-medium mt-1 capitalize">{selectedPatient.gender}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Phone</Label>
-                  <p className="font-medium mt-1">{selectedPatient.phone || "Not provided"}</p>
+                  <Label className="text-muted-foreground">Telefone</Label>
+                  <p className="font-medium mt-1">{selectedPatient.phone || "Não informado"}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-medium mt-1">{selectedPatient.email || "Not provided"}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Insurance Number</Label>
-                  <p className="font-medium mt-1">{selectedPatient.insurance_number || "Not provided"}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Insurance Provider</Label>
-                  <p className="font-medium mt-1">{selectedPatient.insurance_provider || "Not provided"}</p>
+                  <Label className="text-muted-foreground">E-mail</Label>
+                  <p className="font-medium mt-1">{selectedPatient.email || "Não informado"}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Registered</Label>
+                  <Label className="text-muted-foreground">Número do Convênio</Label>
+                  <p className="font-medium mt-1">{selectedPatient.insurance_number || "Não informado"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Operadora do Convênio</Label>
+                  <p className="font-medium mt-1">{selectedPatient.insurance_provider || "Não informada"}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Cadastrado em</Label>
                   <p className="font-medium mt-1">{formatDate(selectedPatient.created_at)}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Last Updated</Label>
+                  <Label className="text-muted-foreground">Última Atualização</Label>
                   <p className="font-medium mt-1">{formatDate(selectedPatient.updated_at)}</p>
                 </div>
               </div>
@@ -632,7 +632,7 @@ export default function Patients() {
           )}
 
           <DialogFooter>
-            <Button onClick={() => setShowViewDialog(false)}>Close</Button>
+            <Button onClick={() => setShowViewDialog(false)}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -641,9 +641,9 @@ export default function Patients() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Patient</DialogTitle>
+            <DialogTitle>Editar Paciente</DialogTitle>
             <DialogDescription>
-              Update patient information. Fields marked with * are required.
+              Atualize as informações do paciente. Campos marcados com * são obrigatórios.
             </DialogDescription>
           </DialogHeader>
 
@@ -651,10 +651,10 @@ export default function Patients() {
             <div className="grid gap-4 py-4">
               {/* Name */}
               <div className="grid gap-2">
-                <Label htmlFor="edit-name">Full Name *</Label>
+                <Label htmlFor="edit-name">Nome Completo *</Label>
                 <Input
                   id="edit-name"
-                  placeholder="John Doe"
+                  placeholder="João Silva"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -673,12 +673,12 @@ export default function Patients() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {/* Birthdate */}
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-birthdate">Birthdate</Label>
-                  <Input
-                    id="edit-birthdate"
-                    type="date"
+              {/* Birthdate */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-birthdate">Data de Nascimento</Label>
+                <Input
+                  id="edit-birthdate"
+                  type="date"
                     value={formData.birthdate}
                     onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
                   />
@@ -686,19 +686,19 @@ export default function Patients() {
 
                 {/* Gender */}
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-gender">Gender</Label>
+                  <Label htmlFor="edit-gender">Sexo</Label>
                   <Select
                     value={formData.gender}
                     onValueChange={(value) => setFormData({ ...formData, gender: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder="Selecione o sexo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="unknown">Prefer not to say</SelectItem>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="unknown">Prefiro não informar</SelectItem>
+                      <SelectItem value="male">Masculino</SelectItem>
+                      <SelectItem value="female">Feminino</SelectItem>
+                      <SelectItem value="other">Outro</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -707,10 +707,10 @@ export default function Patients() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Phone */}
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Label htmlFor="edit-phone">Telefone</Label>
                   <Input
                     id="edit-phone"
-                    placeholder="(00) 00000-0000"
+                    placeholder="(11) 98765-4321"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
@@ -718,11 +718,11 @@ export default function Patients() {
 
                 {/* Email */}
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-email">Email</Label>
+                  <Label htmlFor="edit-email">E-mail</Label>
                   <Input
                     id="edit-email"
                     type="email"
-                    placeholder="patient@example.com"
+                    placeholder="paciente@exemplo.com.br"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
@@ -730,23 +730,23 @@ export default function Patients() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {/* Insurance Number */}
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-insurance_number">Insurance Number</Label>
-                  <Input
-                    id="edit-insurance_number"
-                    placeholder="0000000000"
+              {/* Insurance Number */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-insurance_number">Número do Convênio</Label>
+                <Input
+                  id="edit-insurance_number"
+                  placeholder="0000000000"
                     value={formData.insurance_number}
                     onChange={(e) => setFormData({ ...formData, insurance_number: e.target.value })}
                   />
                 </div>
 
-                {/* Insurance Provider */}
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-insurance_provider">Insurance Provider</Label>
-                  <Input
-                    id="edit-insurance_provider"
-                    placeholder="Provider name"
+              {/* Insurance Provider */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-insurance_provider">Operadora do Convênio</Label>
+                <Input
+                  id="edit-insurance_provider"
+                  placeholder="Nome da operadora"
                     value={formData.insurance_provider}
                     onChange={(e) => setFormData({ ...formData, insurance_provider: e.target.value })}
                   />
@@ -761,16 +761,16 @@ export default function Patients() {
                 onClick={() => setShowEditDialog(false)}
                 disabled={saving}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" disabled={saving || !formData.name}>
                 {saving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
+                    Atualizando...
                   </>
                 ) : (
-                  "Update Patient"
+                  "Atualizar Paciente"
                 )}
               </Button>
             </DialogFooter>
@@ -782,9 +782,9 @@ export default function Patients() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Patient</DialogTitle>
+            <DialogTitle>Excluir Paciente</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this patient? This action cannot be undone.
+              Tem certeza que deseja excluir este paciente? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
 
@@ -793,10 +793,10 @@ export default function Patients() {
               <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
                 <p className="font-medium">{selectedPatient.name}</p>
                 {selectedPatient.cpf && <p className="text-sm text-muted-foreground">CPF: {selectedPatient.cpf}</p>}
-                {selectedPatient.phone && <p className="text-sm text-muted-foreground">Phone: {selectedPatient.phone}</p>}
+                {selectedPatient.phone && <p className="text-sm text-muted-foreground">Telefone: {selectedPatient.phone}</p>}
               </div>
               <p className="text-sm text-muted-foreground mt-4">
-                All related appointments, medical records, and invoices will remain in the system but will be orphaned.
+                Todas as consultas, prontuários e faturas relacionadas permanecerão no sistema.
               </p>
             </div>
           )}
@@ -807,7 +807,7 @@ export default function Patients() {
               onClick={() => setShowDeleteDialog(false)}
               disabled={deleting}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               variant="destructive"
@@ -817,12 +817,12 @@ export default function Patients() {
               {deleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  Excluindo...
                 </>
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Patient
+                  Excluir Paciente
                 </>
               )}
             </Button>
