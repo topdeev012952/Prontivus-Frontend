@@ -142,6 +142,7 @@ export default function Patients() {
         email: "",
         insurance_number: "",
         insurance_provider: "",
+        address: {},
       });
       
       setShowAddDialog(false);
@@ -172,6 +173,7 @@ export default function Patients() {
       email: patient.email || "",
       insurance_number: patient.insurance_number || "",
       insurance_provider: patient.insurance_provider || "",
+      address: patient.address || {},  // Include address from patient data
     });
     setShowEditDialog(true);
   };
