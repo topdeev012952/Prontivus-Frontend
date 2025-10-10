@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle, Building2, User } from "lucide-react";
 import { apiClient } from "@/lib/api";
 
 export default function Register() {
@@ -18,6 +19,7 @@ export default function Register() {
     adminEmail: "",
     password: "",
     confirmPassword: "",
+    role: "admin",  // Default to admin for first user
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -77,6 +79,7 @@ export default function Register() {
           name: formData.adminName,
           email: formData.adminEmail,
           password: formData.password,
+          role: formData.role,  // Include role in registration
         },
       };
       
@@ -139,7 +142,10 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Clinic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Clinic Information</h3>
+              <div className="flex items-center gap-2 pb-2 border-b">
+                <Building2 className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Clinic Information</h3>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -202,7 +208,10 @@ export default function Register() {
 
             {/* Admin User Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Administrator Account</h3>
+              <div className="flex items-center gap-2 pb-2 border-b">
+                <User className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Administrator Account</h3>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -260,6 +269,28 @@ export default function Register() {
                     disabled={isLoading}
                     required
                   />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="role">Role *</Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) => setFormData({ ...formData, role: value })}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Administrator</SelectItem>
+                      <SelectItem value="doctor">Doctor</SelectItem>
+                      <SelectItem value="secretary">Secretary/Receptionist</SelectItem>
+                      <SelectItem value="patient">Patient</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    First user is typically an Administrator
+                  </p>
                 </div>
               </div>
             </div>
