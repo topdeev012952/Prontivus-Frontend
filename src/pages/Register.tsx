@@ -89,11 +89,13 @@ export default function Register() {
       });
 
       // Register clinic and admin user
-      await apiClient.request('/auth/register', {
+      const response = await apiClient.request('/auth/register', {
         method: 'POST',
         requiresAuth: false,
         body: JSON.stringify(registrationData),
       });
+      
+      console.log('Registration successful:', response);
 
       setSuccess(true);
       setTimeout(() => {
@@ -101,7 +103,19 @@ export default function Register() {
       }, 2000);
     } catch (err) {
       console.error('Registration error details:', err);
-      const errorMessage = err instanceof Error ? err.message : "Falha no cadastro. Tente novamente.";
+      
+      // Extract the most specific error message
+      let errorMessage = "Falha no cadastro. Tente novamente.";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        errorMessage = String(err.message);
+      }
+      
+      console.error('Displaying error:', errorMessage);
       setError(errorMessage);
     } finally {
       setIsLoading(false);

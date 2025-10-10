@@ -45,18 +45,35 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Falha na requisição' }));
+      let errorMessage = `Falha na requisição: ${response.status}`;
       
-      // Handle Pydantic validation errors (422)
-      if (response.status === 422 && error.detail && Array.isArray(error.detail)) {
-        const validationErrors = error.detail.map((err: any) => {
-          const field = err.loc?.slice(1).join('.') || 'Campo';
-          return `${field}: ${err.msg}`;
-        }).join('; ');
-        throw new Error(`Erro de Validação: ${validationErrors}`);
+      try {
+        const error = await response.json();
+        console.error('API Error Response:', error);
+        
+        // Handle Pydantic validation errors (422)
+        if (response.status === 422 && error.detail && Array.isArray(error.detail)) {
+          const validationErrors = error.detail.map((err: any) => {
+            const field = err.loc?.slice(1).join('.') || 'Campo';
+            return `${field}: ${err.msg}`;
+          }).join('; ');
+          errorMessage = `Erro de Validação: ${validationErrors}`;
+        }
+        // Handle standard error response with detail field
+        else if (error.detail) {
+          errorMessage = typeof error.detail === 'string' 
+            ? error.detail 
+            : JSON.stringify(error.detail);
+        }
+        // Handle error with message field
+        else if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch (parseError) {
+        console.error('Failed to parse error response:', parseError);
       }
       
-      throw new Error(error.detail || `Falha na requisição: ${response.status}`);
+      throw new Error(errorMessage);
     }
 
     return response.json();
