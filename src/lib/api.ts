@@ -59,11 +59,17 @@ class ApiClient {
           }).join('; ');
           errorMessage = `Erro de Validação: ${validationErrors}`;
         }
-        // Handle standard error response with detail field
+        // Handle standard FastAPI error response with detail field
         else if (error.detail) {
           errorMessage = typeof error.detail === 'string' 
             ? error.detail 
             : JSON.stringify(error.detail);
+        }
+        // Handle error with "error" field (alternative backend format)
+        else if (error.error) {
+          errorMessage = typeof error.error === 'string' 
+            ? error.error 
+            : JSON.stringify(error.error);
         }
         // Handle error with message field
         else if (error.message) {
