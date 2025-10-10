@@ -71,6 +71,7 @@ export default function Patients() {
     email: "",
     insurance_number: "",
     insurance_provider: "",
+    address: {},  // Include address field to prevent validation error
   });
 
   useEffect(() => {
@@ -202,6 +203,7 @@ export default function Patients() {
         email: "",
         insurance_number: "",
         insurance_provider: "",
+        address: {},
       });
       
       // Reload patients
