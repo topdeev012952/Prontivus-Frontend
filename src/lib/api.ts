@@ -41,22 +41,22 @@ class ApiClient {
       if (refreshed) {
         return this.request(endpoint, config);
       }
-      throw new Error('Authentication required');
+      throw new Error('Autenticação necessária');
     }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Request failed' }));
+      const error = await response.json().catch(() => ({ detail: 'Falha na requisição' }));
       
       // Handle Pydantic validation errors (422)
       if (response.status === 422 && error.detail && Array.isArray(error.detail)) {
         const validationErrors = error.detail.map((err: any) => {
-          const field = err.loc?.slice(1).join('.') || 'Field';
+          const field = err.loc?.slice(1).join('.') || 'Campo';
           return `${field}: ${err.msg}`;
         }).join('; ');
-        throw new Error(`Validation Error: ${validationErrors}`);
+        throw new Error(`Erro de Validação: ${validationErrors}`);
       }
       
-      throw new Error(error.detail || `Request failed: ${response.status}`);
+      throw new Error(error.detail || `Falha na requisição: ${response.status}`);
     }
 
     return response.json();
@@ -94,8 +94,8 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Login failed' }));
-      throw new Error(error.detail || 'Invalid credentials');
+      const error = await response.json().catch(() => ({ detail: 'Falha no login' }));
+      throw new Error(error.detail || 'Credenciais inválidas');
     }
 
     const data = await response.json();
