@@ -1,5 +1,5 @@
 // API client with JWT auth and error handling
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1';
 
 interface RequestConfig extends RequestInit {
   requiresAuth?: boolean;

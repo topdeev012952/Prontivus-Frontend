@@ -21,8 +21,8 @@ export const useWebSocket = () => {
     if (!isAuthenticated || !user) return;
 
     const token = localStorage.getItem('access_token');
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    const wsUrl = `${apiUrl.replace('http', 'ws').replace('/api/v1', '')}/ws/notifications?token=${token}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1';
+    const wsUrl = `${apiUrl.replace('https', 'wss').replace('http', 'ws').replace('/api/v1', '')}/ws/notifications?token=${token}`;
     
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;

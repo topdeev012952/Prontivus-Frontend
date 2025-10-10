@@ -367,7 +367,7 @@ export default function MedicalRecordsAdvanced() {
       formData.append("description", `Attachment for medical record`);
 
       const response = await fetch(
-        `http://localhost:8000/api/v1/medical_records/${recordId}/files`,
+        `https://prontivus-backend-wnw2.onrender.com/api/v1/medical_records/${recordId}/files`,
         {
           method: "POST",
           headers: {
@@ -1088,7 +1088,7 @@ export default function MedicalRecordsAdvanced() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => window.open(`http://localhost:8000${file.url}`, '_blank')}
+                            onClick={() => window.open(`https://prontivus-backend-wnw2.onrender.com${file.url}`, '_blank')}
                             title="View/Download"
                           >
                             <Eye className="h-4 w-4" />

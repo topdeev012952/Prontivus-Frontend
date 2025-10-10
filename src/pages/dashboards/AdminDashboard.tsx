@@ -163,7 +163,7 @@ export default function AdminDashboard() {
               <span className="text-sm">Background Workers</span>
               <Badge className="bg-green-100 text-green-800">Running</Badge>
             </div>
-            <Button className="w-full mt-2" variant="outline" onClick={() => window.open("http://localhost:8000/health", "_blank")}>
+            <Button className="w-full mt-2" variant="outline" onClick={() => window.open("https://prontivus-backend-wnw2.onrender.com/health", "_blank")}>
               View Full Health Check
             </Button>
           </CardContent>

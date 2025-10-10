@@ -45,7 +45,7 @@ export const useOffline = () => {
         
         for (const event of events) {
           try {
-            await fetch('http://localhost:8000/api/v1/sync/events', {
+            await fetch('https://prontivus-backend-wnw2.onrender.com/api/v1/sync/events', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

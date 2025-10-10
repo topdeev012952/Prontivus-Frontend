@@ -123,7 +123,7 @@ export default function BIDashboard() {
           <Button 
             onClick={async () => {
               try {
-                const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/v1';
+                const baseUrl = (import.meta as any).env?.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1';
                 const token = localStorage.getItem('access_token');
                 const url = `${baseUrl}/reports/export/csv?report_type=appointments`;
                 const res = await fetch(url, {
