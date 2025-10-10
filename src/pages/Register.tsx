@@ -40,27 +40,27 @@ export default function Register() {
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError("As senhas não coincidem");
       return;
     }
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setError("A senha deve ter no mínimo 8 caracteres");
       return;
     }
 
     if (formData.cnpjCpf.length < 11) {
-      setError("CNPJ/CPF must be at least 11 characters long");
+      setError("CNPJ/CPF deve ter no mínimo 11 caracteres");
       return;
     }
 
     if (formData.clinicName.length < 2) {
-      setError("Clinic name must be at least 2 characters long");
+      setError("Nome da clínica deve ter no mínimo 2 caracteres");
       return;
     }
 
     if (formData.adminName.length < 2) {
-      setError("Admin name must be at least 2 characters long");
+      setError("Nome do administrador deve ter no mínimo 2 caracteres");
       return;
     }
 
@@ -101,7 +101,7 @@ export default function Register() {
       }, 2000);
     } catch (err) {
       console.error('Registration error details:', err);
-      const errorMessage = err instanceof Error ? err.message : "Registration failed. Please try again.";
+      const errorMessage = err instanceof Error ? err.message : "Falha no cadastro. Tente novamente.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -119,8 +119,8 @@ export default function Register() {
               className="h-32 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl">Create Your Account</CardTitle>
-          <CardDescription>Register your clinic to get started with Prontivus</CardDescription>
+          <CardTitle className="text-2xl">Crie Sua Conta</CardTitle>
+          <CardDescription>Cadastre sua clínica para começar a usar o Prontivus</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -134,7 +134,7 @@ export default function Register() {
             <Alert className="mb-4 border-green-500 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                Registration successful! Redirecting to login...
+                Cadastro realizado com sucesso! Redirecionando para o login...
               </AlertDescription>
             </Alert>
           )}
@@ -144,16 +144,16 @@ export default function Register() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b">
                 <Building2 className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Clinic Information</h3>
+                <h3 className="text-lg font-semibold">Informações da Clínica</h3>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="clinicName">Clinic Name *</Label>
+                  <Label htmlFor="clinicName">Nome da Clínica *</Label>
                   <Input
                     id="clinicName"
                     name="clinicName"
-                    placeholder="Medical Center"
+                    placeholder="Centro Médico"
                     value={formData.clinicName}
                     onChange={handleChange}
                     disabled={isLoading}
@@ -162,7 +162,7 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cnpjCpf">CNPJ/CPF * (min. 11 digits)</Label>
+                  <Label htmlFor="cnpjCpf">CNPJ/CPF * (mín. 11 dígitos)</Label>
                   <Input
                     id="cnpjCpf"
                     name="cnpjCpf"
@@ -176,12 +176,12 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Contact Email * (must include .com, .org, etc.)</Label>
+                  <Label htmlFor="contactEmail">E-mail de Contato * (deve incluir .com, .org, etc.)</Label>
                   <Input
                     id="contactEmail"
                     name="contactEmail"
                     type="email"
-                    placeholder="contact@clinic.com"
+                    placeholder="contato@clinica.com.br"
                     pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}"
                     value={formData.contactEmail}
                     onChange={handleChange}
@@ -191,7 +191,7 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contactPhone">Contact Phone *</Label>
+                  <Label htmlFor="contactPhone">Telefone de Contato *</Label>
                   <Input
                     id="contactPhone"
                     name="contactPhone"
@@ -210,16 +210,16 @@ export default function Register() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b">
                 <User className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Administrator Account</h3>
+                <h3 className="text-lg font-semibold">Conta do Administrador</h3>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="adminName">Full Name *</Label>
+                  <Label htmlFor="adminName">Nome Completo *</Label>
                   <Input
                     id="adminName"
                     name="adminName"
-                    placeholder="Dr. John Doe"
+                    placeholder="Dr. João Silva"
                     value={formData.adminName}
                     onChange={handleChange}
                     disabled={isLoading}
@@ -228,12 +228,12 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="adminEmail">Email * (must include .com, .org, etc.)</Label>
+                  <Label htmlFor="adminEmail">E-mail * (deve incluir .com, .org, etc.)</Label>
                   <Input
                     id="adminEmail"
                     name="adminEmail"
                     type="email"
-                    placeholder="admin@clinic.com"
+                    placeholder="admin@clinica.com.br"
                     pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}"
                     value={formData.adminEmail}
                     onChange={handleChange}
@@ -243,7 +243,7 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password * (min. 8 characters)</Label>
+                  <Label htmlFor="password">Senha * (mín. 8 caracteres)</Label>
                   <Input
                     id="password"
                     name="password"
@@ -258,7 +258,7 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                  <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -272,24 +272,24 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="role">Role *</Label>
+                  <Label htmlFor="role">Função *</Label>
                   <Select
                     value={formData.role}
                     onValueChange={(value) => setFormData({ ...formData, role: value })}
                     disabled={isLoading}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
+                      <SelectValue placeholder="Selecione a função" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">Administrator</SelectItem>
-                      <SelectItem value="doctor">Doctor</SelectItem>
-                      <SelectItem value="secretary">Secretary/Receptionist</SelectItem>
-                      <SelectItem value="patient">Patient</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
+                      <SelectItem value="doctor">Médico</SelectItem>
+                      <SelectItem value="secretary">Secretário/Recepcionista</SelectItem>
+                      <SelectItem value="patient">Paciente</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    First user is typically an Administrator
+                    O primeiro usuário geralmente é um Administrador
                   </p>
                 </div>
               </div>
@@ -299,22 +299,22 @@ export default function Register() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
+                  Criando Conta...
                 </>
               ) : (
-                "Create Account"
+                "Criar Conta"
               )}
             </Button>
           </form>
           
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Already have an account? </span>
+            <span className="text-muted-foreground">Já tem uma conta? </span>
             <button 
               type="button"
               onClick={() => navigate("/login")}
               className="text-primary font-medium hover:underline"
             >
-              Sign in
+              Entrar
             </button>
           </div>
         </CardContent>

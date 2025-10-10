@@ -25,7 +25,7 @@ export default function Login() {
       await login(email, password);
       navigate("/app/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid email or password. Please try again.");
+      setError(err instanceof Error ? err.message : "E-mail ou senha inválidos. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -43,10 +43,10 @@ export default function Login() {
             />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Welcome Back
+            Bem-vindo de Volta
           </CardTitle>
           <CardDescription className="text-base">
-            Enter your credentials to access Prontivus
+            Digite suas credenciais para acessar o Prontivus
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -61,12 +61,12 @@ export default function Login() {
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                Email
+                E-mail
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="doctor@clinic.com"
+                placeholder="medico@clinica.com.br"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -78,14 +78,14 @@ export default function Login() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="flex items-center gap-2">
                   <Lock className="h-4 w-4" />
-                  Password
+                  Senha
                 </Label>
                 <button 
                   type="button"
                   onClick={() => navigate("/forgot-password")}
                   className="text-sm text-primary hover:underline"
                 >
-                  Forgot password?
+                  Esqueceu a senha?
                 </button>
               </div>
               <Input
@@ -102,33 +102,33 @@ export default function Login() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Signing in...
+                  Entrando...
                 </>
               ) : (
                 <>
                   <LogIn className="mr-2 h-5 w-5" />
-                  Sign In
+                  Entrar
                 </>
               )}
             </Button>
           </form>
           
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
+            <span className="text-muted-foreground">Não tem uma conta? </span>
             <button 
               type="button"
               onClick={() => navigate("/register")}
               className="text-primary font-medium hover:underline"
             >
-              Sign up
+              Cadastre-se
             </button>
           </div>
           
           <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-            <p className="text-xs text-center text-muted-foreground mb-2 font-semibold">Demo Credentials:</p>
+            <p className="text-xs text-center text-muted-foreground mb-2 font-semibold">Credenciais de Demonstração:</p>
             <div className="text-xs text-muted-foreground space-y-1">
-              <p className="text-center"><strong>Email:</strong> admin@example.com</p>
-              <p className="text-center"><strong>Password:</strong> admin123</p>
+              <p className="text-center"><strong>E-mail:</strong> admin@example.com</p>
+              <p className="text-center"><strong>Senha:</strong> admin123</p>
             </div>
           </div>
         </CardContent>
