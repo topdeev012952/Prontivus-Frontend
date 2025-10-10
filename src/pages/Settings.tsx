@@ -102,7 +102,7 @@ export default function Settings() {
       }
     } catch (err: any) {
       console.error("Error loading settings:", err);
-      setError(err.message || "Failed to load settings. Please try again.");
+      setError(err.message || "Falha ao carregar configurações. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -126,11 +126,11 @@ export default function Settings() {
         }),
       });
 
-      setSuccess("Profile updated successfully!");
+      setSuccess("Perfil atualizado com sucesso!");
       await loadSettings(); // Reload to get updated data
     } catch (err: any) {
       console.error("Error updating profile:", err);
-      setError(err.message || "Failed to update profile. Please try again.");
+      setError(err.message || "Falha ao atualizar perfil. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -156,11 +156,11 @@ export default function Settings() {
         }),
       });
 
-      setSuccess("Clinic settings updated successfully!");
+      setSuccess("Configurações da clínica atualizadas com sucesso!");
       await loadSettings(); // Reload to get updated data
     } catch (err: any) {
       console.error("Error updating clinic:", err);
-      setError(err.message || "Failed to update clinic settings. Please try again.");
+      setError(err.message || "Falha ao atualizar configurações da clínica. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -170,12 +170,12 @@ export default function Settings() {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError("Passwords don't match");
+      setError("As senhas não coincidem");
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError("A senha deve ter no mínimo 8 caracteres");
       return;
     }
 
@@ -192,7 +192,7 @@ export default function Settings() {
         }),
       });
 
-      setSuccess("Password changed successfully!");
+      setSuccess("Senha alterada com sucesso!");
       
       // Reset form
       setPasswordData({
@@ -202,7 +202,7 @@ export default function Settings() {
       });
     } catch (err: any) {
       console.error("Error changing password:", err);
-      setError(err.message || "Failed to change password. Please try again.");
+      setError(err.message || "Falha ao alterar senha. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -226,11 +226,11 @@ export default function Settings() {
         }),
       });
 
-      setSuccess("Notification preferences updated!");
+      setSuccess("Preferências de notificação atualizadas!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
       console.error("Error updating notifications:", err);
-      setError("Failed to update notification settings");
+      setError("Falha ao atualizar configurações de notificação");
       // Revert change
       setNotificationSettings(notificationSettings);
     }
@@ -249,7 +249,7 @@ export default function Settings() {
       reader.readAsDataURL(file);
       
       // TODO: In production, upload to S3/MinIO and get URL
-      setSuccess("Logo preview updated. Click 'Save Branding' to apply.");
+      setSuccess("Prévia do logo atualizada. Clique em 'Salvar Marca' para aplicar.");
     }
   };
 
@@ -258,7 +258,7 @@ export default function Settings() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading settings...</p>
+          <p className="text-muted-foreground">Carregando configurações...</p>
         </div>
       </div>
     );
@@ -268,8 +268,8 @@ export default function Settings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your clinic and account settings</p>
+        <h1 className="text-3xl font-bold">Configurações</h1>
+        <p className="text-muted-foreground">Gerencie as configurações da clínica e da conta</p>
       </div>
 
       {error && (
@@ -295,7 +295,7 @@ export default function Settings() {
               <div>
                 <h2 className="text-xl font-semibold">{userInfo.name}</h2>
                 <p className="text-sm text-muted-foreground">{userInfo.email}</p>
-                <p className="text-xs text-muted-foreground">Role: {userInfo.role}</p>
+                <p className="text-xs text-muted-foreground">Função: {userInfo.role}</p>
               </div>
             </div>
           </CardContent>
@@ -305,10 +305,10 @@ export default function Settings() {
       {/* Tabs */}
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="clinic">Clinic</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="profile">Perfil</TabsTrigger>
+          <TabsTrigger value="clinic">Clínica</TabsTrigger>
+          <TabsTrigger value="security">Segurança</TabsTrigger>
+          <TabsTrigger value="notifications">Notificações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">
@@ -316,15 +316,15 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Profile Information
+                Informações do Perfil
               </CardTitle>
-              <CardDescription>Update your personal information</CardDescription>
+              <CardDescription>Atualize suas informações pessoais</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name">Nome Completo</Label>
                     <Input
                       id="name"
                       value={profileData.name}
@@ -333,7 +333,7 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email (Read-only)</Label>
+                    <Label htmlFor="email">E-mail (Somente leitura)</Label>
                     <Input
                       id="email"
                       type="email"
@@ -345,7 +345,7 @@ export default function Settings() {
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Telefone</Label>
                     <Input
                       id="phone"
                       value={profileData.phone}
@@ -354,7 +354,7 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="role">Role (Read-only)</Label>
+                    <Label htmlFor="role">Função (Somente leitura)</Label>
                     <Input
                       id="role"
                       value={userInfo?.role || ""}
@@ -367,12 +367,12 @@ export default function Settings() {
                   {saving ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Saving...
+                      Salvando...
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4" />
-                      Save Changes
+                      Salvar Alterações
                     </>
                   )}
                 </Button>
@@ -386,19 +386,19 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                Clinic Information
+                Informações da Clínica
               </CardTitle>
-              <CardDescription>Update your clinic's information and branding</CardDescription>
+              <CardDescription>Atualize as informações e marca da sua clínica</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleClinicSubmit} className="space-y-6">
               {/* Logo Upload */}
               <div className="space-y-3">
-                <Label>Clinic Logo</Label>
+                <Label>Logo da Clínica</Label>
                 <div className="flex items-center gap-4">
                     <div className="h-24 w-24 rounded-lg border-2 border-dashed border-muted flex items-center justify-center bg-muted/20 overflow-hidden">
                     {logoPreview ? (
-                        <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain" />
+                        <img src={logoPreview} alt="Prévia do logo" className="h-full w-full object-contain" />
                     ) : (
                       <Upload className="h-8 w-8 text-muted-foreground" />
                     )}
@@ -415,18 +415,18 @@ export default function Settings() {
                       <Button type="button" variant="outline" asChild>
                           <span>
                             <Upload className="mr-2 h-4 w-4" />
-                            Upload Logo
+                            Fazer Upload do Logo
                           </span>
                       </Button>
                     </Label>
-                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 2MB</p>
+                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG até 2MB</p>
                   </div>
                 </div>
               </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="clinicName">Clinic Name</Label>
+                    <Label htmlFor="clinicName">Nome da Clínica</Label>
                     <Input
                       id="clinicName"
                       value={clinicData.name}
@@ -435,7 +435,7 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cnpj">CNPJ/CPF (Read-only)</Label>
+                    <Label htmlFor="cnpj">CNPJ/CPF (Somente leitura)</Label>
                     <Input
                       id="cnpj"
                       value={clinicInfo?.cnpj_cpf || ""}
@@ -447,7 +447,7 @@ export default function Settings() {
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="clinicEmail">Contact Email</Label>
+                    <Label htmlFor="clinicEmail">E-mail de Contato</Label>
                     <Input
                       id="clinicEmail"
                       type="email"
@@ -457,7 +457,7 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="clinicPhone">Contact Phone</Label>
+                    <Label htmlFor="clinicPhone">Telefone de Contato</Label>
                     <Input
                       id="clinicPhone"
                       value={clinicData.contact_phone}
@@ -468,7 +468,7 @@ export default function Settings() {
                 </div>
 
               <div className="space-y-2">
-                  <Label htmlFor="status">Status (Read-only)</Label>
+                  <Label htmlFor="status">Status (Somente leitura)</Label>
                   <Input 
                     id="status"
                     value={clinicInfo?.status || ""}
@@ -481,12 +481,12 @@ export default function Settings() {
                   {saving ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Saving...
+                      Salvando...
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4" />
-                      Save Clinic Settings
+                      Salvar Configurações da Clínica
                     </>
                   )}
                 </Button>
@@ -500,14 +500,14 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Security Settings
+                Configurações de Segurança
               </CardTitle>
-              <CardDescription>Manage your password and authentication</CardDescription>
+              <CardDescription>Gerencie sua senha e autenticação</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Label htmlFor="currentPassword">Senha Atual</Label>
                   <Input
                     id="currentPassword"
                     type="password"
@@ -517,7 +517,7 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
+                  <Label htmlFor="newPassword">Nova Senha</Label>
                   <Input
                     id="newPassword"
                     type="password"
@@ -526,11 +526,11 @@ export default function Settings() {
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Must be at least 8 characters
+                    Deve ter no mínimo 8 caracteres
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -543,10 +543,10 @@ export default function Settings() {
                   {saving ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Updating...
+                      Atualizando...
                     </>
                   ) : (
-                    "Update Password"
+                    "Atualizar Senha"
                   )}
                 </Button>
                 </form>
@@ -554,28 +554,28 @@ export default function Settings() {
               <div className="pt-6 border-t mt-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Two-Factor Authentication</Label>
+                    <Label>Autenticação de Dois Fatores</Label>
                     <p className="text-sm text-muted-foreground">
-                      Add an extra layer of security to your account
+                      Adicione uma camada extra de segurança à sua conta
                     </p>
                   </div>
                   <Switch 
                     checked={twoFactorEnabled}
                     onCheckedChange={(checked) => {
                       setTwoFactorEnabled(checked);
-                      setSuccess(checked ? "2FA Enabled (Demo)" : "2FA Disabled (Demo)");
+                      setSuccess(checked ? "2FA Ativado (Demo)" : "2FA Desativado (Demo)");
                       setTimeout(() => setSuccess(""), 3000);
                     }}
                   />
                 </div>
                 {twoFactorEnabled && (
                   <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <p className="text-sm font-medium mb-2">Scan this QR code with your authenticator app</p>
+                    <p className="text-sm font-medium mb-2">Escaneie este código QR com seu aplicativo autenticador</p>
                     <div className="h-32 w-32 bg-background border rounded flex items-center justify-center">
-                      <p className="text-xs text-muted-foreground">QR Code Placeholder</p>
+                      <p className="text-xs text-muted-foreground">Espaço para QR Code</p>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      2FA implementation ready - requires backend endpoint
+                      Implementação 2FA pronta - requer endpoint backend
                     </p>
                   </div>
                 )}
@@ -589,17 +589,17 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                Notification Preferences
+                Preferências de Notificações
               </CardTitle>
-              <CardDescription>Manage how you receive notifications</CardDescription>
+              <CardDescription>Gerencie como você recebe notificações</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>New Appointments</Label>
+                    <Label>Novas Consultas</Label>
                     <p className="text-sm text-muted-foreground">
-                      Get notified when a new appointment is scheduled
+                      Seja notificado quando uma nova consulta for agendada
                     </p>
                   </div>
                   <Switch 
@@ -609,9 +609,9 @@ export default function Settings() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Patient Messages</Label>
+                    <Label>Mensagens de Pacientes</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receive notifications for patient messages
+                      Receba notificações de mensagens de pacientes
                     </p>
                   </div>
                   <Switch 
@@ -621,9 +621,9 @@ export default function Settings() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Payment Updates</Label>
+                    <Label>Atualizações de Pagamento</Label>
                     <p className="text-sm text-muted-foreground">
-                      Get notified about payment confirmations
+                      Seja notificado sobre confirmações de pagamento
                     </p>
                   </div>
                   <Switch 
@@ -633,9 +633,9 @@ export default function Settings() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>System Updates</Label>
+                    <Label>Atualizações do Sistema</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receive important system and feature updates
+                      Receba atualizações importantes do sistema e novos recursos
                     </p>
                   </div>
                   <Switch 
@@ -645,7 +645,7 @@ export default function Settings() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground italic">
-                Notification preferences are saved automatically
+                As preferências de notificação são salvas automaticamente
               </p>
             </CardContent>
           </Card>
