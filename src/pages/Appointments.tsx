@@ -107,7 +107,7 @@ export default function Appointments() {
       setTotal(data.total);
     } catch (err) {
       console.error("Error loading appointments:", err);
-      setError("Failed to load appointments. Please try again.");
+      setError("Falha ao carregar consultas. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -242,7 +242,7 @@ export default function Appointments() {
       await loadAppointments();
     } catch (err: any) {
       console.error("Error updating appointment:", err);
-      setError(err.message || "Failed to update appointment. Please try again.");
+      setError(err.message || "Falha ao atualizar consulta. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -271,7 +271,7 @@ export default function Appointments() {
       await loadAppointments();
     } catch (err: any) {
       console.error("Error deleting appointment:", err);
-      setError(err.message || "Failed to delete appointment. Please try again.");
+      setError(err.message || "Falha ao excluir consulta. Tente novamente.");
     } finally {
       setDeleting(false);
     }
@@ -322,14 +322,14 @@ export default function Appointments() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Appointments</h1>
+          <h1 className="text-3xl font-bold">Consultas</h1>
           <p className="text-muted-foreground">
-            {total > 0 ? `Managing ${total.toLocaleString()} appointments` : "Manage your schedule and appointments"}
+            {total > 0 ? `Gerenciando ${total.toLocaleString()} consultas` : "Gerencie sua agenda e consultas"}
           </p>
         </div>
         <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4" />
-          New Appointment
+          Nova Consulta
         </Button>
       </div>
 
@@ -377,24 +377,24 @@ export default function Appointments() {
                   disabled={loading}
                   className="w-full"
                 >
-                  Today
+                  Hoje
                 </Button>
               </div>
               <div className="space-y-2 border-t pt-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Total Appointments</span>
+                  <span className="text-muted-foreground">Total de Consultas</span>
                   <span className="font-semibold">{appointments.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Confirmed</span>
+                  <span className="text-muted-foreground">Confirmadas</span>
                   <span className="font-semibold text-accent">{confirmedCount}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Pending</span>
+                  <span className="text-muted-foreground">Pendentes</span>
                   <span className="font-semibold text-yellow-600">{pendingCount}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Completed</span>
+                  <span className="text-muted-foreground">Concluídas</span>
                   <span className="font-semibold text-green-600">{completedCount}</span>
                 </div>
               </div>
@@ -405,7 +405,7 @@ export default function Appointments() {
         {/* Appointments List */}
         <Card className="lg:col-span-2 shadow-card">
           <CardHeader>
-            <CardTitle className="text-lg">Schedule</CardTitle>
+            <CardTitle className="text-lg">Agenda</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -415,13 +415,13 @@ export default function Appointments() {
             ) : appointments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <CalendarIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No appointments scheduled</h3>
+                <h3 className="text-lg font-semibold mb-2">Nenhuma consulta agendada</h3>
                 <p className="text-muted-foreground mb-4">
-                  There are no appointments for {selectedDate.toLocaleDateString('pt-BR')}
+                  Não há consultas para {selectedDate.toLocaleDateString('pt-BR')}
                 </p>
                 <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
                   <Plus className="h-4 w-4" />
-                  Schedule Appointment
+                  Agendar Consulta
                 </Button>
               </div>
             ) : (
@@ -445,12 +445,12 @@ export default function Appointments() {
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">
-                            {appointment.patient_name || `Patient #${appointment.patient_id.slice(0, 8)}`}
+                            {appointment.patient_name || `Paciente #${appointment.patient_id.slice(0, 8)}`}
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>Type: Consulta</span>
-                          <span>Duration: {calculateDuration(appointment.start_time, appointment.end_time)} min</span>
+                          <span>Tipo: Consulta</span>
+                          <span>Duração: {calculateDuration(appointment.start_time, appointment.end_time)} min</span>
                           {appointment.doctor_name && <span>Dr: {appointment.doctor_name}</span>}
                         </div>
                       </div>
@@ -462,7 +462,7 @@ export default function Appointments() {
                             e.stopPropagation();
                             handleViewAppointment(appointment);
                           }}
-                          title="View Details"
+                          title="Ver Detalhes"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -473,7 +473,7 @@ export default function Appointments() {
                             e.stopPropagation();
                             handleEditAppointment(appointment);
                           }}
-                          title="Edit Appointment"
+                          title="Editar Consulta"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -484,7 +484,7 @@ export default function Appointments() {
                             e.stopPropagation();
                             handleDeleteClick(appointment);
                           }}
-                          title="Delete Appointment"
+                          title="Excluir Consulta"
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -503,9 +503,9 @@ export default function Appointments() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>New Appointment</DialogTitle>
+            <DialogTitle>Nova Consulta</DialogTitle>
             <DialogDescription>
-              Schedule a new appointment for a patient
+              Agende uma nova consulta para um paciente
             </DialogDescription>
           </DialogHeader>
 
@@ -513,14 +513,14 @@ export default function Appointments() {
             <div className="grid gap-4 py-4">
               {/* Patient Selection */}
               <div className="grid gap-2">
-                <Label htmlFor="patient">Patient *</Label>
+                <Label htmlFor="patient">Paciente *</Label>
                 <Select
                   value={formData.patient_id}
                   onValueChange={(value) => setFormData({ ...formData, patient_id: value })}
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select patient" />
+                    <SelectValue placeholder="Selecione o paciente" />
                   </SelectTrigger>
                   <SelectContent>
                     {patients.map((patient) => (
@@ -534,14 +534,14 @@ export default function Appointments() {
 
               {/* Doctor Selection */}
               <div className="grid gap-2">
-                <Label htmlFor="doctor">Doctor *</Label>
+                <Label htmlFor="doctor">Médico *</Label>
                 <Select
                   value={formData.doctor_id}
                   onValueChange={(value) => setFormData({ ...formData, doctor_id: value })}
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select doctor" />
+                    <SelectValue placeholder="Selecione o médico" />
                   </SelectTrigger>
                   <SelectContent>
                     {doctors.map((doctor) => (
@@ -628,16 +628,16 @@ export default function Appointments() {
                 onClick={() => setShowCreateDialog(false)}
                 disabled={saving}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" disabled={saving || !formData.patient_id || !formData.doctor_id}>
                 {saving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
+                    Criando...
                   </>
                 ) : (
-                  "Create Appointment"
+                  "Criar Consulta"
                 )}
               </Button>
             </DialogFooter>
@@ -649,35 +649,35 @@ export default function Appointments() {
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Appointment Details</DialogTitle>
+            <DialogTitle>Detalhes da Consulta</DialogTitle>
           </DialogHeader>
 
           {selectedAppointment && (
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Patient</Label>
+                  <Label className="text-muted-foreground">Paciente</Label>
                   <p className="font-medium">
-                    {selectedAppointment.patient_name || `Patient #${selectedAppointment.patient_id.slice(0, 8)}`}
+                    {selectedAppointment.patient_name || `Paciente #${selectedAppointment.patient_id.slice(0, 8)}`}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Doctor</Label>
+                  <Label className="text-muted-foreground">Médico</Label>
                   <p className="font-medium">
-                    {selectedAppointment.doctor_name || `Doctor #${selectedAppointment.doctor_id.slice(0, 8)}`}
+                    {selectedAppointment.doctor_name || `Médico #${selectedAppointment.doctor_id.slice(0, 8)}`}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Date</Label>
+                  <Label className="text-muted-foreground">Data</Label>
                   <p className="font-medium">
                     {new Date(selectedAppointment.start_time).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Time</Label>
+                  <Label className="text-muted-foreground">Horário</Label>
                   <p className="font-medium">
                     {formatTime(selectedAppointment.start_time)} - {formatTime(selectedAppointment.end_time)}
                   </p>
@@ -686,9 +686,9 @@ export default function Appointments() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Duration</Label>
+                  <Label className="text-muted-foreground">Duração</Label>
                   <p className="font-medium">
-                    {calculateDuration(selectedAppointment.start_time, selectedAppointment.end_time)} minutes
+                    {calculateDuration(selectedAppointment.start_time, selectedAppointment.end_time)} minutos
                   </p>
                 </div>
                 <div>
@@ -700,7 +700,7 @@ export default function Appointments() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Created</Label>
+                <Label className="text-muted-foreground">Criado em</Label>
                 <p className="text-sm">
                   {new Date(selectedAppointment.created_at).toLocaleString('pt-BR')}
                 </p>
@@ -714,7 +714,7 @@ export default function Appointments() {
               variant="outline"
               onClick={() => setShowViewDialog(false)}
             >
-              Close
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -724,9 +724,9 @@ export default function Appointments() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Appointment</DialogTitle>
+            <DialogTitle>Editar Consulta</DialogTitle>
             <DialogDescription>
-              Update appointment information. Patient and doctor cannot be changed.
+              Atualize as informações da consulta. Paciente e médico não podem ser alterados.
             </DialogDescription>
           </DialogHeader>
 
@@ -734,9 +734,9 @@ export default function Appointments() {
             <div className="space-y-4 py-4">
               {/* Patient (Read-only) */}
               <div className="space-y-2">
-                <Label>Patient (Cannot be changed)</Label>
+                <Label>Paciente (Não pode ser alterado)</Label>
                 <Input
-                  value={selectedAppointment?.patient_name || `Patient #${selectedAppointment?.patient_id.slice(0, 8)}`}
+                  value={selectedAppointment?.patient_name || `Paciente #${selectedAppointment?.patient_id.slice(0, 8)}`}
                   disabled
                   className="bg-muted"
                 />
@@ -744,9 +744,9 @@ export default function Appointments() {
 
               {/* Doctor (Read-only) */}
               <div className="space-y-2">
-                <Label>Doctor (Cannot be changed)</Label>
+                <Label>Médico (Não pode ser alterado)</Label>
                 <Input
-                  value={selectedAppointment?.doctor_name || `Doctor #${selectedAppointment?.doctor_id.slice(0, 8)}`}
+                  value={selectedAppointment?.doctor_name || `Médico #${selectedAppointment?.doctor_id.slice(0, 8)}`}
                   disabled
                   className="bg-muted"
                 />
@@ -754,7 +754,7 @@ export default function Appointments() {
 
               {/* Date */}
               <div className="space-y-2">
-                <Label htmlFor="edit-date">Date</Label>
+                <Label htmlFor="edit-date">Data</Label>
                 <Input
                   id="edit-date"
                   type="date"
@@ -767,7 +767,7 @@ export default function Appointments() {
               {/* Time and Duration */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-start-time">Start Time</Label>
+                  <Label htmlFor="edit-start-time">Horário de Início</Label>
                   <Input
                     id="edit-start-time"
                     type="time"
@@ -777,7 +777,7 @@ export default function Appointments() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-duration">Duration (minutes)</Label>
+                  <Label htmlFor="edit-duration">Duração (minutos)</Label>
                   <Select
                     value={formData.duration}
                     onValueChange={(value) => setFormData({ ...formData, duration: value })}
@@ -786,12 +786,12 @@ export default function Appointments() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="15">15 minutes</SelectItem>
-                      <SelectItem value="30">30 minutes</SelectItem>
-                      <SelectItem value="45">45 minutes</SelectItem>
-                      <SelectItem value="60">1 hour</SelectItem>
-                      <SelectItem value="90">1.5 hours</SelectItem>
-                      <SelectItem value="120">2 hours</SelectItem>
+                      <SelectItem value="15">15 minutos</SelectItem>
+                      <SelectItem value="30">30 minutos</SelectItem>
+                      <SelectItem value="45">45 minutos</SelectItem>
+                      <SelectItem value="60">1 hora</SelectItem>
+                      <SelectItem value="90">1,5 hora</SelectItem>
+                      <SelectItem value="120">2 horas</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -808,11 +808,11 @@ export default function Appointments() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="scheduled">Scheduled</SelectItem>
-                    <SelectItem value="checked_in">Checked In</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="scheduled">Agendada</SelectItem>
+                    <SelectItem value="checked_in">Check-in Realizado</SelectItem>
+                    <SelectItem value="in_progress">Em Andamento</SelectItem>
+                    <SelectItem value="completed">Concluída</SelectItem>
+                    <SelectItem value="cancelled">Cancelada</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -825,16 +825,16 @@ export default function Appointments() {
                 onClick={() => setShowEditDialog(false)}
                 disabled={saving}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" disabled={saving}>
                 {saving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
+                    Atualizando...
                   </>
                 ) : (
-                  "Update Appointment"
+                  "Atualizar Consulta"
                 )}
               </Button>
             </DialogFooter>
@@ -846,9 +846,9 @@ export default function Appointments() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Appointment</DialogTitle>
+            <DialogTitle>Excluir Consulta</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this appointment? This action cannot be undone.
+              Tem certeza que deseja excluir esta consulta? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
 
@@ -856,17 +856,17 @@ export default function Appointments() {
             <div className="py-4">
               <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
                 <p className="font-medium">
-                  {selectedAppointment.patient_name || `Patient #${selectedAppointment.patient_id.slice(0, 8)}`}
+                  {selectedAppointment.patient_name || `Paciente #${selectedAppointment.patient_id.slice(0, 8)}`}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDate(selectedAppointment.start_time)} at {formatTime(selectedAppointment.start_time)}
+                  {formatDate(selectedAppointment.start_time)} às {formatTime(selectedAppointment.start_time)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Status: {getStatusLabel(selectedAppointment.status)}
                 </p>
               </div>
               <p className="text-sm text-muted-foreground mt-4">
-                Related medical records and invoices will remain in the system but will be orphaned.
+                Prontuários e faturas relacionadas permanecerão no sistema.
               </p>
             </div>
           )}
@@ -877,7 +877,7 @@ export default function Appointments() {
               onClick={() => setShowDeleteDialog(false)}
               disabled={deleting}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               variant="destructive"
@@ -887,12 +887,12 @@ export default function Appointments() {
               {deleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  Excluindo...
                 </>
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Appointment
+                  Excluir Consulta
                 </>
               )}
             </Button>
