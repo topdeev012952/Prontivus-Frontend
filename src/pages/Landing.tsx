@@ -22,65 +22,65 @@ export default function Landing() {
   const features = [
     {
       icon: Users,
-      title: "Patient Management",
-      description: "Complete patient records, history, and demographic management in one place.",
+      title: "Gestão de Pacientes",
+      description: "Registros completos de pacientes, histórico e gestão demográfica em um só lugar.",
       image: "/Images/img (6).jpg"
     },
     {
       icon: Calendar,
-      title: "Smart Scheduling",
-      description: "Intelligent appointment booking with collision detection and real-time availability.",
+      title: "Agendamento Inteligente",
+      description: "Agendamento inteligente de consultas com detecção de conflitos e disponibilidade em tempo real.",
       image: "/Images/img (7).jpg"
     },
     {
       icon: Brain,
-      title: "AI Consultation Assistant",
-      description: "AI-powered transcription and medical summarization to save time and improve accuracy.",
+      title: "Assistente de Consulta com IA",
+      description: "Transcrição e resumo médico com IA para economizar tempo e melhorar a precisão.",
       image: "/Images/img (8).jpg"
     },
     {
       icon: FileText,
-      title: "Digital Prescriptions",
-      description: "ICP-Brasil compliant digital signatures with QR code verification.",
+      title: "Prescrições Digitais",
+      description: "Assinaturas digitais conforme ICP-Brasil com verificação por código QR.",
       image: "/Images/img (9).jpg"
     },
     {
       icon: Video,
-      title: "Telemedicine",
-      description: "Built-in WebRTC video consultations with recording and consent management.",
+      title: "Telemedicina",
+      description: "Consultas por vídeo WebRTC integradas com gravação e gerenciamento de consentimento.",
       image: "/Images/img (10).jpg"
     },
     {
       icon: ClipboardCheck,
-      title: "Medical Records",
-      description: "Complete EMR system with audit trails and HIPAA-compliant security.",
+      title: "Prontuários Médicos",
+      description: "Sistema completo de prontuário eletrônico com trilhas de auditoria e segurança conforme LGPD.",
       image: "/Images/img (1).jpg"
     },
     {
       icon: Heart,
-      title: "Waiting Queue",
-      description: "Real-time queue management with priority system and patient notifications.",
+      title: "Fila de Espera",
+      description: "Gestão de fila em tempo real com sistema de prioridade e notificações aos pacientes.",
       image: "/Images/img (2).jpg"
     },
     {
       icon: Shield,
-      title: "TISS Integration",
-      description: "Seamless integration with Brazilian health insurance systems.",
+      title: "Integração TISS",
+      description: "Integração perfeita com sistemas de convênios de saúde brasileiros.",
       image: "/Images/img (3).jpg"
     },
     {
       icon: Zap,
-      title: "Offline-First",
-      description: "Work without internet and sync when you're back online.",
+      title: "Funciona Offline",
+      description: "Trabalhe sem internet e sincronize quando estiver online novamente.",
       image: "/Images/img (4).jpg"
     }
   ];
 
   const stats = [
-    { value: "10,000+", label: "Patients Managed" },
-    { value: "50,000+", label: "Appointments" },
-    { value: "99.9%", label: "Uptime" },
-    { value: "24/7", label: "Support" }
+    { value: "10.000+", label: "Pacientes Gerenciados" },
+    { value: "50.000+", label: "Consultas" },
+    { value: "99,9%", label: "Disponibilidade" },
+    { value: "24/7", label: "Suporte" }
   ];
 
   useEffect(() => {
@@ -152,13 +152,13 @@ export default function Landing() {
               onClick={() => navigate("/login")}
               className="hover:scale-105 transition-transform duration-200"
             >
-              Login
+              Entrar
             </Button>
             <Button 
               onClick={() => navigate("/login")}
               className="hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl group"
             >
-              Get Started
+              Começar
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
@@ -171,20 +171,20 @@ export default function Landing() {
           <div className="space-y-6 animate-in fade-in slide-in-from-left duration-700">
             <Badge variant="secondary" className="w-fit">
               <Zap className="mr-1 h-3 w-3" />
-              Modern Healthcare Management Platform
+              Plataforma Moderna de Gestão em Saúde
             </Badge>
             
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Transform Your Healthcare
+              Transforme Sua
               <span className="block text-primary mt-2 bg-gradient-to-r from-primary via-blue-600 to-primary bg-clip-text text-transparent animate-gradient">
-                Practice Management
+                Gestão de Saúde
               </span>
             </h1>
             
             <p className="text-xl text-muted-foreground">
-              Complete medical SaaS platform with AI-powered tools, telemedicine, 
-              digital prescriptions, and seamless TISS integration. Everything you need 
-              to run a modern healthcare practice.
+              Plataforma médica SaaS completa com ferramentas com IA, telemedicina, 
+              prescrições digitais e integração TISS. Tudo que você precisa 
+              para gerir uma clínica moderna.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -193,7 +193,7 @@ export default function Landing() {
                 onClick={() => navigate("/login")} 
                 className="text-lg h-12 px-8 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl group"
               >
-                Start Free Trial
+                Iniciar Teste Grátis
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
@@ -202,22 +202,22 @@ export default function Landing() {
                 onClick={() => navigate("/login")} 
                 className="text-lg h-12 px-8 hover:scale-105 transition-all duration-200 group"
               >
-                Sign In
+                Entrar
               </Button>
             </div>
 
             <div className="flex flex-wrap items-center gap-6 pt-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer">
                 <Shield className="h-4 w-4 text-primary" />
-                LGPD Compliant
+                Conforme LGPD
               </div>
               <div className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer">
                 <Heart className="h-4 w-4 text-primary" />
-                ICP-Brasil Certified
+                Certificado ICP-Brasil
               </div>
               <div className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer">
                 <Zap className="h-4 w-4 text-primary" />
-                Enterprise Ready
+                Pronto para Empresas
               </div>
             </div>
           </div>
@@ -263,7 +263,7 @@ export default function Landing() {
             <div className="absolute top-8 -left-4 animate-float">
               <Badge className="bg-green-500 text-white shadow-lg">
                 <CheckCircle className="mr-1 h-3 w-3" />
-                HIPAA Compliant
+                Conforme LGPD
               </Badge>
             </div>
           </div>
@@ -292,10 +292,10 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20 bg-muted/50">
         <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom duration-700">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Everything You Need to Run Your Practice
+            Tudo que Você Precisa para Gerir Sua Clínica
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive tools designed for modern healthcare professionals
+            Ferramentas abrangentes projetadas para profissionais de saúde modernos
           </p>
         </div>
 
@@ -335,10 +335,10 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center animate-in fade-in duration-700">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Built with Modern Technology
+            Construído com Tecnologia Moderna
           </h2>
           <p className="text-lg text-muted-foreground mb-12">
-            Enterprise-grade architecture for reliability and scalability
+            Arquitetura de nível empresarial para confiabilidade e escalabilidade
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -373,11 +373,11 @@ export default function Landing() {
           
           <div className="relative max-w-4xl mx-auto text-center space-y-6 text-white">
             <h2 className="text-3xl md:text-4xl font-bold">
-              Ready to Transform Your Practice?
+              Pronto para Transformar Sua Clínica?
             </h2>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Join thousands of healthcare professionals using Prontivus to deliver 
-              better patient care and streamline their operations.
+              Junte-se a milhares de profissionais de saúde que usam o Prontivus para oferecer 
+              melhor atendimento ao paciente e otimizar suas operações.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Button 
@@ -386,7 +386,7 @@ export default function Landing() {
                 onClick={() => navigate("/login")} 
                 className="text-lg h-12 px-8 hover:scale-105 transition-transform duration-200 shadow-lg group"
               >
-                Create Free Account
+                Criar Conta Grátis
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
@@ -395,7 +395,7 @@ export default function Landing() {
                 onClick={() => navigate("/login")} 
                 className="text-lg h-12 px-8 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-all duration-200"
               >
-                Schedule Demo
+                Agendar Demonstração
               </Button>
             </div>
             
@@ -426,12 +426,12 @@ export default function Landing() {
                 ))}
               </div>
               <p className="text-sm text-white/90 font-medium">
-                Trusted by 10,000+ healthcare professionals
+                Confiado por mais de 10.000 profissionais de saúde
               </p>
             </div>
             
             <p className="text-sm text-white/75 pt-4">
-              No credit card required • Free 30-day trial • Cancel anytime
+              Sem cartão de crédito • Teste grátis de 30 dias • Cancele quando quiser
             </p>
           </div>
 
@@ -454,39 +454,39 @@ export default function Landing() {
                 />
               </div>
               <p className="text-sm text-muted-foreground">
-                Modern healthcare management platform for the future of medicine.
+                Plataforma moderna de gestão em saúde para o futuro da medicina.
               </p>
             </div>
             <div className="animate-in fade-in duration-500 delay-100">
-              <h3 className="font-semibold mb-4">Product</h3>
+              <h3 className="font-semibold mb-4">Produto</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Features</a></li>
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Pricing</a></li>
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Security</a></li>
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Updates</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Recursos</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Preços</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Segurança</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Atualizações</a></li>
               </ul>
             </div>
             <div className="animate-in fade-in duration-500 delay-200">
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="font-semibold mb-4">Empresa</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">About</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Sobre</a></li>
                 <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Blog</a></li>
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Careers</a></li>
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Contact</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Carreiras</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Contato</a></li>
               </ul>
             </div>
             <div className="animate-in fade-in duration-500 delay-300">
               <h3 className="font-semibold mb-4">Legal</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Privacy</a></li>
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Terms</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Privacidade</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Termos</a></li>
                 <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">LGPD</a></li>
-                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Compliance</a></li>
+                <li><a href="#" className="hover:text-primary transition-all hover:translate-x-1 inline-block">Conformidade</a></li>
               </ul>
             </div>
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground animate-in fade-in duration-500 delay-500">
-            <p>© 2025 Prontivus. All rights reserved. Built with ❤️ for healthcare professionals.</p>
+            <p>© 2025 Prontivus. Todos os direitos reservados. Feito com ❤️ para profissionais de saúde.</p>
           </div>
         </div>
       </footer>

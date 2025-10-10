@@ -24,16 +24,16 @@ import { useAuth } from "@/hooks/useAuth";
 
 const navigation = [
   { name: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
-  { name: "Patients", href: "/app/patients", icon: Users },
-  { name: "Appointments", href: "/app/appointments", icon: Calendar },
-  { name: "Medical Records", href: "/app/records", icon: FileText },
-  { name: "Prescriptions", href: "/app/prescriptions", icon: Pill },
-  { name: "Invoices", href: "/app/invoices", icon: Receipt },
-  { name: "Waiting Room", href: "/app/waiting-room", icon: Clock },
-  { name: "TISS Module", href: "/app/tiss", icon: Shield },
-  { name: "Health Plans", href: "/app/health-plans", icon: Building2 },
-  { name: "BI Dashboard", href: "/app/bi-dashboard", icon: BarChart3 },
-  { name: "Settings", href: "/app/settings", icon: Settings },
+  { name: "Pacientes", href: "/app/patients", icon: Users },
+  { name: "Consultas", href: "/app/appointments", icon: Calendar },
+  { name: "Prontuários", href: "/app/records", icon: FileText },
+  { name: "Prescrições", href: "/app/prescriptions", icon: Pill },
+  { name: "Faturas", href: "/app/invoices", icon: Receipt },
+  { name: "Sala de Espera", href: "/app/waiting-room", icon: Clock },
+  { name: "Módulo TISS", href: "/app/tiss", icon: Shield },
+  { name: "Planos de Saúde", href: "/app/health-plans", icon: Building2 },
+  { name: "Dashboard BI", href: "/app/bi-dashboard", icon: BarChart3 },
+  { name: "Configurações", href: "/app/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -113,20 +113,20 @@ export function Sidebar() {
           <div 
             onClick={handleLogout}
             className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-red-500/10 cursor-pointer transition-colors group"
-            title="Click to logout"
+            title="Clique para sair"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-active text-white text-sm font-semibold">
               {getUserInitials()}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate text-sidebar-foreground" title={user?.name}>
-                {user?.name || "User"}
+                {user?.name || "Usuário"}
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate" title={user?.email}>
                 {user?.email || ""}
               </p>
-              <p className="text-[10px] font-semibold text-sidebar-active/80 uppercase tracking-wide mt-0.5" title={`Role: ${user?.role}`}>
-                {user?.role || "Role"}
+              <p className="text-[10px] font-semibold text-sidebar-active/80 uppercase tracking-wide mt-0.5" title={`Função: ${user?.role}`}>
+                {user?.role || "Função"}
               </p>
             </div>
             <LogOut className="h-4 w-4 text-sidebar-foreground/60 group-hover:text-red-500 transition-colors" />
