@@ -11,6 +11,7 @@ import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import Appointments from "./pages/Appointments";
+import AppointmentRequests from "./pages/AppointmentRequests";
 import MedicalRecordsAdvanced from "./pages/MedicalRecordsAdvanced";
 import Invoices from "./pages/Invoices";
 import Settings from "./pages/Settings";
@@ -56,6 +57,7 @@ function AppContent() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="patients" element={<Patients />} />
           <Route path="appointments" element={<Appointments />} />
+          <Route path="appointment-requests" element={<AppointmentRequests />} />
             <Route path="records" element={<MedicalRecordsAdvanced />} />
           <Route path="prescriptions" element={<DigitalPrescriptions />} />
           <Route path="invoices" element={<Invoices />} />
