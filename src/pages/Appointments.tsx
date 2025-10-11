@@ -132,7 +132,7 @@ export default function Appointments() {
 
   const handleCreateAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setSaving(true);
       setError("");
@@ -154,6 +154,9 @@ export default function Appointments() {
         body: JSON.stringify(appointmentData),
       });
 
+      // Update selected date to show the newly created appointment
+      setSelectedDate(startDateTime);
+
       // Reset form
       setFormData({
         patient_id: "",
@@ -166,8 +169,8 @@ export default function Appointments() {
       
       setShowCreateDialog(false);
       
-      // Reload appointments
-      await loadAppointments();
+      // Reload appointments for the new date (will happen automatically via useEffect)
+      // No need to call loadAppointments() - the selectedDate change will trigger it
     } catch (err: any) {
       console.error("Error creating appointment:", err);
       setError(err.response?.data?.detail || "Failed to create appointment. Please try again.");
