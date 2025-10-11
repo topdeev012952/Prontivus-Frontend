@@ -65,7 +65,11 @@ export default function DigitalPrescriptions() {
   const [success, setSuccess] = useState("");
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [patients, setPatients] = useState<any[]>([]);
   const [selectedPatient, setSelectedPatient] = useState("");
@@ -223,6 +227,45 @@ export default function DigitalPrescriptions() {
     setPrescriptionNotes("");
   };
 
+  const handleViewPrescription = (prescription: Prescription) => {
+    setSelectedPrescription(prescription);
+    setShowViewDialog(true);
+  };
+
+  const handleDeleteClick = (prescription: Prescription) => {
+    setSelectedPrescription(prescription);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeletePrescription = async () => {
+    if (!selectedPrescription) return;
+    
+    try {
+      setDeleting(true);
+      setError("");
+
+      await apiClient.request(`/prescriptions/${selectedPrescription.id}`, {
+        method: "DELETE",
+      });
+
+      setShowDeleteDialog(false);
+      setSelectedPrescription(null);
+      setSuccess("Prescrição excluída com sucesso!");
+      
+      // Reload prescriptions
+      setTimeout(async () => {
+        await loadPrescriptions();
+      }, 500);
+      
+      setTimeout(() => setSuccess(""), 5000);
+    } catch (err: any) {
+      console.error("Error deleting prescription:", err);
+      setError(err.message || "Falha ao excluir prescrição. Tente novamente.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -315,10 +358,10 @@ export default function DigitalPrescriptions() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => {/* View prescription */}}
+                      onClick={() => handleViewPrescription(prescription)}
                     >
                       <Eye className="h-4 w-4 mr-1" />
-                      View
+                      Visualizar
                     </Button>
                     {prescription.pdf_url && (
                       <Button
@@ -331,6 +374,15 @@ export default function DigitalPrescriptions() {
                         PDF
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteClick(prescription)}
+                      className="text-destructive hover:text-destructive"
+                      title="Excluir prescrição"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -612,6 +664,161 @@ export default function DigitalPrescriptions() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Prescription Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes da Prescrição</DialogTitle>
+            <DialogDescription>
+              Visualização completa da prescrição médica
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPrescription && (
+            <div className="space-y-6 py-4">
+              {/* Patient Info */}
+              <div>
+                <Label className="text-sm font-semibold">Paciente</Label>
+                <p className="mt-1 text-sm">{selectedPrescription.patient_name || "N/A"}</p>
+              </div>
+
+              {/* Doctor Info */}
+              <div>
+                <Label className="text-sm font-semibold">Médico</Label>
+                <p className="mt-1 text-sm">{selectedPrescription.doctor_name || "N/A"}</p>
+              </div>
+
+              {/* Prescription Type */}
+              <div>
+                <Label className="text-sm font-semibold">Tipo de Prescrição</Label>
+                <div className="mt-1">
+                  <Badge className={PRESCRIPTION_TYPES[selectedPrescription.prescription_type]?.color}>
+                    {PRESCRIPTION_TYPES[selectedPrescription.prescription_type]?.label}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Medications */}
+              <div>
+                <Label className="text-sm font-semibold">Medicamentos</Label>
+                <div className="mt-2 space-y-3">
+                  {selectedPrescription.medications?.map((med, index) => (
+                    <div key={index} className="p-3 border rounded-lg bg-muted/50">
+                      <div className="flex items-start gap-2">
+                        <Pill className="h-4 w-4 text-primary mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{med.name || "Medicamento não especificado"}</p>
+                          <div className="mt-1 text-xs text-muted-foreground space-y-1">
+                            <p><strong>Dosagem:</strong> {med.dosage || "N/A"}</p>
+                            <p><strong>Frequência:</strong> {med.frequency || "N/A"}</p>
+                            <p><strong>Duração:</strong> {med.duration || "N/A"}</p>
+                            {med.instructions && (
+                              <p><strong>Instruções:</strong> {med.instructions}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedPrescription.notes && (
+                <div>
+                  <Label className="text-sm font-semibold">Observações</Label>
+                  <p className="mt-2 text-sm whitespace-pre-wrap">{selectedPrescription.notes}</p>
+                </div>
+              )}
+
+              {/* Signature Info */}
+              {selectedPrescription.signed_at && (
+                <div className="border-t pt-4">
+                  <Label className="text-sm font-semibold">Assinatura Digital</Label>
+                  <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                    <p>✓ Assinado digitalmente em {formatDate(selectedPrescription.signed_at)}</p>
+                    {selectedPrescription.signature_hash && (
+                      <p className="font-mono">Hash: {selectedPrescription.signature_hash.slice(0, 32)}...</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Date */}
+              <div className="border-t pt-4">
+                <Label className="text-sm font-semibold">Data de Criação</Label>
+                <p className="mt-1 text-sm">{formatDate(selectedPrescription.created_at)}</p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewDialog(false)}>
+              Fechar
+            </Button>
+            {selectedPrescription?.pdf_url && (
+              <Button onClick={() => window.open(selectedPrescription.pdf_url, '_blank')}>
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir esta prescrição? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedPrescription && (
+            <div className="py-4">
+              <p className="text-sm">
+                <strong>Paciente:</strong> {selectedPrescription.patient_name}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>Medicamentos:</strong> {selectedPrescription.medications?.length || 0} item(ns)
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>Data:</strong> {formatDate(selectedPrescription.created_at)}
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setSelectedPrescription(null);
+              }}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeletePrescription}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir Prescrição"
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
