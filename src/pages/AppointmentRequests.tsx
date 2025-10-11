@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -257,6 +257,9 @@ export default function AppointmentRequests() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Nova Solicitação de Consulta</DialogTitle>
+              <DialogDescription>
+                Preencha os dados para criar uma nova solicitação de agendamento
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateRequest}>
               <div className="space-y-4">
@@ -278,12 +281,15 @@ export default function AppointmentRequests() {
 
                 <div>
                   <Label htmlFor="doctor_id">Médico (Opcional)</Label>
-                  <Select value={formData.doctor_id} onValueChange={(value) => setFormData({ ...formData, doctor_id: value })}>
+                  <Select 
+                    value={formData.doctor_id || "none"} 
+                    onValueChange={(value) => setFormData({ ...formData, doctor_id: value === "none" ? "" : value })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Qualquer médico disponível" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Qualquer médico</SelectItem>
+                      <SelectItem value="none">Qualquer médico</SelectItem>
                       {doctors.map((doctor) => (
                         <SelectItem key={doctor.id} value={doctor.id}>
                           {doctor.name}
@@ -503,6 +509,9 @@ export default function AppointmentRequests() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Revisar Solicitação</DialogTitle>
+            <DialogDescription>
+              Aprove ou rejeite a solicitação de consulta do paciente
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleReviewRequest}>
             <div className="space-y-4">
