@@ -20,6 +20,14 @@ export const useWebSocket = () => {
   const reconnectAttemptsRef = useRef(0);
 
   useEffect(() => {
+    // WebSocket notifications are currently disabled (endpoint not available)
+    // This prevents console warnings and connection errors
+    const WEBSOCKET_ENABLED = false;
+    
+    if (!WEBSOCKET_ENABLED) {
+      return;
+    }
+    
     if (!isAuthenticated || !user) {
       // Clean up on logout
       if (wsRef.current) {
