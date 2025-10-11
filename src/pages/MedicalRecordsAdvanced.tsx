@@ -328,6 +328,150 @@ export default function MedicalRecordsAdvanced() {
     }
   };
 
+  const handleEditRecord = (record: MedicalRecord) => {
+    setSelectedRecord(record);
+    
+    // Parse the concatenated fields back into form structure
+    // This is a simplified version - you may need to improve parsing logic
+    setFormData({
+      appointment_id: record.appointment_id || "",
+      chief_complaint: "",
+      present_illness: "",
+      anamnesis: record.anamnesis || "",
+      past_medical_history: "",
+      family_history: "",
+      social_history: "",
+      allergies: "",
+      current_medications: "",
+      physical_exam: record.physical_exam || "",
+      temperature: "",
+      bp_systolic: "",
+      bp_diastolic: "",
+      heart_rate: "",
+      respiratory_rate: "",
+      oxygen_saturation: "",
+      weight: "",
+      height: "",
+      cardiovascular: "",
+      respiratory: "",
+      gastrointestinal: "",
+      neurological: "",
+      musculoskeletal: "",
+      evolution_notes: record.evolution_notes || "",
+      diagnosis: record.diagnosis || "",
+      icd_code: record.icd_code || "",
+      treatment_plan: record.treatment_plan || "",
+      prescriptions: record.prescriptions || "",
+    });
+    
+    setSelectedPatient(record.patient_id);
+    setShowEditDialog(true);
+  };
+
+  const handleUpdateRecord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedRecord) return;
+    
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+
+      // Build update data (same structure as create)
+      const recordData = {
+        patient_id: selectedPatient,
+        appointment_id: formData.appointment_id || null,
+        
+        anamnesis: [
+          formData.chief_complaint ? `Chief Complaint: ${formData.chief_complaint}` : "",
+          formData.present_illness ? `Present Illness: ${formData.present_illness}` : "",
+          formData.anamnesis,
+          formData.past_medical_history ? `Past Medical History: ${formData.past_medical_history}` : "",
+          formData.family_history ? `Family History: ${formData.family_history}` : "",
+          formData.social_history ? `Social History: ${formData.social_history}` : "",
+          formData.allergies ? `Allergies: ${formData.allergies}` : "",
+          formData.current_medications ? `Current Medications: ${formData.current_medications}` : "",
+        ].filter(Boolean).join("\n\n"),
+        
+        physical_exam: [
+          formData.temperature ? `Temperature: ${formData.temperature}°C` : "",
+          formData.bp_systolic && formData.bp_diastolic ? `BP: ${formData.bp_systolic}/${formData.bp_diastolic} mmHg` : "",
+          formData.heart_rate ? `HR: ${formData.heart_rate} bpm` : "",
+          formData.respiratory_rate ? `RR: ${formData.respiratory_rate} rpm` : "",
+          formData.oxygen_saturation ? `SpO2: ${formData.oxygen_saturation}%` : "",
+          formData.weight ? `Weight: ${formData.weight} kg` : "",
+          formData.height ? `Height: ${formData.height} cm` : "",
+          "\nSystem Review:",
+          formData.cardiovascular ? `Cardiovascular: ${formData.cardiovascular}` : "",
+          formData.respiratory ? `Respiratory: ${formData.respiratory}` : "",
+          formData.gastrointestinal ? `Gastrointestinal: ${formData.gastrointestinal}` : "",
+          formData.neurological ? `Neurological: ${formData.neurological}` : "",
+          formData.musculoskeletal ? `Musculoskeletal: ${formData.musculoskeletal}` : "",
+          formData.physical_exam,
+        ].filter(Boolean).join("\n"),
+        
+        diagnosis: formData.diagnosis || null,
+        icd_code: formData.icd_code || null,
+        
+        treatment_plan: [
+          formData.treatment_plan,
+          formData.prescriptions ? `Prescriptions:\n${formData.prescriptions}` : "",
+          formData.evolution_notes ? `Evolution Notes:\n${formData.evolution_notes}` : "",
+        ].filter(Boolean).join("\n\n"),
+      };
+
+      await apiClient.request(`/medical_records/${selectedRecord.id}`, {
+        method: "PUT",
+        body: JSON.stringify(recordData),
+      });
+
+      resetForm();
+      setShowEditDialog(false);
+      setSuccess("Prontuário atualizado com sucesso!");
+      
+      await loadRecords();
+      
+      setTimeout(() => setSuccess(""), 5000);
+    } catch (err: any) {
+      console.error("Error updating record:", err);
+      setError(err.message || "Falha ao atualizar prontuário. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteClick = (record: MedicalRecord) => {
+    setSelectedRecord(record);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteRecord = async () => {
+    if (!selectedRecord) return;
+    
+    try {
+      setDeleting(true);
+      setError("");
+
+      await apiClient.request(`/medical_records/${selectedRecord.id}`, {
+        method: "DELETE",
+      });
+
+      setShowDeleteDialog(false);
+      setSelectedRecord(null);
+      setSuccess("Prontuário excluído com sucesso!");
+      
+      await loadRecords();
+      
+      setTimeout(() => setSuccess(""), 5000);
+    } catch (err: any) {
+      console.error("Error deleting record:", err);
+      setError(err.message || "Falha ao excluir prontuário. Tente novamente.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleLockRecord = async (record: MedicalRecord) => {
     if (record.is_locked) {
       setError("Record is already locked");
@@ -345,13 +489,13 @@ export default function MedicalRecordsAdvanced() {
         }),
       });
 
-      setSuccess("Medical record locked successfully!");
+      setSuccess("Prontuário bloqueado com sucesso!");
       await loadRecords();
       
-      setTimeout(() => setSuccess(""), 3000);
+      setTimeout(() => setSuccess(""), 5000);
     } catch (err: any) {
       console.error("Error locking record:", err);
-      setError(err.message || "Failed to lock medical record.");
+      setError(err.message || "Falha ao bloquear prontuário.");
     } finally {
       setLocking(false);
     }
@@ -534,7 +678,7 @@ export default function MedicalRecordsAdvanced() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => {/* handleEditRecord */}}
+                            onClick={() => handleEditRecord(record)}
                             title="Edit Record"
                           >
                             <Edit className="h-4 w-4" />
@@ -542,7 +686,7 @@ export default function MedicalRecordsAdvanced() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => {/* handleDeleteClick */}}
+                            onClick={() => handleDeleteClick(record)}
                             title="Delete Record"
                             className="text-destructive hover:text-destructive"
                           >
@@ -1123,6 +1267,211 @@ export default function MedicalRecordsAdvanced() {
 
           <DialogFooter>
             <Button onClick={() => setShowViewDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Medical Record Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Prontuário</DialogTitle>
+            <DialogDescription>
+              Atualize as informações do prontuário médico
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleUpdateRecord}>
+            {/* Patient Selection (disabled in edit mode) */}
+            <div className="mb-4">
+              <Label htmlFor="patient">Paciente</Label>
+              <Select value={selectedPatient} onValueChange={setSelectedPatient} disabled>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o paciente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {patients.map((patient) => (
+                    <SelectItem key={patient.id} value={patient.id}>
+                      {patient.name} {patient.cpf && `(CPF: ${patient.cpf})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tabbed Interface */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="historia">História Clínica</TabsTrigger>
+                <TabsTrigger value="exame">Exame Físico</TabsTrigger>
+                <TabsTrigger value="evolucao">Evolução</TabsTrigger>
+                <TabsTrigger value="conduta">Conduta</TabsTrigger>
+              </TabsList>
+
+              {/* Tab 1: História Clínica */}
+              <TabsContent value="historia" className="space-y-4 mt-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="edit_anamnesis">Anamnese</Label>
+                    <Textarea
+                      id="edit_anamnesis"
+                      placeholder="História clínica do paciente..."
+                      value={formData.anamnesis}
+                      onChange={(e) => setFormData({ ...formData, anamnesis: e.target.value })}
+                      rows={10}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab 2: Exame Físico */}
+              <TabsContent value="exame" className="space-y-4 mt-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="edit_physical_exam">Exame Físico</Label>
+                    <Textarea
+                      id="edit_physical_exam"
+                      placeholder="Achados do exame físico..."
+                      value={formData.physical_exam}
+                      onChange={(e) => setFormData({ ...formData, physical_exam: e.target.value })}
+                      rows={10}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab 3: Evolução */}
+              <TabsContent value="evolucao" className="space-y-4 mt-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="edit_evolution_notes">Notas de Evolução</Label>
+                    <Textarea
+                      id="edit_evolution_notes"
+                      placeholder="Progresso do paciente, resposta ao tratamento..."
+                      value={formData.evolution_notes}
+                      onChange={(e) => setFormData({ ...formData, evolution_notes: e.target.value })}
+                      rows={10}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab 4: Conduta */}
+              <TabsContent value="conduta" className="space-y-4 mt-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="edit_diagnosis">Diagnóstico</Label>
+                    <Textarea
+                      id="edit_diagnosis"
+                      placeholder="Diagnóstico médico..."
+                      value={formData.diagnosis}
+                      onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit_icd_code">Código CID-10</Label>
+                    <CID10Autocomplete
+                      value={formData.icd_code}
+                      onChange={(code, description) => {
+                        setFormData({ 
+                          ...formData, 
+                          icd_code: code,
+                          diagnosis: formData.diagnosis || description
+                        });
+                      }}
+                      placeholder="Buscar código CID-10..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit_treatment_plan">Plano de Tratamento</Label>
+                    <Textarea
+                      id="edit_treatment_plan"
+                      placeholder="Plano de tratamento, procedimentos..."
+                      value={formData.treatment_plan}
+                      onChange={(e) => setFormData({ ...formData, treatment_plan: e.target.value })}
+                      rows={6}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <DialogFooter className="mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowEditDialog(false);
+                  resetForm();
+                }}
+                disabled={saving}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={saving || !selectedPatient}>
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  "Salvar Alterações"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este prontuário? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedRecord && (
+            <div className="py-4">
+              <p className="text-sm">
+                <strong>Paciente:</strong> {selectedRecord.patient_name}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>Data:</strong> {formatDate(selectedRecord.created_at)}
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setSelectedRecord(null);
+              }}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteRecord}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir Prontuário"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
