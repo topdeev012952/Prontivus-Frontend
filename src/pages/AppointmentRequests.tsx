@@ -96,7 +96,7 @@ export default function AppointmentRequests() {
 
   const loadPatients = async () => {
     try {
-      const data = await apiClient.request<any>("/patients?page=1&size=1000");
+      const data = await apiClient.request<any>("/patients?page=1&size=100");
       setPatients(data.items || []);
     } catch (err) {
       console.error("Error loading patients:", err);
