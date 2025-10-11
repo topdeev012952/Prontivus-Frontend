@@ -188,14 +188,16 @@ export default function DigitalPrescriptions() {
         body: JSON.stringify(prescriptionData),
       });
 
-      setSuccess("Prescription created successfully!");
+      setSuccess("Prescrição criada com sucesso!");
       setShowCreateDialog(false);
       resetForm();
       
-      // Reload prescriptions
-      await loadPrescriptions();
+      // Wait a moment for database commit, then reload prescriptions
+      setTimeout(async () => {
+        await loadPrescriptions();
+      }, 500);
 
-      setTimeout(() => setSuccess(""), 3000);
+      setTimeout(() => setSuccess(""), 5000);
     } catch (err: any) {
       console.error("Error creating prescription:", err);
       setError(err.message || "Failed to create prescription. Please try again.");

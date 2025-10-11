@@ -60,6 +60,7 @@ export default function Appointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [total, setTotal] = useState(0);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
@@ -136,6 +137,7 @@ export default function Appointments() {
     try {
       setSaving(true);
       setError("");
+      setSuccess("");
 
       // Calculate start_time and end_time
       const startDateTime = new Date(`${formData.date}T${formData.start_time}`);
@@ -154,6 +156,9 @@ export default function Appointments() {
         body: JSON.stringify(appointmentData),
       });
 
+      // Show success message
+      setSuccess("Consulta agendada com sucesso!");
+      
       // Update selected date to show the newly created appointment
       setSelectedDate(startDateTime);
 
@@ -169,11 +174,14 @@ export default function Appointments() {
       
       setShowCreateDialog(false);
       
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(""), 5000);
+      
       // Reload appointments for the new date (will happen automatically via useEffect)
       // No need to call loadAppointments() - the selectedDate change will trigger it
     } catch (err: any) {
       console.error("Error creating appointment:", err);
-      setError(err.response?.data?.detail || "Failed to create appointment. Please try again.");
+      setError(err.response?.data?.detail || "Falha ao agendar consulta. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -339,6 +347,12 @@ export default function Appointments() {
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {success && (
+        <Alert className="bg-green-50 border-green-200">
+          <AlertDescription className="text-green-800">{success}</AlertDescription>
         </Alert>
       )}
 
