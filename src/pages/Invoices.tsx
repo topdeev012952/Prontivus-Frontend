@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DollarSign, Plus, Search, Filter, Loader2, FileText, Calendar, User, Download, Edit, Trash2, Eye } from "lucide-react";
+import { DollarSign, Plus, Search, Filter, Loader2, FileText, Calendar, User, Download, Edit, Trash2, Eye, QrCode, Banknote, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,6 +23,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { apiClient } from "@/lib/api";
+import { PixPaymentModal, BoletoPaymentModal } from "@/components/Payments";
+import { SADTRequestModal } from "@/components/TISS";
 
 interface Invoice {
   id: string;
@@ -74,6 +76,9 @@ export default function Invoices() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [showBoletoModal, setShowBoletoModal] = useState(false);
+  const [showSADTModal, setShowSADTModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -748,7 +753,35 @@ export default function Invoices() {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            {selectedInvoice && selectedInvoice.status !== "paid" && (
+              <>
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={() => {
+                    setShowViewDialog(false);
+                    setShowPixModal(true);
+                  }}
+                  className="gap-2"
+                >
+                  <QrCode className="h-4 w-4" />
+                  Generate PIX
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowViewDialog(false);
+                    setShowBoletoModal(true);
+                  }}
+                  className="gap-2"
+                >
+                  <Banknote className="h-4 w-4" />
+                  Generate Boleto
+                </Button>
+              </>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -759,6 +792,45 @@ export default function Invoices() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* PIX Payment Modal */}
+      {selectedInvoice && (
+        <PixPaymentModal
+          open={showPixModal}
+          onClose={() => setShowPixModal(false)}
+          invoice={selectedInvoice}
+          onPaymentCreated={(data) => {
+            console.log('PIX payment created:', data);
+            loadInvoices(); // Reload to update payment metadata
+          }}
+        />
+      )}
+
+      {/* Boleto Payment Modal */}
+      {selectedInvoice && (
+        <BoletoPaymentModal
+          open={showBoletoModal}
+          onClose={() => setShowBoletoModal(false)}
+          invoice={selectedInvoice}
+          onPaymentCreated={(data) => {
+            console.log('Boleto created:', data);
+            loadInvoices(); // Reload to update payment metadata
+          }}
+        />
+      )}
+
+      {/* SADT Request Modal */}
+      {selectedInvoice && (
+        <SADTRequestModal
+          open={showSADTModal}
+          onClose={() => setShowSADTModal(false)}
+          patientId={selectedInvoice.patient_id}
+          patientName={selectedInvoice.patient_name}
+          onRequestCreated={(data) => {
+            console.log('SADT request created:', data);
+          }}
+        />
+      )}
 
       {/* Edit Invoice Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
