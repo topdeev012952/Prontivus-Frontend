@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { apiClient } from "@/lib/api";
+import { TwoFactorSettings } from "@/components/TwoFactorAuth";
 
 interface UserInfo {
   id: string;
@@ -36,7 +37,6 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Form states
@@ -500,9 +500,9 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Configurações de Segurança
+                Alterar Senha
               </CardTitle>
-              <CardDescription>Gerencie sua senha e autenticação</CardDescription>
+              <CardDescription>Atualize sua senha de acesso</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -549,39 +549,12 @@ export default function Settings() {
                     "Atualizar Senha"
                   )}
                 </Button>
-                </form>
-
-              <div className="pt-6 border-t mt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Autenticação de Dois Fatores</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Adicione uma camada extra de segurança à sua conta
-                    </p>
-                  </div>
-                  <Switch 
-                    checked={twoFactorEnabled}
-                    onCheckedChange={(checked) => {
-                      setTwoFactorEnabled(checked);
-                      setSuccess(checked ? "2FA Ativado (Demo)" : "2FA Desativado (Demo)");
-                      setTimeout(() => setSuccess(""), 3000);
-                    }}
-                  />
-                </div>
-                {twoFactorEnabled && (
-                  <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <p className="text-sm font-medium mb-2">Escaneie este código QR com seu aplicativo autenticador</p>
-                    <div className="h-32 w-32 bg-background border rounded flex items-center justify-center">
-                      <p className="text-xs text-muted-foreground">Espaço para QR Code</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Implementação 2FA pronta - requer endpoint backend
-                    </p>
-                  </div>
-                )}
-              </div>
+              </form>
             </CardContent>
           </Card>
+
+          {/* Two-Factor Authentication Card */}
+          <TwoFactorSettings />
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4">
