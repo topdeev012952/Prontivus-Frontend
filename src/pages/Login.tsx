@@ -7,12 +7,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, AlertCircle, LogIn, Mail, Lock } from "lucide-react";
+import { TwoFactorLogin } from "@/components/TwoFactorAuth";
+import { apiClient } from "@/lib/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [twoFAError, setTwoFAError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -24,8 +28,46 @@ export default function Login() {
     try {
       await login(email, password);
       navigate("/app/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "E-mail ou senha inválidos. Tente novamente.");
+    } catch (err: any) {
+      // Check if 2FA is required
+      if (err.message?.includes("2FA") || err.message?.includes("Código 2FA necessário")) {
+        setShow2FA(true);
+        setError("");
+      } else {
+        setError(err instanceof Error ? err.message : "E-mail ou senha inválidos. Tente novamente.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handle2FAVerify = async (code: string) => {
+    setTwoFAError("");
+    setIsLoading(true);
+
+    try {
+      // Call login with 2FA code
+      const response = await apiClient.request("/auth/login", {
+        method: "POST",
+        requiresAuth: false,
+        body: JSON.stringify({
+          email,
+          password,
+          two_fa_code: code
+        })
+      });
+
+      // Store token and navigate
+      localStorage.setItem("access_token", response.access_token);
+      if (response.refresh_token) {
+        localStorage.setItem("refresh_token", response.refresh_token);
+      }
+      
+      setShow2FA(false);
+      navigate("/app/dashboard");
+    } catch (err: any) {
+      setTwoFAError(err.message || "Código 2FA inválido");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -133,6 +175,18 @@ export default function Login() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Two-Factor Authentication Modal */}
+      <TwoFactorLogin
+        open={show2FA}
+        onVerify={handle2FAVerify}
+        onCancel={() => {
+          setShow2FA(false);
+          setTwoFAError("");
+        }}
+        loading={isLoading}
+        error={twoFAError}
+      />
     </div>
   );
 }
