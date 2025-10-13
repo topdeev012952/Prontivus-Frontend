@@ -77,7 +77,7 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex h-16 items-center justify-center border-b border-sidebar-active/20 px-6">
           <img 
-            src="/Logo/Logotipo em Fundo Transparente.png" 
+            src="/Logo/Prontivus Horizontal Transparents.png" 
             alt="Prontivus" 
             className="h-12 w-auto"
           />
