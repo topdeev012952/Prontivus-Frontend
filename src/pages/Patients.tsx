@@ -71,7 +71,15 @@ export default function Patients() {
     email: "",
     insurance_number: "",
     insurance_provider: "",
-    address: {},  // Include address field to prevent validation error
+    address: {
+      street: "",
+      number: "",
+      complement: "",
+      neighborhood: "",
+      city: "",
+      state: "",
+      zip_code: "",
+    },
   });
 
   useEffect(() => {
@@ -173,7 +181,15 @@ export default function Patients() {
       email: patient.email || "",
       insurance_number: patient.insurance_number || "",
       insurance_provider: patient.insurance_provider || "",
-      address: patient.address || {},  // Include address from patient data
+      address: {
+        street: patient.address?.street || "",
+        number: patient.address?.number || "",
+        complement: patient.address?.complement || "",
+        neighborhood: patient.address?.neighborhood || "",
+        city: patient.address?.city || "",
+        state: patient.address?.state || "",
+        zip_code: patient.address?.zip_code || "",
+      },
     });
     setShowEditDialog(true);
   };
@@ -515,6 +531,116 @@ export default function Patients() {
                 </div>
               </div>
 
+              {/* Address Section */}
+              <div className="space-y-4 pt-2 border-t">
+                <Label className="text-base font-semibold">Endereço</Label>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Street */}
+                  <div className="col-span-2 grid gap-2">
+                    <Label htmlFor="address_street">Rua/Avenida</Label>
+                    <Input
+                      id="address_street"
+                      placeholder="Rua das Flores"
+                      value={formData.address.street}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, street: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  {/* Number */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="address_number">Número</Label>
+                    <Input
+                      id="address_number"
+                      placeholder="123"
+                      value={formData.address.number}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, number: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Complement */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="address_complement">Complemento</Label>
+                    <Input
+                      id="address_complement"
+                      placeholder="Apto 101, Bloco A"
+                      value={formData.address.complement}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, complement: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  {/* Neighborhood */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="address_neighborhood">Bairro</Label>
+                    <Input
+                      id="address_neighborhood"
+                      placeholder="Centro"
+                      value={formData.address.neighborhood}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, neighborhood: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  {/* City */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="address_city">Cidade</Label>
+                    <Input
+                      id="address_city"
+                      placeholder="São Paulo"
+                      value={formData.address.city}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, city: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  {/* State */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="address_state">Estado</Label>
+                    <Input
+                      id="address_state"
+                      placeholder="SP"
+                      maxLength={2}
+                      value={formData.address.state}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, state: e.target.value.toUpperCase() }
+                      })}
+                    />
+                  </div>
+
+                  {/* ZIP Code */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="address_zip">CEP</Label>
+                    <Input
+                      id="address_zip"
+                      placeholder="00000-000"
+                      value={formData.address.zip_code}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, zip_code: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 {/* Insurance Number */}
                 <div className="grid gap-2">
@@ -610,6 +736,34 @@ export default function Patients() {
                   <p className="font-medium mt-1">{selectedPatient.email || "Não informado"}</p>
                 </div>
               </div>
+
+              {/* Address Section */}
+              {selectedPatient.address && Object.keys(selectedPatient.address).length > 0 && (
+                <div className="space-y-2 pt-2 border-t">
+                  <Label className="text-base font-semibold">Endereço</Label>
+                  <div className="text-sm">
+                    {selectedPatient.address.street && (
+                      <p className="font-medium">
+                        {selectedPatient.address.street}
+                        {selectedPatient.address.number && `, ${selectedPatient.address.number}`}
+                        {selectedPatient.address.complement && ` - ${selectedPatient.address.complement}`}
+                      </p>
+                    )}
+                    {selectedPatient.address.neighborhood && (
+                      <p>{selectedPatient.address.neighborhood}</p>
+                    )}
+                    {(selectedPatient.address.city || selectedPatient.address.state) && (
+                      <p>
+                        {selectedPatient.address.city}
+                        {selectedPatient.address.state && ` - ${selectedPatient.address.state}`}
+                      </p>
+                    )}
+                    {selectedPatient.address.zip_code && (
+                      <p>CEP: {selectedPatient.address.zip_code}</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -730,6 +884,116 @@ export default function Patients() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
+                </div>
+              </div>
+
+              {/* Address Section */}
+              <div className="space-y-4 pt-2 border-t">
+                <Label className="text-base font-semibold">Endereço</Label>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Street */}
+                  <div className="col-span-2 grid gap-2">
+                    <Label htmlFor="edit-address_street">Rua/Avenida</Label>
+                    <Input
+                      id="edit-address_street"
+                      placeholder="Rua das Flores"
+                      value={formData.address.street}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, street: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  {/* Number */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-address_number">Número</Label>
+                    <Input
+                      id="edit-address_number"
+                      placeholder="123"
+                      value={formData.address.number}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, number: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Complement */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-address_complement">Complemento</Label>
+                    <Input
+                      id="edit-address_complement"
+                      placeholder="Apto 101, Bloco A"
+                      value={formData.address.complement}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, complement: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  {/* Neighborhood */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-address_neighborhood">Bairro</Label>
+                    <Input
+                      id="edit-address_neighborhood"
+                      placeholder="Centro"
+                      value={formData.address.neighborhood}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, neighborhood: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  {/* City */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-address_city">Cidade</Label>
+                    <Input
+                      id="edit-address_city"
+                      placeholder="São Paulo"
+                      value={formData.address.city}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, city: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  {/* State */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-address_state">Estado</Label>
+                    <Input
+                      id="edit-address_state"
+                      placeholder="SP"
+                      maxLength={2}
+                      value={formData.address.state}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, state: e.target.value.toUpperCase() }
+                      })}
+                    />
+                  </div>
+
+                  {/* ZIP Code */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-address_zip">CEP</Label>
+                    <Input
+                      id="edit-address_zip"
+                      placeholder="00000-000"
+                      value={formData.address.zip_code}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        address: { ...formData.address, zip_code: e.target.value }
+                      })}
+                    />
+                  </div>
                 </div>
               </div>
 
