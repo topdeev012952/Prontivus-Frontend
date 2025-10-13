@@ -26,7 +26,8 @@ import { useAuth } from "@/hooks/useAuth";
 const navigation = [
   { name: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
   { name: "Pacientes", href: "/app/patients", icon: Users },
-  { name: "Consultas", href: "/app/appointments", icon: Calendar },
+  { name: "Atendimentos", href: "/app/consultations", icon: Activity },
+  { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
   { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
   { name: "Prontuários", href: "/app/records", icon: FileText },
   { name: "Prescrições", href: "/app/prescriptions", icon: Pill },
