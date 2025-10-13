@@ -14,8 +14,11 @@ import {
   Menu,
   Pill,
   Shield,
-  Video,
-  Building2
+  Building2,
+  Stethoscope,
+  CalendarDays,
+  Briefcase,
+  TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ClinicSwitcher } from "@/components/ClinicSwitcher";
@@ -23,20 +26,58 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-const navigation = [
-  { name: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
-  { name: "Pacientes", href: "/app/patients", icon: Users },
-  { name: "Atendimentos", href: "/app/consultations", icon: Activity },
-  { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
-  { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
-  { name: "Prontuários", href: "/app/records", icon: FileText },
-  { name: "Prescrições", href: "/app/prescriptions", icon: Pill },
-  { name: "Faturas", href: "/app/invoices", icon: Receipt },
-  { name: "Sala de Espera", href: "/app/waiting-room", icon: Clock },
-  { name: "Módulo TISS", href: "/app/tiss", icon: Shield },
-  { name: "Planos de Saúde", href: "/app/health-plans", icon: Building2 },
-  { name: "Dashboard BI", href: "/app/bi-dashboard", icon: BarChart3 },
-  { name: "Configurações", href: "/app/settings", icon: Settings },
+interface NavigationSection {
+  title: string;
+  items: NavigationItem[];
+}
+
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: any;
+  badge?: string;
+  isNew?: boolean;
+}
+
+const navigationSections: NavigationSection[] = [
+  {
+    title: "Principal",
+    items: [
+      { name: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: "Atendimento Clínico",
+    items: [
+      { name: "Atendimentos", href: "/app/consultations", icon: Activity, isNew: true },
+      { name: "Pacientes", href: "/app/patients", icon: Users },
+      { name: "Prontuários", href: "/app/records", icon: FileText },
+      { name: "Prescrições", href: "/app/prescriptions", icon: Pill },
+    ],
+  },
+  {
+    title: "Agendamento",
+    items: [
+      { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
+      { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
+      { name: "Sala de Espera", href: "/app/waiting-room", icon: Clock },
+    ],
+  },
+  {
+    title: "Financeiro & Convênios",
+    items: [
+      { name: "Faturas", href: "/app/invoices", icon: Receipt },
+      { name: "Planos de Saúde", href: "/app/health-plans", icon: Building2 },
+      { name: "Módulo TISS", href: "/app/tiss", icon: Shield },
+    ],
+  },
+  {
+    title: "Análises & Sistema",
+    items: [
+      { name: "Dashboard BI", href: "/app/bi-dashboard", icon: BarChart3 },
+      { name: "Configurações", href: "/app/settings", icon: Settings },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -90,24 +131,52 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
-          {navigation.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              end={item.href === "/app/dashboard"}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all",
-                  isActive
-                    ? "bg-sidebar-active/10 text-sidebar-active border-l-4 border-sidebar-active"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground border-l-4 border-transparent"
-                )
-              }
-            >
-              <item.icon className="h-5 w-5" />
-              {item.name}
-            </NavLink>
+        <nav className="flex-1 space-y-6 px-3 py-4 overflow-y-auto">
+          {navigationSections.map((section) => (
+            <div key={section.title} className="space-y-1">
+              {/* Section Header */}
+              <h3 className="px-3 mb-2 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider">
+                {section.title}
+              </h3>
+              
+              {/* Section Items */}
+              <div className="space-y-1">
+                {section.items.map((item) => (
+                  <NavLink
+                    key={item.name}
+                    to={item.href}
+                    end={item.href === "/app/dashboard"}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all group relative",
+                        isActive
+                          ? "bg-sidebar-active/10 text-sidebar-active border-l-4 border-sidebar-active"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground border-l-4 border-transparent"
+                      )
+                    }
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <span>{item.name}</span>
+                    </div>
+                    
+                    {/* "New" Badge */}
+                    {item.isNew && (
+                      <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-500 text-white rounded-full">
+                        Novo
+                      </span>
+                    )}
+                    
+                    {/* Optional Badge */}
+                    {item.badge && (
+                      <span className="px-2 py-0.5 text-xs font-semibold bg-sidebar-active/20 text-sidebar-active rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
