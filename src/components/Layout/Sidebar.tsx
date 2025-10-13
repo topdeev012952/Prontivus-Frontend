@@ -75,11 +75,11 @@ export function Sidebar() {
         </Button>
 
         {/* Logo */}
-        <div className="flex h-16 items-center justify-center border-b border-sidebar-active/20 px-6">
+        <div className="flex h-32 items-center justify-center border-b border-sidebar-active/20 px-6">
           <img 
             src="/Logo/Prontivus Horizontal Transparents.png" 
             alt="Prontivus" 
-            className="h-12 w-auto"
+            className="h-30 w-auto"
           />
         </div>
         
