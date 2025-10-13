@@ -1,0 +1,9 @@
+# This is a placeholder for the audio alert file
+# In production, replace this with an actual MP3 audio file
+# for the patient calling alert sound
+
+# You can use a free sound from:
+# - https://freesound.org/
+# - https://www.zapsplat.com/
+# - Or record a custom "Paciente chamado" message
+

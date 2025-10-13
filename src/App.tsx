@@ -27,7 +27,7 @@ import NotFound from "./pages/NotFound";
 import WaitingRoom from "./pages/WaitingRoom";
 import BIDashboard from "./pages/BIDashboard";
 import ConsultationDetail from "./pages/ConsultationDetail";
-import ConsultationWorkflow from "./pages/ConsultationWorkflow";
+import ConsultationWorkflowEnhanced from "./pages/ConsultationWorkflowEnhanced";
 
 const queryClient = new QueryClient();
 
@@ -67,7 +67,7 @@ function AppContent() {
           <Route path="telemed/:sessionId" element={<TelemedicineRoom />} />
           <Route path="waiting-room" element={<WaitingRoom />} />
           <Route path="bi-dashboard" element={<BIDashboard />} />
-          <Route path="consultations" element={<ConsultationWorkflow />} />
+          <Route path="consultations" element={<ConsultationWorkflowEnhanced />} />
           <Route path="consultations/:id" element={<ConsultationDetail />} />
           <Route path="waiting-queue" element={<WaitingRoom />} />
           <Route path="settings" element={<Settings />} />
