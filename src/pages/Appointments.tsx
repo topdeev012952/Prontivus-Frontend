@@ -22,6 +22,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { apiClient } from "@/lib/api";
+import { formatDate, formatTime } from "@/lib/utils";
 
 interface Appointment {
   id: string;
