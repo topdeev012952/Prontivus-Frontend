@@ -144,8 +144,17 @@ export default function Billing() {
 
   const loadPayments = async () => {
     try {
-      const response = await apiClient.request<PaymentRecord[]>("/billing/payments");
-      setPayments(response || []);
+      const response = await apiClient.request<any>("/billing/payments");
+      // Handle both array and object responses
+      if (Array.isArray(response)) {
+        setPayments(response);
+      } else if (response && Array.isArray(response.items)) {
+        setPayments(response.items);
+      } else if (response && Array.isArray(response.data)) {
+        setPayments(response.data);
+      } else {
+        setPayments([]);
+      }
     } catch (err: any) {
       console.error("Error loading payments:", err);
       // Set empty array on error to prevent filter errors
@@ -160,8 +169,15 @@ export default function Billing() {
 
   const loadInsurancePlans = async () => {
     try {
-      const response = await apiClient.request<InsurancePlan[]>("/tiss/providers");
-      setInsurancePlans(response || []);
+      const response = await apiClient.request<any>("/tiss/providers");
+      // Handle both array and object responses
+      if (Array.isArray(response)) {
+        setInsurancePlans(response);
+      } else if (response && Array.isArray(response.items)) {
+        setInsurancePlans(response.items);
+      } else {
+        setInsurancePlans([]);
+      }
     } catch (err: any) {
       console.error("Error loading insurance plans:", err);
       // Set empty array on error to prevent filter errors
@@ -171,8 +187,17 @@ export default function Billing() {
 
   const loadPatients = async () => {
     try {
-      const response = await apiClient.request<{ items: Patient[] }>("/patients?page=1&size=100");
-      setPatients(response.items || []);
+      const response = await apiClient.request<any>("/patients?page=1&size=100");
+      // Handle both array and object responses
+      if (Array.isArray(response)) {
+        setPatients(response);
+      } else if (response && Array.isArray(response.items)) {
+        setPatients(response.items);
+      } else if (response && Array.isArray(response.data)) {
+        setPatients(response.data);
+      } else {
+        setPatients([]);
+      }
     } catch (err: any) {
       console.error("Error loading patients:", err);
       // Set empty array on error to prevent filter errors
@@ -184,8 +209,17 @@ export default function Billing() {
     try {
       // Get recent appointments
       const today = new Date().toISOString().split('T')[0];
-      const response = await apiClient.request<Appointment[]>(`/appointments?status=completed,scheduled&limit=100`);
-      setAppointments(response || []);
+      const response = await apiClient.request<any>(`/appointments?status=completed,scheduled&limit=100`);
+      // Handle both array and object responses
+      if (Array.isArray(response)) {
+        setAppointments(response);
+      } else if (response && Array.isArray(response.items)) {
+        setAppointments(response.items);
+      } else if (response && Array.isArray(response.data)) {
+        setAppointments(response.data);
+      } else {
+        setAppointments([]);
+      }
     } catch (err: any) {
       console.error("Error loading appointments:", err);
       // Set empty array on error to prevent filter errors
