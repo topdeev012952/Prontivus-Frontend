@@ -43,11 +43,30 @@ interface Doctor {
   name: string;
 }
 
+interface AppointmentRequestStats {
+  total_requests: number;
+  pending_requests: number;
+  approved_requests: number;
+  rejected_requests: number;
+  requests_today: number;
+  pending_today: number;
+  approved_this_week: number;
+}
+
 export default function AppointmentRequests() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<AppointmentRequest[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [stats, setStats] = useState<AppointmentRequestStats>({
+    total_requests: 0,
+    pending_requests: 0,
+    approved_requests: 0,
+    rejected_requests: 0,
+    requests_today: 0,
+    pending_today: 0,
+    approved_this_week: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -76,6 +95,7 @@ export default function AppointmentRequests() {
     loadRequests();
     loadPatients();
     loadDoctors();
+    loadStats();
   }, [filterStatus]);
 
   const loadRequests = async () => {
@@ -115,6 +135,15 @@ export default function AppointmentRequests() {
     }
   };
 
+  const loadStats = async () => {
+    try {
+      const data = await apiClient.request<AppointmentRequestStats>("/appointment-requests/stats");
+      setStats(data);
+    } catch (err) {
+      console.error("Error loading stats:", err);
+    }
+  };
+
   const handleCreateRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -127,6 +156,7 @@ export default function AppointmentRequests() {
       setShowCreateDialog(false);
       resetForm();
       loadRequests();
+      loadStats();
       setTimeout(() => setSuccess(""), 5000);
     } catch (err: any) {
       console.error("Error creating request:", err);
@@ -170,6 +200,7 @@ export default function AppointmentRequests() {
       setSelectedRequest(null);
       resetReviewForm();
       loadRequests();
+      loadStats();
       setTimeout(() => setSuccess(""), 5000);
     } catch (err: any) {
       console.error("Error reviewing request:", err);
@@ -187,6 +218,7 @@ export default function AppointmentRequests() {
       });
       setSuccess("Solicitação cancelada com sucesso!");
       loadRequests();
+      loadStats();
       setTimeout(() => setSuccess(""), 5000);
     } catch (err: any) {
       console.error("Error cancelling request:", err);
@@ -361,6 +393,61 @@ export default function AppointmentRequests() {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Solicitações</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total_requests}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.requests_today} hoje
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{stats.pending_requests}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.pending_today} hoje
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Aprovadas</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.approved_requests}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.approved_this_week} esta semana
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Rejeitadas</CardTitle>
+            <XCircle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.rejected_requests}</div>
+            <p className="text-xs text-muted-foreground">
+              Total de rejeitadas
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
