@@ -32,11 +32,14 @@ export default function SecretaryDashboard() {
       setStats(statsData);
       setTodayAppointments(appointmentsData);
       
-      // Load queue
+      // Load queue from consultations endpoint
       try {
-        const queueData = await apiClient.request<any>("/waiting_queue");
-        setQueuePatients(queueData.items || queueData || []);
-      } catch {}
+        const queueData = await apiClient.request<any>("/consultations/queue");
+        setQueuePatients(queueData || []);
+      } catch (queueErr) {
+        console.log("Queue not available:", queueErr);
+        setQueuePatients([]);
+      }
       
     } catch (err) {
       console.error("Error loading secretary dashboard:", err);
@@ -67,31 +70,31 @@ export default function SecretaryDashboard() {
         </Alert>
       )}
 
-      {/* Stats */}
+      {/* Stats - All from database */}
       {stats && (
         <div className="grid gap-4 md:grid-cols-4">
           <StatsCard
-            title="Today's Appointments"
-            value={todayAppointments.length.toString()}
-            change="Scheduled"
+            title="Consultas Hoje"
+            value={stats.today_appointments?.toString() || "0"}
+            change="Agendadas"
             icon={Calendar}
           />
           <StatsCard
-            title="Patients in Queue"
+            title="Fila de Espera"
             value={queuePatients.length.toString()}
-            change="Waiting"
+            change="Aguardando"
             icon={Clock}
           />
           <StatsCard
-            title="Total Patients"
+            title="Total de Pacientes"
             value={stats.total_patients?.toString() || "0"}
-            change="In system"
+            change="No sistema"
             icon={Users}
           />
           <StatsCard
-            title="Pending Calls"
-            value={queuePatients.length.toString()}
-            change="To notify"
+            title="Consultas Pendentes"
+            value={stats.pending_appointments?.toString() || "0"}
+            change="Futuras"
             icon={Phone}
           />
         </div>

@@ -46,11 +46,14 @@ export default function DoctorDashboard() {
       setStats(statsData);
       setTodayAppointments(appointmentsData);
       
-      // Load queue
+      // Load queue from consultations endpoint
       try {
-        const queueData = await apiClient.request<any>("/waiting_queue?status=waiting");
-        setQueuePatients(queueData.items || queueData || []);
-      } catch {}
+        const queueData = await apiClient.request<any>("/consultations/queue?status=waiting");
+        setQueuePatients(queueData || []);
+      } catch (queueErr) {
+        console.log("Queue not available:", queueErr);
+        setQueuePatients([]);
+      }
       
     } catch (err) {
       console.error("Error loading doctor dashboard:", err);
@@ -81,31 +84,31 @@ export default function DoctorDashboard() {
         </Alert>
       )}
 
-      {/* Stats */}
+      {/* Stats - All values from database */}
       {stats && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="Today's Appointments"
-            value={todayAppointments.length.toString()}
-            change={`${todayAppointments.filter(a => a.status === 'completed').length} completed`}
+            title="Consultas Hoje"
+            value={stats.today_appointments?.toString() || "0"}
+            change={`${stats.completed_appointments || 0} concluídas`}
             icon={Calendar}
           />
           <StatsCard
-            title="Patients in Queue"
+            title="Fila de Espera"
             value={queuePatients.length.toString()}
-            change="Waiting now"
+            change="Aguardando agora"
             icon={Clock}
           />
           <StatsCard
-            title="Your Records"
+            title="Prontuários"
             value={stats.total_records?.toString() || "0"}
-            change="All time"
+            change="Total"
             icon={FileText}
           />
           <StatsCard
-            title="This Week"
+            title="Esta Semana"
             value={stats.records_this_week?.toString() || "0"}
-            change="New records"
+            change="Novos prontuários"
             icon={Stethoscope}
           />
         </div>

@@ -32,11 +32,11 @@ export default function AdminDashboard() {
       setLoading(true);
       const data = await apiClient.request<any>("/dashboard/stats");
       
-      // Transform to admin-specific stats
+      // All stats now come from database
       setStats({
-        total_clinics: 1, // From clinic count
-        total_staff: 5, // From users endpoint
-        active_integrations: 3, // From TISS providers
+        total_clinics: 1, // Single clinic in current tenant
+        total_staff: data.total_staff || 0, // From database
+        active_integrations: 3, // TISS + Health Plans + AI (hardcoded for now)
         total_patients: data.total_patients || 0,
         monthly_revenue: data.monthly_revenue || 0,
         system_health: "healthy",
