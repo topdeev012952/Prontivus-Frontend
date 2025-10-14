@@ -18,7 +18,7 @@ import {
   User, Clock, Phone, Calendar, Heart, Activity, Thermometer, Weight,
   FileText, Pill, ClipboardList, Send, Upload, Download, Save, 
   CheckCircle, AlertCircle, History, Image as ImageIcon, Mic, StopCircle,
-  Plus, X, Loader2, ArrowLeft, Bell
+  Plus, X, Loader2, ArrowLeft, Bell, Shield
 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
