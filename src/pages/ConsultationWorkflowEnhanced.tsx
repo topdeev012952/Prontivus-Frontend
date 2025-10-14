@@ -650,6 +650,146 @@ export default function ConsultationWorkflowEnhanced() {
     setSadtItems(sadtItems.filter((_, i) => i !== index));
   };
 
+  const handleGeneratePrescription = async () => {
+    if (!consultationData.id) {
+      toast({
+        title: "Erro",
+        description: "Consulta não foi salva ainda. Salve a consulta antes de gerar a prescrição.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (medications.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Adicione pelo menos um medicamento antes de gerar a prescrição.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      
+      const response = await apiClient.request<{
+        success: boolean;
+        pdf_base64: string;
+        verification_url: string;
+        message: string;
+      }>(
+        `/consultations/${consultationData.id}/prescription`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            prescription_type: prescriptionType,
+            medications: medications,
+            notes: prescriptionNotes,
+          }),
+        }
+      );
+
+      if (response.success && response.pdf_base64) {
+        // Convert base64 to blob and download
+        const binaryString = atob(response.pdf_base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `Prescricao_${currentPatient?.patient_name || "Paciente"}_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toast({
+          title: "Sucesso",
+          description: "Prescrição gerada e baixada com sucesso!",
+        });
+      }
+    } catch (err: any) {
+      console.error("Error generating prescription:", err);
+      toast({
+        title: "Erro",
+        description: err.message || "Falha ao gerar prescrição",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGenerateTISS = async () => {
+    if (!consultationData.id) {
+      toast({
+        title: "Erro",
+        description: "Consulta não foi salva ainda. Salve a consulta antes de gerar a guia TISS.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (sadtItems.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Adicione pelo menos um procedimento antes de gerar a guia TISS.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      
+      const response = await apiClient.request<{
+        success: boolean;
+        xml_content: string;
+        status: string;
+        message: string;
+      }>(
+        `/consultations/${consultationData.id}/tiss`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            items: sadtItems,
+            justification: sadtJustification,
+          }),
+        }
+      );
+
+      if (response.success && response.xml_content) {
+        // Convert XML to blob and download
+        const blob = new Blob([response.xml_content], { type: "application/xml" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `TISS_SADT_${currentPatient?.patient_name || "Paciente"}_${new Date().toISOString().split('T')[0]}.xml`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toast({
+          title: "Sucesso",
+          description: "Guia TISS gerada e baixada com sucesso!",
+        });
+      }
+    } catch (err: any) {
+      console.error("Error generating TISS:", err);
+      toast({
+        title: "Erro",
+        description: err.message || "Falha ao gerar guia TISS",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "waiting":
@@ -1238,9 +1378,23 @@ export default function ConsultationWorkflowEnhanced() {
                 </div>
 
                 {!isReadOnly && medications.length > 0 && (
-                  <Button className="w-full" variant="outline">
-                    <Download className="mr-2 h-4 w-4" />
-                    Gerar PDF com Assinatura Digital
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={handleGeneratePrescription}
+                    disabled={saving || !consultationData.id}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="mr-2 h-4 w-4" />
+                        Gerar PDF com Assinatura Digital
+                      </>
+                    )}
                   </Button>
                 )}
               </CardContent>
@@ -1354,9 +1508,23 @@ export default function ConsultationWorkflowEnhanced() {
                     </div>
 
                     {!isReadOnly && (
-                      <Button className="w-full" variant="outline">
-                        <Download className="mr-2 h-4 w-4" />
-                        Gerar XML TISS
+                      <Button 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={handleGenerateTISS}
+                        disabled={saving || !consultationData.id}
+                      >
+                        {saving ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Gerando...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="mr-2 h-4 w-4" />
+                            Gerar XML TISS
+                          </>
+                        )}
                       </Button>
                     )}
                   </>
