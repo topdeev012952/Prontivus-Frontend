@@ -820,26 +820,26 @@ export default function ConsultationImproved() {
               <ScrollArea className="h-[600px] pr-4">
                 {loading ? (
                   <div className="flex justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-300" />
                   </div>
                 ) : waitingPatients.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Clock className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Clock className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-500" />
                     <p>Nenhum paciente na fila</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {waitingPatients.map((patient, index) => (
-                      <Card key={patient.id} className="border-2 hover:border-blue-300 transition-colors">
+                      <Card key={patient.id} className="border-2 hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-semibold">
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-semibold">
                                 {patient.position}
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900">{patient.patient_name}</h4>
-                                <p className="text-sm text-gray-500">
+                                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{patient.patient_name}</h4>
+                                <p className="text-sm text-gray-500 dark:text-gray-300">
                                   {patient.patient_age} anos • {formatTime(patient.appointment_time)}
                                 </p>
                               </div>
@@ -887,19 +887,19 @@ export default function ConsultationImproved() {
             <CardContent>
               <ScrollArea className="h-[600px] pr-4">
                 {completedPatients.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <CheckCircle className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-500" />
                     <p>Nenhum atendimento finalizado hoje</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {completedPatients.map((patient) => (
-                      <Card key={patient.id} className="border hover:border-green-300 transition-colors">
+                      <Card key={patient.id} className="border hover:border-green-300 dark:hover:border-green-500 transition-colors">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div>
-                              <h4 className="font-semibold text-gray-900">{patient.patient_name}</h4>
-                              <p className="text-sm text-gray-500">
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100">{patient.patient_name}</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-300">
                                 Atendido às {formatTime(patient.called_at || patient.appointment_time)}
                               </p>
                             </div>
@@ -933,7 +933,7 @@ export default function ConsultationImproved() {
       <audio ref={audioRef} src="/alert-sound.mp3" preload="auto" />
       
       {/* Header */}
-      <div className="bg-white border-b px-6 py-4 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-700 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -949,8 +949,8 @@ export default function ConsultationImproved() {
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">{currentPatient.patient_name}</h2>
-            <p className="text-sm text-gray-500">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{currentPatient.patient_name}</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               {currentPatient.patient_age} anos • CPF: {currentPatient.patient_cpf}
             </p>
           </div>
@@ -990,7 +990,7 @@ export default function ConsultationImproved() {
       </div>
 
       {/* Main Content Area - 2 Columns */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-800">
         <div className="h-full grid lg:grid-cols-[1fr_320px] gap-6 p-6">
           {/* Left Column - Scrollable Consultation Form */}
           <ScrollArea className="h-full">
@@ -999,12 +999,12 @@ export default function ConsultationImproved() {
               <Collapsible open={anamneseOpen} onOpenChange={setAnamneseOpen}>
                 <Card>
                   <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                          Anamnese e História Clínica
-                        </CardTitle>
+                <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                      <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      Anamnese e História Clínica
+                    </CardTitle>
                         {anamneseOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                       </div>
                     </CardHeader>
@@ -1090,12 +1090,12 @@ export default function ConsultationImproved() {
               <Collapsible open={evolucaoOpen} onOpenChange={setEvolucaoOpen}>
                 <Card>
                   <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Activity className="h-5 w-5 text-green-600" />
-                          Evolução e Conduta
-                        </CardTitle>
+                <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                      <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      Evolução e Conduta
+                    </CardTitle>
                         {evolucaoOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                       </div>
                     </CardHeader>
@@ -1241,12 +1241,12 @@ export default function ConsultationImproved() {
               <Collapsible open={prescricaoOpen} onOpenChange={setPrescricaoOpen}>
                 <Card>
                   <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Pill className="h-5 w-5 text-purple-600" />
-                          Prescrição Médica
-                        </CardTitle>
+                <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                      <Pill className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      Prescrição Médica
+                    </CardTitle>
                         {prescricaoOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                       </div>
                     </CardHeader>
@@ -1456,12 +1456,12 @@ export default function ConsultationImproved() {
               <Collapsible open={tissOpen} onOpenChange={setTissOpen}>
                 <Card>
                   <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Shield className="h-5 w-5 text-orange-600" />
-                          Guias SADT e TISS
-                        </CardTitle>
+                <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                      <Shield className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                      Guias SADT e TISS
+                    </CardTitle>
                         {tissOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                       </div>
                     </CardHeader>
@@ -1589,11 +1589,11 @@ export default function ConsultationImproved() {
           {/* Right Column - Attachments Panel */}
           <Card className="flex flex-col h-full">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Paperclip className="h-5 w-5 text-blue-600" />
+              <CardTitle className="flex items-center gap-2 text-lg text-gray-900 dark:text-gray-100">
+                <Paperclip className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 Anexos
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-xs text-gray-600 dark:text-gray-300">
                 Exames e documentos do paciente
               </CardDescription>
             </CardHeader>
@@ -1609,11 +1609,11 @@ export default function ConsultationImproved() {
                   />
                   <Label
                     htmlFor="file-upload-sidebar"
-                    className="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    className="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                    <span className="text-sm font-medium text-gray-700">Enviar Arquivo</span>
-                    <span className="text-xs text-gray-500 mt-1">PDF, Imagens, Word (máx. 10MB)</span>
+                    <Upload className="h-8 w-8 text-gray-400 dark:text-gray-300 mb-2" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Enviar Arquivo</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-300 mt-1">PDF, Imagens, Word (máx. 10MB)</span>
                   </Label>
                 </div>
               )}
@@ -1627,21 +1627,21 @@ export default function ConsultationImproved() {
                 )}
 
                 {attachments.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Paperclip className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Paperclip className="h-12 w-12 mx-auto mb-2 text-gray-300 dark:text-gray-500" />
                     <p className="text-sm">Nenhum arquivo anexado</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {attachments.map((attachment, index) => (
-                      <Card key={index} className="p-3 hover:bg-gray-50 transition-colors">
+                      <Card key={index} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <div className="flex items-start gap-2">
-                          <FileCheck className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                          <FileCheck className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                               {attachment.file_name}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {attachment.uploaded_at && formatDate(attachment.uploaded_at)}
                             </p>
                           </div>
