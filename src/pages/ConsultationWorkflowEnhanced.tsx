@@ -175,14 +175,24 @@ export default function ConsultationWorkflowEnhanced() {
   const [autoCallNext, setAutoCallNext] = useState(true);
 
   useEffect(() => {
-    loadWaitingPatients();
-    const interval = setInterval(loadWaitingPatients, 10000); // Refresh every 10s
-    return () => clearInterval(interval);
-  }, []);
+    // Only load if user is authenticated
+    if (user && user.id) {
+      loadWaitingPatients();
+      const interval = setInterval(loadWaitingPatients, 10000); // Refresh every 10s
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   const loadWaitingPatients = async () => {
+    // Don't attempt if user is not authenticated
+    if (!user || !user.id) {
+      console.log("User not authenticated, skipping queue load");
+      return;
+    }
+    
     try {
       setLoading(true);
+      setError(""); // Clear any previous errors
       
       // Load from consultations/queue endpoint for accurate data
       const queueResponse = await apiClient.request(`/consultations/queue`);
@@ -246,6 +256,15 @@ export default function ConsultationWorkflowEnhanced() {
       setCompletedPatients(completed);
     } catch (err: any) {
       console.error("Error loading patients:", err);
+      
+      // Handle authentication errors
+      if (err.message?.includes("Autenticação") || err.message?.includes("401")) {
+        console.log("Authentication error - user may need to login again");
+        // Don't show error toast for auth issues in background polling
+        // The user will be redirected by the app's auth guard
+        return;
+      }
+      
       setError(err.message || "Falha ao carregar lista de espera");
     } finally {
       setLoading(false);
@@ -1027,7 +1046,7 @@ export default function ConsultationWorkflowEnhanced() {
                     <Label htmlFor="diagnosis_code">CID-10</Label>
                     <CID10Autocomplete
                       value={consultationData.diagnosis_code}
-                      onSelect={(code) =>
+                      onChange={(code, description) =>
                         setConsultationData({ ...consultationData, diagnosis_code: code })
                       }
                       disabled={isReadOnly}
