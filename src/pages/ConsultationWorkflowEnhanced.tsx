@@ -183,48 +183,66 @@ export default function ConsultationWorkflowEnhanced() {
   const loadWaitingPatients = async () => {
     try {
       setLoading(true);
-      const today = new Date().toISOString().split('T')[0];
       
-      const response = await apiClient.request(
-        `/appointments?day=${today}&status=scheduled,checked_in,in_progress`
-      );
+      // Load from consultations/queue endpoint for accurate data
+      const queueResponse = await apiClient.request(`/consultations/queue`);
       
-      const waiting = response.items
-        .filter((apt: any) => apt.status !== 'completed')
-        .map((apt: any, index: number) => ({
-          id: apt.id,
-          queue_id: apt.id,
-          patient_id: apt.patient_id,
-          patient_name: apt.patient_name,
-          patient_cpf: apt.patient?.cpf || "N/A",
-          patient_age: apt.patient?.age || 0,
-          patient_gender: apt.patient?.gender || "unknown",
-          appointment_id: apt.id,
-          appointment_time: apt.scheduled_time,
-          doctor_name: apt.doctor_name,
-          status: apt.status === 'checked_in' ? 'waiting' : 
-                  apt.status === 'in_progress' ? 'in_progress' : 'waiting',
-          position: index + 1,
+      const waiting = queueResponse
+        .filter((patient: any) => patient.status === 'waiting')
+        .map((patient: any) => ({
+          id: patient.id,
+          queue_id: patient.id,
+          patient_id: patient.patient_id,
+          patient_name: patient.patient_name,
+          patient_cpf: patient.patient_cpf || "N/A",
+          patient_age: patient.patient_age || 0,
+          patient_gender: patient.patient_gender || "unknown",
+          appointment_id: patient.appointment_id,
+          appointment_time: patient.appointment_time,
+          doctor_name: patient.doctor_name || "Doctor",
+          status: 'waiting' as const,
+          position: patient.position,
+          called_at: undefined,
         }));
       
-      const completed = response.items
-        .filter((apt: any) => apt.status === 'completed')
-        .map((apt: any) => ({
-          id: apt.id,
-          queue_id: apt.id,
-          patient_id: apt.patient_id,
-          patient_name: apt.patient_name,
-          patient_cpf: apt.patient?.cpf || "N/A",
-          patient_age: apt.patient?.age || 0,
-          patient_gender: apt.patient?.gender || "unknown",
-          appointment_id: apt.id,
-          appointment_time: apt.scheduled_time,
-          doctor_name: apt.doctor_name,
+      const inProgress = queueResponse
+        .filter((patient: any) => patient.status === 'in_progress')
+        .map((patient: any) => ({
+          id: patient.id,
+          queue_id: patient.id,
+          patient_id: patient.patient_id,
+          patient_name: patient.patient_name,
+          patient_cpf: patient.patient_cpf || "N/A",
+          patient_age: patient.patient_age || 0,
+          patient_gender: patient.patient_gender || "unknown",
+          appointment_id: patient.appointment_id,
+          appointment_time: patient.appointment_time,
+          doctor_name: patient.doctor_name || "Doctor",
+          status: 'in_progress' as const,
+          position: patient.position,
+          called_at: patient.called_at,
+        }));
+      
+      const completed = queueResponse
+        .filter((patient: any) => patient.status === 'completed')
+        .map((patient: any) => ({
+          id: patient.id,
+          queue_id: patient.id,
+          patient_id: patient.patient_id,
+          patient_name: patient.patient_name,
+          patient_cpf: patient.patient_cpf || "N/A",
+          patient_age: patient.patient_age || 0,
+          patient_gender: patient.patient_gender || "unknown",
+          appointment_id: patient.appointment_id,
+          appointment_time: patient.appointment_time,
+          doctor_name: patient.doctor_name || "Doctor",
           status: 'completed' as const,
-          position: 0,
+          position: patient.position,
+          called_at: patient.called_at,
         }));
       
-      setWaitingPatients(waiting);
+      // Combine waiting and in_progress for the queue display
+      setWaitingPatients([...waiting, ...inProgress]);
       setCompletedPatients(completed);
     } catch (err: any) {
       console.error("Error loading patients:", err);
