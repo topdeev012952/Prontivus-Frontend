@@ -401,7 +401,6 @@ export default function Appointments() {
                         }
                       }}
                       initialFocus
-                      locale="pt-BR"
                     />
                   </PopoverContent>
                 </Popover>
@@ -648,7 +647,6 @@ export default function Appointments() {
                           }
                         }}
                         initialFocus
-                        locale="pt-BR"
                       />
                     </PopoverContent>
                   </Popover>
@@ -738,6 +736,9 @@ export default function Appointments() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Detalhes da Consulta</DialogTitle>
+            <DialogDescription>
+              Visualize todas as informações da consulta agendada.
+            </DialogDescription>
           </DialogHeader>
 
           {selectedAppointment && (
