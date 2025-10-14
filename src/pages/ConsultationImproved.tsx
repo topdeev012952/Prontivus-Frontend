@@ -1247,14 +1247,14 @@ export default function ConsultationImproved() {
                       <Pill className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       Prescrição Médica
                     </CardTitle>
-                        {prescricaoOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                        {prescricaoOpen ? <ChevronUp className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
                       </div>
                     </CardHeader>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <CardContent className="space-y-4">
                       <div>
-                        <Label htmlFor="prescription_type">Tipo de Receita</Label>
+                        <Label htmlFor="prescription_type" className="text-gray-900 dark:text-gray-100">Tipo de Receita</Label>
                         <Select
                           value={prescriptionType}
                           onValueChange={setPrescriptionType}
@@ -1273,7 +1273,7 @@ export default function ConsultationImproved() {
 
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <Label>Medicamentos</Label>
+                          <Label className="text-gray-900 dark:text-gray-100">Medicamentos</Label>
                           {!isReadOnly && (
                             <Button
                               type="button"
@@ -1288,10 +1288,10 @@ export default function ConsultationImproved() {
                         </div>
 
                         {medications.map((med, index) => (
-                          <Card key={index} className="bg-gray-50">
+                          <Card key={index} className="bg-gray-50 dark:bg-gray-700">
                             <CardContent className="p-4 space-y-3">
                               <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium">Medicamento {index + 1}</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Medicamento {index + 1}</span>
                                 {!isReadOnly && (
                                   <Button
                                     type="button"
@@ -1305,7 +1305,7 @@ export default function ConsultationImproved() {
                               </div>
                               <div className="grid md:grid-cols-2 gap-3">
                                 <div className="md:col-span-2">
-                                  <Label className="text-xs">Nome</Label>
+                                  <Label className="text-xs text-gray-700 dark:text-gray-200">Nome</Label>
                                   <Input
                                     type="text"
                                     value={med.name}
@@ -1324,7 +1324,7 @@ export default function ConsultationImproved() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-xs">Dosagem</Label>
+                                  <Label className="text-xs text-gray-700 dark:text-gray-200">Dosagem</Label>
                                   <Input
                                     type="text"
                                     value={med.dosage}
@@ -1343,7 +1343,7 @@ export default function ConsultationImproved() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-xs">Frequência</Label>
+                                  <Label className="text-xs text-gray-700 dark:text-gray-200">Frequência</Label>
                                   <Input
                                     type="text"
                                     value={med.frequency}
@@ -1362,7 +1362,7 @@ export default function ConsultationImproved() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-xs">Duração</Label>
+                                  <Label className="text-xs text-gray-700 dark:text-gray-200">Duração</Label>
                                   <Input
                                     type="text"
                                     value={med.duration}
@@ -1413,8 +1413,8 @@ export default function ConsultationImproved() {
 
                       {medications.length > 0 && (
                         <div className="pt-4 space-y-3">
-                          <div>
-                            <Label htmlFor="prescription_notes">Observações</Label>
+                        <div>
+                          <Label htmlFor="prescription_notes" className="text-gray-900 dark:text-gray-100">Observações</Label>
                             <Textarea
                               id="prescription_notes"
                               value={prescriptionNotes}
@@ -1462,7 +1462,7 @@ export default function ConsultationImproved() {
                       <Shield className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                       Guias SADT e TISS
                     </CardTitle>
-                        {tissOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                        {tissOpen ? <ChevronUp className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
                       </div>
                     </CardHeader>
                   </CollapsibleTrigger>
@@ -1470,7 +1470,7 @@ export default function ConsultationImproved() {
                     <CardContent className="space-y-4">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <Label>Procedimentos/Exames</Label>
+                          <Label className="text-gray-900 dark:text-gray-100">Procedimentos/Exames</Label>
                           {!isReadOnly && (
                             <Button
                               type="button"
@@ -1485,10 +1485,10 @@ export default function ConsultationImproved() {
                         </div>
 
                         {sadtItems.map((item, index) => (
-                          <Card key={index} className="bg-gray-50">
+                          <Card key={index} className="bg-gray-50 dark:bg-gray-700">
                             <CardContent className="p-4 space-y-3">
                               <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium">Procedimento {index + 1}</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Procedimento {index + 1}</span>
                                 {!isReadOnly && (
                                   <Button
                                     type="button"
@@ -1502,7 +1502,7 @@ export default function ConsultationImproved() {
                               </div>
                               <div className="grid md:grid-cols-2 gap-3">
                                 <div>
-                                  <Label className="text-xs">Código TUSS</Label>
+                                  <Label className="text-xs text-gray-700 dark:text-gray-200">Código TUSS</Label>
                                   <Input
                                     type="text"
                                     value={item.procedure_code}
@@ -1512,7 +1512,7 @@ export default function ConsultationImproved() {
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-xs">Procedimento</Label>
+                                  <Label className="text-xs text-gray-700 dark:text-gray-200">Procedimento</Label>
                                   <Input
                                     type="text"
                                     value={item.procedure_name}
@@ -1522,7 +1522,7 @@ export default function ConsultationImproved() {
                                   />
                                 </div>
                                 <div className="md:col-span-2">
-                                  <Label className="text-xs">Justificativa</Label>
+                                  <Label className="text-xs text-gray-700 dark:text-gray-200">Justificativa</Label>
                                   <Textarea
                                     value={item.justification}
                                     onChange={(e) => updateSADTItem(index, "justification", e.target.value)}
@@ -1537,7 +1537,7 @@ export default function ConsultationImproved() {
                         ))}
 
                         {sadtItems.length === 0 && (
-                          <p className="text-sm text-gray-500 text-center py-4">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
                             Nenhum procedimento solicitado
                           </p>
                         )}
@@ -1546,7 +1546,7 @@ export default function ConsultationImproved() {
                       {sadtItems.length > 0 && (
                         <div className="pt-4 space-y-3">
                           <div>
-                            <Label htmlFor="sadt_justification">Justificativa Geral</Label>
+                            <Label htmlFor="sadt_justification" className="text-gray-900 dark:text-gray-100">Justificativa Geral</Label>
                             <Textarea
                               id="sadt_justification"
                               value={sadtJustification}
