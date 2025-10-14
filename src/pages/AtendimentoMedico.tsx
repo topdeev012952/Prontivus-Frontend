@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   User, Clock, Phone, Calendar, Heart, Activity, Thermometer, Weight,
   FileText, Pill, ClipboardList, Send, Upload, Download, Save, 
@@ -109,10 +110,15 @@ export default function AtendimentoMedico() {
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [showExamModal, setShowExamModal] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showPhotosModal, setShowPhotosModal] = useState(false);
   
   // Voice Recording
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  
+  // Past consultations
+  const [pastConsultations, setPastConsultations] = useState<any[]>([]);
 
   // Load queue on mount
   useEffect(() => {
@@ -172,10 +178,25 @@ export default function AtendimentoMedico() {
       });
       
       // Get or create consultation
-      const consultationResponse = await apiClient.request<any>(`/consultations?patient_id=${patientId}`);
+      let consultationResponse = await apiClient.request<any>(`/consultations?patient_id=${patientId}`);
+      
+      let consultation;
       if (Array.isArray(consultationResponse) && consultationResponse.length > 0) {
-        const consultation = consultationResponse[0];
-        setConsultationId(consultation.id);
+        // Use existing consultation
+        consultation = consultationResponse[0];
+      } else {
+        // Create new consultation if none exists
+        consultation = await apiClient.request<any>("/consultations", {
+          method: "POST",
+          body: JSON.stringify({
+            patient_id: patientId,
+            chief_complaint: "Consulta em andamento",
+            diagnosis: "A ser determinado"
+          })
+        });
+      }
+      
+      setConsultationId(consultation.id);
         
         // Load vitals
         try {
@@ -462,6 +483,71 @@ export default function AtendimentoMedico() {
     }
   };
 
+  const loadPatientHistory = async () => {
+    if (!currentPatient) return;
+    
+    try {
+      const history = await apiClient.request<any[]>(`/consultations?patient_id=${currentPatient.id}`);
+      setPastConsultations(Array.isArray(history) ? history : []);
+      setShowHistoryModal(true);
+    } catch (error) {
+      console.error("Error loading history:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao carregar histórico",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const reopenConsultation = async (consultationId: string) => {
+    try {
+      // Load the past consultation
+      const consultation = await apiClient.request<any>(`/consultations/${consultationId}`);
+      
+      setConsultationId(consultation.id);
+      
+      // Load all data for this consultation
+      const vitalsResponse = await apiClient.request<any>(`/consultation-management/vitals/${consultation.id}`);
+      if (vitalsResponse) {
+        setVitals({
+          blood_pressure: vitalsResponse.blood_pressure || "",
+          heart_rate: vitalsResponse.heart_rate || "",
+          temperature: vitalsResponse.temperature || "",
+          weight: vitalsResponse.weight || ""
+        });
+      }
+      
+      const notesResponse = await apiClient.request<any>(`/consultation-management/notes/${consultation.id}`);
+      if (notesResponse) {
+        setNotes({
+          anamnese: notesResponse.anamnese || "",
+          physical_exam: notesResponse.physical_exam || "",
+          evolution: notesResponse.evolution || "",
+          diagnosis: notesResponse.diagnosis || "",
+          treatment_plan: notesResponse.treatment_plan || ""
+        });
+      }
+      
+      const attachmentsResponse = await apiClient.request<Attachment[]>(`/consultation-management/attachments/${consultation.id}`);
+      setAttachments(Array.isArray(attachmentsResponse) ? attachmentsResponse : []);
+      
+      setShowHistoryModal(false);
+      
+      toast({
+        title: "Consulta reaberta",
+        description: "Você pode editar os dados desta consulta"
+      });
+    } catch (error) {
+      console.error("Error reopening consultation:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao reabrir consulta",
+        variant: "destructive"
+      });
+    }
+  };
+
   const calculateAge = (birthdate: string): number => {
     if (!birthdate) return 0;
     const today = new Date();
@@ -553,18 +639,42 @@ export default function AtendimentoMedico() {
             <h2 className="text-xl font-semibold mb-4">Atendidos Hoje</h2>
             <div className="grid gap-2">
               {queue.filter(p => p.status === "completed").map((patient) => (
-                <div key={patient.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <span className="font-medium">{patient.patient_name}</span>
-                    <span className="text-sm text-muted-foreground ml-4">
-                      {new Date(patient.appointment_time).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-green-600">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Atendido
-                  </Badge>
-                </div>
+                <Card key={patient.id} className="hover:shadow-sm transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{patient.patient_name}</span>
+                        <span className="text-sm text-muted-foreground ml-4">
+                          {new Date(patient.appointment_time).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-green-600">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Atendido
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={async () => {
+                            // Find consultation for this appointment
+                            try {
+                              const consultations = await apiClient.request<any[]>(`/consultations?appointment_id=${patient.appointment_id}`);
+                              if (consultations && consultations.length > 0) {
+                                await reopenConsultation(consultations[0].id);
+                              }
+                            } catch (error) {
+                              console.error("Error finding consultation:", error);
+                            }
+                          }}
+                        >
+                          <History className="h-4 w-4 mr-1" />
+                          Reabrir
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -644,11 +754,11 @@ export default function AtendimentoMedico() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={loadPatientHistory}>
                 <History className="h-4 w-4 mr-2" />
                 Histórico
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowPhotosModal(true)}>
                 <ImageIcon className="h-4 w-4 mr-2" />
                 Fotos
               </Button>
@@ -892,7 +1002,17 @@ export default function AtendimentoMedico() {
                               </p>
                             </div>
                           </div>
-                          <Button size="sm" variant="ghost">
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => {
+                              // Download file
+                              const link = document.createElement('a');
+                              link.href = attachment.file_url;
+                              link.download = attachment.file_name;
+                              link.click();
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
                         </div>
@@ -934,6 +1054,99 @@ export default function AtendimentoMedico() {
           patientId={currentPatient.id}
           onClose={() => setShowReferralModal(false)}
         />
+      )}
+
+      {/* History Modal */}
+      {showHistoryModal && (
+        <Dialog open={showHistoryModal} onOpenChange={setShowHistoryModal}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="history-description">
+            <DialogHeader>
+              <DialogTitle>Histórico de Consultas - {currentPatient?.name}</DialogTitle>
+              <p id="history-description" className="sr-only">Lista de consultas anteriores do paciente</p>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {pastConsultations.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">Nenhuma consulta anterior encontrada</p>
+              ) : (
+                pastConsultations.map((consult) => (
+                  <Card key={consult.id} className="hover:shadow-sm transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {new Date(consult.created_at).toLocaleDateString("pt-BR", {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric"
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            <strong>Diagnóstico:</strong> {consult.diagnosis || "Não registrado"}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            <strong>Queixa:</strong> {consult.chief_complaint || "Não registrado"}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => reopenConsultation(consult.id)}
+                        >
+                          <History className="h-4 w-4 mr-2" />
+                          Reabrir
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Photos Modal */}
+      {showPhotosModal && (
+        <Dialog open={showPhotosModal} onOpenChange={setShowPhotosModal}>
+          <DialogContent className="max-w-4xl" aria-describedby="photos-description">
+            <DialogHeader>
+              <DialogTitle>Fotos do Paciente - {currentPatient?.name}</DialogTitle>
+              <p id="photos-description" className="sr-only">Galeria de fotos e imagens do paciente</p>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-3 gap-4">
+                {attachments.filter(a => a.file_type.startsWith('image/')).length === 0 ? (
+                  <div className="col-span-3 text-center py-8 text-muted-foreground">
+                    <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nenhuma foto disponível</p>
+                    <p className="text-sm mt-2">Use a seção "Anexos" para fazer upload de imagens</p>
+                  </div>
+                ) : (
+                  attachments
+                    .filter(a => a.file_type.startsWith('image/'))
+                    .map((photo) => (
+                      <div key={photo.id} className="border rounded-lg overflow-hidden">
+                        <img
+                          src={photo.file_url}
+                          alt={photo.file_name}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="p-2">
+                          <p className="text-xs font-medium truncate">{photo.file_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(photo.uploaded_at).toLocaleDateString("pt-BR")}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
