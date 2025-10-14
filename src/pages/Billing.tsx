@@ -148,6 +148,8 @@ export default function Billing() {
       setPayments(response || []);
     } catch (err: any) {
       console.error("Error loading payments:", err);
+      // Set empty array on error to prevent filter errors
+      setPayments([]);
       toast({
         title: "Erro",
         description: "Falha ao carregar pagamentos",
@@ -158,19 +160,23 @@ export default function Billing() {
 
   const loadInsurancePlans = async () => {
     try {
-      const response = await apiClient.request<InsurancePlan[]>("/health-plans");
+      const response = await apiClient.request<InsurancePlan[]>("/tiss/providers");
       setInsurancePlans(response || []);
     } catch (err: any) {
       console.error("Error loading insurance plans:", err);
+      // Set empty array on error to prevent filter errors
+      setInsurancePlans([]);
     }
   };
 
   const loadPatients = async () => {
     try {
-      const response = await apiClient.request<{ items: Patient[] }>("/patients?page=1&size=1000");
+      const response = await apiClient.request<{ items: Patient[] }>("/patients?page=1&size=100");
       setPatients(response.items || []);
     } catch (err: any) {
       console.error("Error loading patients:", err);
+      // Set empty array on error to prevent filter errors
+      setPatients([]);
     }
   };
 
@@ -182,6 +188,8 @@ export default function Billing() {
       setAppointments(response || []);
     } catch (err: any) {
       console.error("Error loading appointments:", err);
+      // Set empty array on error to prevent filter errors
+      setAppointments([]);
     }
   };
 
@@ -406,8 +414,8 @@ export default function Billing() {
     }
   };
 
-  // Apply filters
-  const filteredPayments = payments.filter(payment => {
+  // Apply filters - ensure payments is always an array
+  const filteredPayments = (payments || []).filter(payment => {
     if (filterStatus !== "all" && payment.status !== filterStatus) return false;
     if (filterPaymentMethod !== "all" && payment.payment_method !== filterPaymentMethod) return false;
     if (searchTerm && !payment.patient_name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
@@ -432,7 +440,7 @@ export default function Billing() {
       return acc;
     }, {} as Record<string, number>);
 
-  const selectedPatientAppointments = appointments.filter(
+  const selectedPatientAppointments = (appointments || []).filter(
     a => a.patient_id === formData.patient_id
   );
 
