@@ -57,9 +57,32 @@ interface TISSJob {
   error_message?: string;
 }
 
+interface TISSStats {
+  total_providers: number;
+  active_providers: number;
+  total_jobs: number;
+  jobs_today: number;
+  pending_jobs: number;
+  completed_jobs: number;
+  failed_jobs: number;
+  jobs_this_week: number;
+  success_rate: number;
+}
+
 export default function TISSModule() {
   const [providers, setProviders] = useState<TISSProvider[]>([]);
   const [jobs, setJobs] = useState<TISSJob[]>([]);
+  const [stats, setStats] = useState<TISSStats>({
+    total_providers: 0,
+    active_providers: 0,
+    total_jobs: 0,
+    jobs_today: 0,
+    pending_jobs: 0,
+    completed_jobs: 0,
+    failed_jobs: 0,
+    jobs_this_week: 0,
+    success_rate: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -84,6 +107,7 @@ export default function TISSModule() {
   useEffect(() => {
     loadProviders();
     loadJobs();
+    loadStats();
   }, []);
 
   const loadProviders = async () => {
@@ -108,6 +132,15 @@ export default function TISSModule() {
     }
   };
 
+  const loadStats = async () => {
+    try {
+      const data = await apiClient.request<TISSStats>("/tiss/stats");
+      setStats(data);
+    } catch (err) {
+      console.error("Error loading stats:", err);
+    }
+  };
+
   const handleCreateProvider = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -125,6 +158,7 @@ export default function TISSModule() {
       setShowCreateDialog(false);
       resetForm();
       await loadProviders();
+      await loadStats();
       
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
@@ -240,6 +274,61 @@ export default function TISSModule() {
           <AlertDescription className="text-green-800">{success}</AlertDescription>
         </Alert>
       )}
+
+      {/* Statistics Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Provedores TISS</CardTitle>
+            <Shield className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total_providers}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.active_providers} ativos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Jobs TISS</CardTitle>
+            <Server className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total_jobs}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.jobs_today} hoje • {stats.jobs_this_week} esta semana
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Jobs Pendentes</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{stats.pending_jobs}</div>
+            <p className="text-xs text-muted-foreground">
+              Aguardando processamento
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Taxa de Sucesso</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.success_rate}%</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.completed_jobs} concluídos • {stats.failed_jobs} falhas
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       <Tabs defaultValue="providers" className="w-full">
         <TabsList>
