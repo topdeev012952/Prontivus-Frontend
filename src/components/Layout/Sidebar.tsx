@@ -18,7 +18,8 @@ import {
   Stethoscope,
   CalendarDays,
   Briefcase,
-  TrendingUp
+  TrendingUp,
+  DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ClinicSwitcher } from "@/components/ClinicSwitcher";
@@ -66,6 +67,7 @@ const navigationSections: NavigationSection[] = [
   {
     title: "Financeiro & Convênios",
     items: [
+      { name: "Faturamento", href: "/app/billing", icon: DollarSign },
       { name: "Faturas", href: "/app/invoices", icon: Receipt },
       { name: "Planos de Saúde", href: "/app/health-plans", icon: Building2 },
       { name: "Módulo TISS", href: "/app/tiss", icon: Shield },

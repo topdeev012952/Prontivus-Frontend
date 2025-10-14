@@ -28,6 +28,7 @@ import WaitingRoom from "./pages/WaitingRoom";
 import BIDashboard from "./pages/BIDashboard";
 import ConsultationDetail from "./pages/ConsultationDetail";
 import ConsultationImproved from "./pages/ConsultationImproved";
+import Billing from "./pages/Billing";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ function AppContent() {
             <Route path="records" element={<MedicalRecordsAdvanced />} />
           <Route path="prescriptions" element={<DigitalPrescriptions />} />
           <Route path="invoices" element={<Invoices />} />
+          <Route path="billing" element={<Billing />} />
           <Route path="tiss" element={<TISSModule />} />
           <Route path="health-plans" element={<HealthPlanIntegration />} />
           <Route path="telemed/:sessionId" element={<TelemedicineRoom />} />
