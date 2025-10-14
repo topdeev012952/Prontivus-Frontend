@@ -50,7 +50,8 @@ const navigationSections: NavigationSection[] = [
   {
     title: "Atendimento Clínico",
     items: [
-      { name: "Atendimentos", href: "/app/consultations", icon: Activity, isNew: true },
+      { name: "Atendimento Médico", href: "/app/atendimento", icon: Stethoscope, isNew: true },
+      { name: "Atendimentos", href: "/app/consultations", icon: Activity },
       { name: "Pacientes", href: "/app/patients", icon: Users },
       { name: "Prontuários", href: "/app/records", icon: FileText },
       { name: "Prescrições", href: "/app/prescriptions", icon: Pill },

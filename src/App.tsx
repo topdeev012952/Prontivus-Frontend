@@ -28,6 +28,7 @@ import WaitingRoom from "./pages/WaitingRoom";
 import BIDashboard from "./pages/BIDashboard";
 import ConsultationDetail from "./pages/ConsultationDetail";
 import ConsultationImproved from "./pages/ConsultationImproved";
+import AtendimentoMedico from "./pages/AtendimentoMedico";
 import Billing from "./pages/Billing";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ function AppContent() {
           <Route path="bi-dashboard" element={<BIDashboard />} />
           <Route path="consultations" element={<ConsultationImproved />} />
           <Route path="consultations/:id" element={<ConsultationDetail />} />
+          <Route path="atendimento" element={<AtendimentoMedico />} />
           <Route path="waiting-queue" element={<WaitingRoom />} />
           <Route path="settings" element={<Settings />} />
         </Route>
