@@ -235,9 +235,14 @@ export default function AtendimentoMedico() {
         method: "POST"
       });
       
-      // Play alert sound
-      const audio = new Audio("/sounds/notification.mp3");
-      audio.play().catch(() => console.log("Audio play failed"));
+      // Play alert sound (optional - silently fail if not available)
+      try {
+        const audio = new Audio("/sounds/notification.mp3");
+        await audio.play();
+      } catch (audioError) {
+        // Audio not available or autoplay blocked - that's okay
+        console.log("Audio notification not played (file missing or blocked)");
+      }
       
       // Load patient consultation
       await loadPatientConsultation(patientId);

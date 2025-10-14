@@ -80,9 +80,10 @@ export default function CertificateModal({ consultationId, patientId, onClose }:
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" aria-describedby="certificate-description">
         <DialogHeader>
           <DialogTitle>Novo Atestado Médico</DialogTitle>
+          <p id="certificate-description" className="sr-only">Formulário para criar um atestado médico</p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

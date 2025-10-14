@@ -81,9 +81,10 @@ export default function ReferralModal({ consultationId, patientId, onClose }: Re
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" aria-describedby="referral-description">
         <DialogHeader>
           <DialogTitle>Novo Encaminhamento</DialogTitle>
+          <p id="referral-description" className="sr-only">Formulário para criar um encaminhamento médico</p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

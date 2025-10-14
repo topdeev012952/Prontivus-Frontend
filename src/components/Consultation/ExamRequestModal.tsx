@@ -79,9 +79,10 @@ export default function ExamRequestModal({ consultationId, patientId, onClose }:
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" aria-describedby="exam-description">
         <DialogHeader>
           <DialogTitle>Solicitar Exame</DialogTitle>
+          <p id="exam-description" className="sr-only">Formulário para solicitar um exame médico</p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

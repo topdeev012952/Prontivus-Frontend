@@ -114,9 +114,10 @@ export default function PrescriptionModal({ consultationId, patientId, onClose }
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="prescription-description">
         <DialogHeader>
           <DialogTitle>Nova Receita Médica</DialogTitle>
+          <p id="prescription-description" className="sr-only">Formulário para criar uma nova receita médica com medicamentos</p>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
