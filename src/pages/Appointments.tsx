@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +24,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { apiClient } from "@/lib/api";
-import { formatDate, formatTime } from "@/lib/utils";
+import { formatDate, formatTime, cn } from "@/lib/utils";
 
 interface Appointment {
   id: string;
@@ -366,37 +368,74 @@ export default function Appointments() {
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
+                {/* Calendar Date Picker */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                      disabled={loading}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDate ? (
+                        selectedDate.toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: 'long',
+                          year: 'numeric'
+                        })
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          setSelectedDate(date);
+                        }
+                      }}
+                      initialFocus
+                      locale="pt-BR"
+                    />
+                  </PopoverContent>
+                </Popover>
+                
+                {/* Quick Navigation */}
                 <div className="flex items-center justify-between gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => changeDate(-1)}
                     disabled={loading}
+                    className="flex-1"
                   >
-                    ← Prev
+                    ← Anterior
                   </Button>
-                  <div className="flex items-center justify-center rounded-lg border p-2 bg-primary/5 flex-1">
-                    <CalendarIcon className="h-4 w-4 text-primary mr-2" />
-                    <span className="font-semibold text-sm">{selectedDate.toLocaleDateString('pt-BR')}</span>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedDate(new Date())}
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    Hoje
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => changeDate(1)}
                     disabled={loading}
+                    className="flex-1"
                   >
-                    Next →
+                    Próximo →
                   </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedDate(new Date())}
-                  disabled={loading}
-                  className="w-full"
-                >
-                  Hoje
-                </Button>
               </div>
               <div className="space-y-2 border-t pt-4">
                 <div className="flex items-center justify-between text-sm">
@@ -572,21 +611,52 @@ export default function Appointments() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {/* Date */}
+                {/* Date with Calendar Picker */}
                 <div className="grid gap-2">
-                  <Label htmlFor="date">Date *</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    required
-                  />
+                  <Label htmlFor="date">Data *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.date ? (
+                          new Date(formData.date).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })
+                        ) : (
+                          <span>Selecione a data</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.date ? new Date(formData.date) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            setFormData({ 
+                              ...formData, 
+                              date: date.toISOString().split('T')[0] 
+                            });
+                          }
+                        }}
+                        initialFocus
+                        locale="pt-BR"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Time */}
                 <div className="grid gap-2">
-                  <Label htmlFor="start_time">Time *</Label>
+                  <Label htmlFor="start_time">Horário *</Label>
                   <Input
                     id="start_time"
                     type="time"
@@ -600,7 +670,7 @@ export default function Appointments() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Duration */}
                 <div className="grid gap-2">
-                  <Label htmlFor="duration">Duration (minutes)</Label>
+                  <Label htmlFor="duration">Duração (minutos)</Label>
                   <Select
                     value={formData.duration}
                     onValueChange={(value) => setFormData({ ...formData, duration: value })}
@@ -609,12 +679,12 @@ export default function Appointments() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="15">15 minutes</SelectItem>
-                      <SelectItem value="30">30 minutes</SelectItem>
-                      <SelectItem value="45">45 minutes</SelectItem>
-                      <SelectItem value="60">1 hour</SelectItem>
-                      <SelectItem value="90">1.5 hours</SelectItem>
-                      <SelectItem value="120">2 hours</SelectItem>
+                      <SelectItem value="15">15 minutos</SelectItem>
+                      <SelectItem value="30">30 minutos</SelectItem>
+                      <SelectItem value="45">45 minutos</SelectItem>
+                      <SelectItem value="60">1 hora</SelectItem>
+                      <SelectItem value="90">1.5 horas</SelectItem>
+                      <SelectItem value="120">2 horas</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -630,9 +700,9 @@ export default function Appointments() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="scheduled">Scheduled</SelectItem>
-                      <SelectItem value="confirmed">Confirmed</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="scheduled">Agendado</SelectItem>
+                      <SelectItem value="confirmed">Confirmado</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
