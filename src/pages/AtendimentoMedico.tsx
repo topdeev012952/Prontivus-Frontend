@@ -1123,6 +1123,7 @@ export default function AtendimentoMedico() {
                             <div className="p-4 pt-0 bg-white">
                               <Button 
                                 className="w-full" 
+                                disabled={!consultationId || !currentPatient}
                                 onClick={() => setShowPrescriptionModal(true)}
                               >
                                 <Pill className="h-4 w-4 mr-2" />
@@ -1154,6 +1155,7 @@ export default function AtendimentoMedico() {
                               <Button 
                                 className="w-full" 
                                 variant="outline"
+                                disabled={!consultationId || !currentPatient}
                                 onClick={() => setShowExamModal(true)}
                               >
                                 <ClipboardList className="h-4 w-4 mr-2" />
@@ -1211,19 +1213,19 @@ export default function AtendimentoMedico() {
                   <CardTitle className="text-lg">Ações Rápidas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowPrescriptionModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowPrescriptionModal(true)}>
                     <Pill className="h-4 w-4 mr-2" />
                     Nova Receita
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowCertificateModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowCertificateModal(true)}>
                     <FileText className="h-4 w-4 mr-2" />
                     Atestado
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowExamModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
                     <ClipboardList className="h-4 w-4 mr-2" />
                     Solicitar Exame
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowReferralModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowReferralModal(true)}>
                     <Send className="h-4 w-4 mr-2" />
                     Encaminhamento
                   </Button>
