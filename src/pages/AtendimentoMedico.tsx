@@ -32,7 +32,6 @@ import PrescriptionModal from "@/components/Consultation/PrescriptionModal";
 import CertificateModal from "@/components/Consultation/CertificateModal";
 import ExamRequestModal from "@/components/Consultation/ExamRequestModal";
 import ReferralModal from "@/components/Consultation/ReferralModal";
-
 interface Patient {
   id: string;
   name: string;
@@ -162,7 +161,8 @@ export default function AtendimentoMedico() {
     diagnostico: true,
     conduta: true,
     prescricao: true,
-    tiss: true
+    tiss: true,
+    exames: true
   });
   
   // Quick Action Modals
@@ -172,6 +172,12 @@ export default function AtendimentoMedico() {
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPhotosModal, setShowPhotosModal] = useState(false);
+  // Section anchors for tab navigation
+  const anamneseRef = useRef<HTMLDivElement | null>(null);
+  const evolucaoRef = useRef<HTMLDivElement | null>(null);
+  const prescricaoRef = useRef<HTMLDivElement | null>(null);
+  const tissRef = useRef<HTMLDivElement | null>(null);
+  const examesRef = useRef<HTMLDivElement | null>(null);
   
   // Safe modal close functions
   const closePrescriptionModal = () => {
@@ -246,6 +252,17 @@ export default function AtendimentoMedico() {
     
     return () => clearInterval(autoSaveInterval);
   }, [consultationId, notes]);
+
+  // Real-time queue updates every 10 seconds
+  useEffect(() => {
+    const queueUpdateInterval = setInterval(() => {
+      if (!currentPatient) { // Only update queue when not in consultation
+        loadQueue();
+      }
+    }, 10000);
+    
+    return () => clearInterval(queueUpdateInterval);
+  }, [currentPatient]);
 
   // Cleanup effect to prevent memory leaks
   useEffect(() => {
@@ -645,8 +662,9 @@ export default function AtendimentoMedico() {
     try {
       setSaving(true);
       
-      // Save final notes
+      // Save final notes and vitals
       await saveConsultationNotes();
+      await saveVitals();
       
       // Finalize consultation
       await apiClient.request(`/consultation-management/queue/finalize/${consultationId}`, {
@@ -662,6 +680,22 @@ export default function AtendimentoMedico() {
       setCurrentPatient(null);
       setConsultationId(null);
       await loadQueue();
+      
+      // Auto-call next patient if available
+      const nextPatient = queue.find(p => p.status === "waiting");
+      if (nextPatient) {
+        setTimeout(async () => {
+          try {
+            await callPatient(nextPatient);
+            toast({
+              title: "Próximo paciente",
+              description: `${nextPatient.patient_name} foi chamado automaticamente`
+            });
+          } catch (error) {
+            console.error("Error auto-calling next patient:", error);
+          }
+        }, 2000); // 2 second delay
+      }
       
       // Navigate back to queue
       navigate("/app/atendimento");
@@ -768,21 +802,71 @@ export default function AtendimentoMedico() {
 
   // Queue View (no patient selected)
   if (!currentPatient) {
+    const waitingPatients = queue.filter(p => p.status === "waiting");
+    const inProgressPatients = queue.filter(p => p.status === "in_progress");
+    const completedPatients = queue.filter(p => p.status === "completed");
+
     return (
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Fila de Atendimento</h1>
-            <p className="text-muted-foreground">Pacientes aguardando atendimento</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+              Fila de Atendimento
+            </h1>
+            <p className="text-muted-foreground">Pacientes aguardando, em atendimento e atendidos</p>
           </div>
-          <Button variant="outline" onClick={loadQueue}>
-            <Activity className="h-4 w-4 mr-2" />
-            Atualizar Fila
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={loadQueue}>
+              <Activity className="h-4 w-4 mr-2" />
+              Atualizar Fila
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/app/appointments")}>
+              <Calendar className="h-4 w-4 mr-2" />
+              Ver Agendamentos
+            </Button>
+          </div>
         </div>
 
+        {/* Resumo de Status */}
+        <div className="grid grid-cols-3 gap-4">
+          <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-600">Aguardando</p>
+                  <p className="text-2xl font-bold text-orange-700">{waitingPatients.length}</p>
+                </div>
+                <Clock className="h-6 w-6 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Em Atendimento</p>
+                  <p className="text-2xl font-bold text-blue-700">{inProgressPatients.length}</p>
+                </div>
+                <User className="h-6 w-6 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600">Atendidos</p>
+                  <p className="text-2xl font-bold text-green-700">{completedPatients.length}</p>
+                </div>
+                <CheckCircle className="h-6 w-6 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Aguardando */}
         <div className="grid gap-4">
-          {queue.filter(p => p.status === "waiting").map((patient, index) => (
+          {waitingPatients.map((patient, index) => (
             <Card key={patient.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -820,7 +904,7 @@ export default function AtendimentoMedico() {
             </Card>
           ))}
 
-          {queue.filter(p => p.status === "waiting").length === 0 && (
+          {waitingPatients.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">
                 <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
@@ -830,6 +914,46 @@ export default function AtendimentoMedico() {
             </Card>
           )}
         </div>
+
+        {/* Em Atendimento */}
+        {inProgressPatients.length > 0 && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold">Em Atendimento</h2>
+            {inProgressPatients.map((patient) => (
+              <Card key={patient.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-lg">
+                        <User className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">{patient.patient_name}</h3>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {patient.patient_age} anos
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {new Date(patient.appointment_time).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">Em atendimento</Badge>
+                      <Button variant="outline" onClick={() => callPatient(patient)}>
+                        Continuar
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Completed Patients */}
         {queue.filter(p => p.status === "completed").length > 0 && (
@@ -982,6 +1106,26 @@ export default function AtendimentoMedico() {
           <div className="grid grid-cols-3 gap-6 h-full">
             {/* Left Column - Consultation Content */}
             <div className="col-span-2 space-y-6">
+              {/* Tabs */}
+              <Tabs defaultValue="anamnese" className="w-full" onValueChange={(val) => {
+                const map: Record<string, HTMLDivElement | null> = {
+                  anamnese: anamneseRef.current,
+                  evolucao: evolucaoRef.current,
+                  prescricao: prescricaoRef.current,
+                  tiss: tissRef.current,
+                  exames: examesRef.current,
+                };
+                const node = map[val];
+                if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}>
+                <TabsList className="grid grid-cols-5">
+                  <TabsTrigger value="anamnese">Anamnese</TabsTrigger>
+                  <TabsTrigger value="evolucao">Evolução</TabsTrigger>
+                  <TabsTrigger value="prescricao">Prescrição</TabsTrigger>
+                  <TabsTrigger value="tiss">SADT / TISS</TabsTrigger>
+                  <TabsTrigger value="exames">Exames</TabsTrigger>
+                </TabsList>
+              </Tabs>
               {/* Vitals */}
               <Card>
                 <CardHeader>
@@ -1074,6 +1218,7 @@ export default function AtendimentoMedico() {
                     <div className="space-y-4 pr-4">
                       
                       {/* Anamnese Section */}
+                      <div ref={anamneseRef} />
                       <Collapsible
                         open={openSections.anamnese}
                         onOpenChange={(open) => setOpenSections({ ...openSections, anamnese: open })}
@@ -1126,6 +1271,7 @@ export default function AtendimentoMedico() {
                       </Collapsible>
 
                       {/* Evolução Section */}
+                      <div ref={evolucaoRef} />
                       <Collapsible
                         open={openSections.evolucao}
                         onOpenChange={(open) => setOpenSections({ ...openSections, evolucao: open })}
@@ -1213,7 +1359,174 @@ export default function AtendimentoMedico() {
                         </div>
                       </Collapsible>
 
-                      {/* Sections 6 and 7 removed as requested */}
+                      {/* Prescrição Section */}
+                      <div ref={prescricaoRef} />
+                      <Collapsible
+                        open={openSections.prescricao}
+                        onOpenChange={(open) => setOpenSections(prev => ({ ...prev, prescricao: open }))}
+                      >
+                        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                          <h3 className="font-semibold text-lg">4. Prescrição Médica</h3>
+                          {openSections.prescricao ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="p-4 pt-0 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <Button 
+                                className="w-full" 
+                                onClick={() => setShowPrescriptionModal(true)}
+                                disabled={!consultationId || !currentPatient}
+                              >
+                                <Pill className="h-4 w-4 mr-2" />
+                                Nova Receita
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => setShowCertificateModal(true)}
+                                disabled={!consultationId || !currentPatient}
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                Atestado Médico
+                              </Button>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              <p>• Clique em "Nova Receita" para criar prescrições com medicamentos</p>
+                              <p>• Use "Atestado Médico" para gerar atestados e declarações</p>
+                              <p>• Todas as prescrições são vinculadas a esta consulta</p>
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+
+                      {/* TISS/SADT Section */}
+                      <div ref={tissRef} />
+                      <Collapsible
+                        open={openSections.tiss}
+                        onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tiss: open }))}
+                      >
+                        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                          <h3 className="font-semibold text-lg">5. Guias SADT / TISS</h3>
+                          {openSections.tiss ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="p-4 pt-0 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <Button 
+                                className="w-full" 
+                                onClick={() => setShowExamModal(true)}
+                                disabled={!consultationId || !currentPatient}
+                              >
+                                <ClipboardList className="h-4 w-4 mr-2" />
+                                Guia SADT
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={async () => {
+                                  if (!consultationId) return;
+                                  try {
+                                    await apiClient.request(`/consultations/${consultationId}/tiss`, {
+                                      method: "POST",
+                                      body: JSON.stringify({
+                                        items: [
+                                          {
+                                            procedure_code: "CONS",
+                                            procedure_name: "Consulta médica",
+                                            quantity: 1,
+                                            justification: "Consulta"
+                                          }
+                                        ],
+                                        justification: "Guia de consulta TISS"
+                                      })
+                                    });
+                                    toast({ title: "Guia gerada", description: "Guia TISS criada com sucesso" });
+                                  } catch (error) {
+                                    toast({ title: "Erro", description: "Falha ao gerar guia TISS", variant: "destructive" });
+                                  }
+                                }}
+                                disabled={!consultationId || !currentPatient}
+                              >
+                                <Shield className="h-4 w-4 mr-2" />
+                                Guia TISS
+                              </Button>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              <p>• Guia SADT para procedimentos e exames</p>
+                              <p>• Guia TISS para consultas e procedimentos</p>
+                              <p>• XMLs são gerados automaticamente e vinculados à consulta</p>
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+
+                      {/* Exames Section */}
+                      <div ref={examesRef} />
+                      <Collapsible
+                        open={openSections.exames}
+                        onOpenChange={(open) => setOpenSections(prev => ({ ...prev, exames: open }))}
+                      >
+                        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                          <h3 className="font-semibold text-lg">6. Exames e Documentos</h3>
+                          {openSections.exames ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="p-4 pt-0 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <Button 
+                                className="w-full" 
+                                onClick={() => setShowExamModal(true)}
+                                disabled={!consultationId || !currentPatient}
+                              >
+                                <ClipboardList className="h-4 w-4 mr-2" />
+                                Solicitar Exame
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => setShowReferralModal(true)}
+                                disabled={!consultationId || !currentPatient}
+                              >
+                                <Send className="h-4 w-4 mr-2" />
+                                Encaminhamento
+                              </Button>
+                            </div>
+                            
+                            {/* File Upload Area */}
+                            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                              <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                              <p className="text-sm text-muted-foreground mb-2">Arraste arquivos aqui ou clique para selecionar</p>
+                              <Button variant="outline" size="sm">
+                                <Upload className="h-4 w-4 mr-2" />
+                                Selecionar Arquivos
+                              </Button>
+                            </div>
+
+                            {/* Attachments List */}
+                            {attachments.length > 0 && (
+                              <div className="space-y-2">
+                                <h4 className="font-medium text-sm">Arquivos Anexados:</h4>
+                                {attachments.map((attachment, index) => (
+                                  <div key={index} className="flex items-center justify-between p-2 border rounded">
+                                    <div className="flex items-center gap-2">
+                                      <FileText className="h-4 w-4" />
+                                      <span className="text-sm">{attachment.file_name}</span>
+                                    </div>
+                                    <div className="flex gap-1">
+                                      <Button size="sm" variant="ghost">
+                                        <Download className="h-3 w-3" />
+                                      </Button>
+                                      <Button size="sm" variant="ghost">
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
 
                     </div>
                   </ScrollArea>
@@ -1223,6 +1536,15 @@ export default function AtendimentoMedico() {
 
             {/* Right Column - Quick Actions & Attachments */}
             <div className="space-y-6">
+              {/* Prescrição Section Anchor */}
+              <div ref={prescricaoRef} />
+              
+              {/* TISS Section Anchor */}
+              <div ref={tissRef} />
+              
+              {/* Exames Section Anchor */}
+              <div ref={examesRef} />
+              
               {/* Quick Actions */}
               <Card>
                 <CardHeader>
