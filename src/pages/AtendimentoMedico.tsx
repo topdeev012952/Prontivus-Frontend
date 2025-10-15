@@ -173,6 +173,39 @@ export default function AtendimentoMedico() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPhotosModal, setShowPhotosModal] = useState(false);
   
+  // Safe modal close functions
+  const closePrescriptionModal = () => {
+    try {
+      setShowPrescriptionModal(false);
+    } catch (error) {
+      console.error("Error closing prescription modal:", error);
+    }
+  };
+  
+  const closeCertificateModal = () => {
+    try {
+      setShowCertificateModal(false);
+    } catch (error) {
+      console.error("Error closing certificate modal:", error);
+    }
+  };
+  
+  const closeExamModal = () => {
+    try {
+      setShowExamModal(false);
+    } catch (error) {
+      console.error("Error closing exam modal:", error);
+    }
+  };
+  
+  const closeReferralModal = () => {
+    try {
+      setShowReferralModal(false);
+    } catch (error) {
+      console.error("Error closing referral modal:", error);
+    }
+  };
+  
   // Voice Recording
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -204,11 +237,25 @@ export default function AtendimentoMedico() {
     if (!consultationId) return;
     
     const autoSaveInterval = setInterval(() => {
-      saveConsultationNotes(true);
+      try {
+        saveConsultationNotes(true);
+      } catch (error) {
+        console.error("Auto-save error:", error);
+      }
     }, 15000);
     
     return () => clearInterval(autoSaveInterval);
   }, [consultationId, notes]);
+
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Cleanup any pending operations
+      setLoading(false);
+      setSaving(false);
+      setIsCallingPatientId(null);
+    };
+  }, []);
 
   const loadQueue = async () => {
     try {
@@ -1120,7 +1167,9 @@ export default function AtendimentoMedico() {
                                 <Label className="text-sm font-medium">CID-10</Label>
                                 <CID10Autocomplete
                                   onChange={(code, description) => {
-                                    setNotes({ ...notes, diagnosis: `${code} - ${description}` });
+                                    if (code && description) {
+                                      setNotes(prev => ({ ...prev, diagnosis: `${code} - ${description}` }));
+                                    }
                                   }}
                                 />
                               </div>
@@ -1301,28 +1350,28 @@ export default function AtendimentoMedico() {
         <PrescriptionModal
           consultationId={consultationId}
           patientId={currentPatient.id}
-          onClose={() => setShowPrescriptionModal(false)}
+          onClose={closePrescriptionModal}
         />
       )}
       {showCertificateModal && consultationId && currentPatient && (
         <CertificateModal
           consultationId={consultationId}
           patientId={currentPatient.id}
-          onClose={() => setShowCertificateModal(false)}
+          onClose={closeCertificateModal}
         />
       )}
       {showExamModal && consultationId && currentPatient && (
         <ExamRequestModal
           consultationId={consultationId}
           patientId={currentPatient.id}
-          onClose={() => setShowExamModal(false)}
+          onClose={closeExamModal}
         />
       )}
       {showReferralModal && consultationId && currentPatient && (
         <ReferralModal
           consultationId={consultationId}
           patientId={currentPatient.id}
-          onClose={() => setShowReferralModal(false)}
+          onClose={closeReferralModal}
         />
       )}
 
