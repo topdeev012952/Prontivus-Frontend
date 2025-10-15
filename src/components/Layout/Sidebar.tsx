@@ -13,7 +13,8 @@ import {
   Shield,
   Building2,
   Stethoscope,
-  DollarSign
+  DollarSign,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ClinicSwitcher } from "@/components/ClinicSwitcher";
@@ -69,6 +70,7 @@ const navigationSections: NavigationSection[] = [
   {
     title: "Sistema",
     items: [
+      { name: "Dashboard BI", href: "/app/bi-dashboard", icon: BarChart3 },
       { name: "Configurações", href: "/app/settings", icon: Settings },
     ],
   },
