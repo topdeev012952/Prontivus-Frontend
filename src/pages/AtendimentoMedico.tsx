@@ -3,7 +3,7 @@
  * Integrated consultation screen with patient queue, vitals, quick actions, attachments
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -171,6 +171,7 @@ export default function AtendimentoMedico() {
   
   // Past consultations
   const [pastConsultations, setPastConsultations] = useState<any[]>([]);
+  const consultationViewRef = useRef<HTMLDivElement | null>(null);
 
   // Load queue on mount
   useEffect(() => {
@@ -276,6 +277,15 @@ export default function AtendimentoMedico() {
       
       setConsultationId(consultation.id);
         
+      // Ensure the consultation panel is scrolled into view
+      setTimeout(() => {
+        try {
+          consultationViewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Also push a slight scroll to reveal lower sections
+          window.scrollTo({ top: (window.scrollY || 0) + 120, behavior: 'smooth' });
+        } catch {}
+      }, 50);
+
         // Load vitals
         try {
           const vitalsResponse = await apiClient.request<any>(`/consultation-management/vitals/${consultation.id}`);
@@ -862,8 +872,8 @@ export default function AtendimentoMedico() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="container mx-auto p-6 h-full">
+      <div className="flex-1 overflow-auto">
+        <div ref={consultationViewRef} className="container mx-auto p-6 h-full">
           <div className="grid grid-cols-3 gap-6 h-full">
             {/* Left Column - Consultation Content */}
             <div className="col-span-2 space-y-6">
