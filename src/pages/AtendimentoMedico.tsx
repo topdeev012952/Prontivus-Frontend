@@ -51,6 +51,7 @@ interface QueuePatient {
   patient_name: string;
   patient_age: number;
   appointment_time: string;
+  appointment_id?: string;
   status: "waiting" | "in_progress" | "completed";
   priority: number;
 }
@@ -105,6 +106,7 @@ export default function AtendimentoMedico() {
   });
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [activeTab, setActiveTab] = useState("anamnese");
+  const [activeAppointmentId, setActiveAppointmentId] = useState<string | null>(null);
   
   // Collapsible sections state
   const [openSections, setOpenSections] = useState({
@@ -198,10 +200,32 @@ export default function AtendimentoMedico() {
         consultation = consultationResponse[0];
       } else {
         // Create new consultation if none exists
+        // Validate required fields for backend schema
+        if (!activeAppointmentId) {
+          toast({
+            title: "Agendamento não encontrado",
+            description: "Não foi possível identificar o agendamento deste paciente.",
+            variant: "destructive"
+          });
+          throw new Error("Missing activeAppointmentId for consultation creation");
+        }
+
+        const doctorId = user?.id;
+        if (!doctorId) {
+          toast({
+            title: "Médico não identificado",
+            description: "Reautentique-se para continuar.",
+            variant: "destructive"
+          });
+          throw new Error("Missing doctorId for consultation creation");
+        }
+
         consultation = await apiClient.request<any>("/consultations", {
           method: "POST",
           body: JSON.stringify({
             patient_id: patientId,
+            appointment_id: activeAppointmentId,
+            doctor_id: doctorId,
             chief_complaint: "Consulta em andamento",
             diagnosis: "A ser determinado"
           })
@@ -261,9 +285,9 @@ export default function AtendimentoMedico() {
     }
   };
 
-  const callPatient = async (patientId: string) => {
+  const callPatient = async (queueItem: QueuePatient) => {
     try {
-      await apiClient.request(`/consultation-management/queue/call/${patientId}`, {
+      await apiClient.request(`/consultation-management/queue/call/${queueItem.patient_id}`, {
         method: "POST"
       });
       
@@ -276,8 +300,11 @@ export default function AtendimentoMedico() {
         console.log("Audio notification not played (file missing or blocked)");
       }
       
+      // Track active appointment for consultation creation
+      setActiveAppointmentId((queueItem as any).appointment_id ?? null);
+
       // Load patient consultation
-      await loadPatientConsultation(patientId);
+      await loadPatientConsultation(queueItem.patient_id);
       await loadQueue();
       
       toast({
@@ -623,7 +650,7 @@ export default function AtendimentoMedico() {
                       <Badge variant="destructive">Urgente</Badge>
                     )}
                     <Badge variant="secondary">{patient.status === "waiting" ? "Aguardando" : "Em atendimento"}</Badge>
-                    <Button onClick={() => callPatient(patient.patient_id)}>
+                    <Button onClick={() => callPatient(patient)}>
                       <Bell className="h-4 w-4 mr-2" />
                       Chamar
                     </Button>
