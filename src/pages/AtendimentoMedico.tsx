@@ -107,6 +107,8 @@ export default function AtendimentoMedico() {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [activeTab, setActiveTab] = useState("anamnese");
   const [activeAppointmentId, setActiveAppointmentId] = useState<string | null>(null);
+  const [isCallingPatientId, setIsCallingPatientId] = useState<string | null>(null);
+  const [isReturningToQueue, setIsReturningToQueue] = useState(false);
   
   const ensureActiveAppointmentForPatient = useCallback(async (patientId: string) => {
     // If we already have it, nothing to do
@@ -327,13 +329,14 @@ export default function AtendimentoMedico() {
 
   const callPatient = async (queueItem: QueuePatient) => {
     try {
+      setIsCallingPatientId(queueItem.patient_id);
       await apiClient.request(`/consultation-management/queue/call/${queueItem.patient_id}`, {
         method: "POST"
       });
       
       // Play alert sound (optional - silently fail if not available)
       try {
-        const audio = new Audio("/sounds/notification.mp3");
+        const audio = new Audio("/alert-sound.mp3");
         await audio.play();
       } catch (audioError) {
         // Audio not available or autoplay blocked - that's okay
@@ -358,6 +361,8 @@ export default function AtendimentoMedico() {
         description: "Falha ao chamar paciente",
         variant: "destructive"
       });
+    } finally {
+      setIsCallingPatientId(null);
     }
   };
 
@@ -768,8 +773,9 @@ export default function AtendimentoMedico() {
       <div className="border-b bg-card">
         <div className="container mx-auto p-6">
           <div className="flex items-start justify-between mb-4">
-            <Button variant="ghost" onClick={async () => {
+            <Button variant="ghost" disabled={isReturningToQueue} onClick={async () => {
               try {
+                setIsReturningToQueue(true);
                 if (consultationId) {
                   await apiClient.request(`/consultation-management/queue/return/${consultationId}`, { method: "POST" });
                 }
@@ -780,6 +786,7 @@ export default function AtendimentoMedico() {
                 setConsultationId(null);
                 await loadQueue();
                 navigate("/app/atendimento");
+                setIsReturningToQueue(false);
               }
             }}>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -787,7 +794,7 @@ export default function AtendimentoMedico() {
             </Button>
             
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => saveConsultationNotes()}>
+              <Button variant="outline" onClick={async () => { await saveVitals(); await saveConsultationNotes(); }}>
                 <Save className="h-4 w-4 mr-2" />
                 Salvar
               </Button>
