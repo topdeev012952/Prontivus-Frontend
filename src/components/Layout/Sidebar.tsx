@@ -7,18 +7,12 @@ import {
   FileText, 
   Receipt, 
   Settings,
-  Activity,
   LogOut,
-  BarChart3,
-  Clock,
   Menu,
   Pill,
   Shield,
   Building2,
   Stethoscope,
-  CalendarDays,
-  Briefcase,
-  TrendingUp,
   DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,23 +44,21 @@ const navigationSections: NavigationSection[] = [
   {
     title: "Atendimento Clínico",
     items: [
-      { name: "Atendimento Médico", href: "/app/atendimento", icon: Stethoscope, isNew: true },
-      { name: "Atendimentos", href: "/app/consultations", icon: Activity },
+      { name: "Atendimento Médico", href: "/app/atendimento", icon: Stethoscope },
       { name: "Pacientes", href: "/app/patients", icon: Users },
       { name: "Prontuários", href: "/app/records", icon: FileText },
       { name: "Prescrições", href: "/app/prescriptions", icon: Pill },
     ],
   },
   {
-    title: "Agendamento",
+    title: "Secretaria",
     items: [
       { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
       { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
-      { name: "Sala de Espera", href: "/app/waiting-room", icon: Clock },
     ],
   },
   {
-    title: "Financeiro & Convênios",
+    title: "Financeiro",
     items: [
       { name: "Faturamento", href: "/app/billing", icon: DollarSign },
       { name: "Faturas", href: "/app/invoices", icon: Receipt },
@@ -75,9 +67,8 @@ const navigationSections: NavigationSection[] = [
     ],
   },
   {
-    title: "Análises & Sistema",
+    title: "Sistema",
     items: [
-      { name: "Dashboard BI", href: "/app/bi-dashboard", icon: BarChart3 },
       { name: "Configurações", href: "/app/settings", icon: Settings },
     ],
   },
