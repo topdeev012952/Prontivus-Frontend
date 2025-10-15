@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +20,7 @@ import {
   User, Clock, Phone, Calendar, Heart, Activity, Thermometer, Weight,
   FileText, Pill, ClipboardList, Send, Upload, Download, Save, 
   CheckCircle, AlertCircle, History, Image as ImageIcon, Mic, StopCircle,
-  Plus, X, Loader2, ArrowLeft, Bell, Shield
+  Plus, X, Loader2, ArrowLeft, Bell, Shield, ChevronDown, ChevronUp
 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -104,6 +105,17 @@ export default function AtendimentoMedico() {
   });
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [activeTab, setActiveTab] = useState("anamnese");
+  
+  // Collapsible sections state
+  const [openSections, setOpenSections] = useState({
+    anamnese: true,
+    exame: false,
+    evolucao: false,
+    diagnostico: false,
+    conduta: false,
+    prescricao: false,
+    tiss: false
+  });
   
   // Quick Action Modals
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
@@ -836,7 +848,7 @@ export default function AtendimentoMedico() {
                 </CardContent>
               </Card>
 
-              {/* Consultation Tabs */}
+              {/* Consultation Sections - Simplified Scrollable View */}
               <Card className="flex-1">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -853,86 +865,248 @@ export default function AtendimentoMedico() {
                           Parar Gravação
                         </Button>
                       )}
+                      <Button size="sm" onClick={() => saveConsultationNotes()} disabled={saving}>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvar Tudo
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="grid w-full grid-cols-5">
-                      <TabsTrigger value="anamnese">Anamnese</TabsTrigger>
-                      <TabsTrigger value="exame">Exame Físico</TabsTrigger>
-                      <TabsTrigger value="evolucao">Evolução</TabsTrigger>
-                      <TabsTrigger value="diagnostico">Diagnóstico</TabsTrigger>
-                      <TabsTrigger value="conduta">Conduta</TabsTrigger>
-                    </TabsList>
-
-                    <ScrollArea className="h-[400px] mt-4">
-                      <TabsContent value="anamnese" className="space-y-4">
-                        <div>
-                          <Label>Queixa Principal e História da Doença Atual</Label>
-                          <Textarea
-                            placeholder="Descreva a queixa principal e a história da doença atual..."
-                            value={notes.anamnese}
-                            onChange={(e) => setNotes({ ...notes, anamnese: e.target.value })}
-                            className="min-h-[300px] mt-2"
-                          />
+                  <ScrollArea className="h-[600px]">
+                    <div className="space-y-4 pr-4">
+                      
+                      {/* Anamnese Section */}
+                      <Collapsible
+                        open={openSections.anamnese}
+                        onOpenChange={(open) => setOpenSections({ ...openSections, anamnese: open })}
+                      >
+                        <div className="border rounded-lg">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                            <h3 className="font-semibold text-lg">1. Anamnese</h3>
+                            {openSections.anamnese ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0 space-y-3">
+                              <div>
+                                <Label className="text-sm font-medium">Queixa Principal e História da Doença Atual</Label>
+                                <Textarea
+                                  placeholder="Descreva a queixa principal e a história da doença atual..."
+                                  value={notes.anamnese}
+                                  onChange={(e) => setNotes({ ...notes, anamnese: e.target.value })}
+                                  className="mt-2 min-h-[150px]"
+                                />
+                              </div>
+                            </div>
+                          </CollapsibleContent>
                         </div>
-                      </TabsContent>
+                      </Collapsible>
 
-                      <TabsContent value="exame" className="space-y-4">
-                        <div>
-                          <Label>Exame Físico</Label>
-                          <Textarea
-                            placeholder="Descreva os achados do exame físico..."
-                            value={notes.physical_exam}
-                            onChange={(e) => setNotes({ ...notes, physical_exam: e.target.value })}
-                            className="min-h-[300px] mt-2"
-                          />
+                      {/* Exame Físico Section */}
+                      <Collapsible
+                        open={openSections.exame}
+                        onOpenChange={(open) => setOpenSections({ ...openSections, exame: open })}
+                      >
+                        <div className="border rounded-lg">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                            <h3 className="font-semibold text-lg">2. Exame Físico</h3>
+                            {openSections.exame ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0 space-y-3">
+                              <div>
+                                <Label className="text-sm font-medium">Achados do Exame Físico</Label>
+                                <Textarea
+                                  placeholder="Descreva os achados do exame físico..."
+                                  value={notes.physical_exam}
+                                  onChange={(e) => setNotes({ ...notes, physical_exam: e.target.value })}
+                                  className="mt-2 min-h-[150px]"
+                                />
+                              </div>
+                            </div>
+                          </CollapsibleContent>
                         </div>
-                      </TabsContent>
+                      </Collapsible>
 
-                      <TabsContent value="evolucao" className="space-y-4">
-                        <div>
-                          <Label>Evolução e Observações</Label>
-                          <Textarea
-                            placeholder="Descreva a evolução do paciente..."
-                            value={notes.evolution}
-                            onChange={(e) => setNotes({ ...notes, evolution: e.target.value })}
-                            className="min-h-[300px] mt-2"
-                          />
+                      {/* Evolução Section */}
+                      <Collapsible
+                        open={openSections.evolucao}
+                        onOpenChange={(open) => setOpenSections({ ...openSections, evolucao: open })}
+                      >
+                        <div className="border rounded-lg">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                            <h3 className="font-semibold text-lg">3. Evolução e Observações</h3>
+                            {openSections.evolucao ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0 space-y-3">
+                              <div>
+                                <Label className="text-sm font-medium">Evolução do Paciente</Label>
+                                <Textarea
+                                  placeholder="Descreva a evolução do paciente..."
+                                  value={notes.evolution}
+                                  onChange={(e) => setNotes({ ...notes, evolution: e.target.value })}
+                                  className="mt-2 min-h-[150px]"
+                                />
+                              </div>
+                            </div>
+                          </CollapsibleContent>
                         </div>
-                      </TabsContent>
+                      </Collapsible>
 
-                      <TabsContent value="diagnostico" className="space-y-4">
-                        <div>
-                          <Label>Diagnóstico (CID-10)</Label>
-                          <CID10Autocomplete
-                            onSelect={(code, description) => {
-                              setNotes({ ...notes, diagnosis: `${code} - ${description}` });
-                            }}
-                          />
-                          <Textarea
-                            placeholder="Diagnóstico detalhado..."
-                            value={notes.diagnosis}
-                            onChange={(e) => setNotes({ ...notes, diagnosis: e.target.value })}
-                            className="min-h-[250px] mt-2"
-                          />
+                      {/* Diagnóstico Section */}
+                      <Collapsible
+                        open={openSections.diagnostico}
+                        onOpenChange={(open) => setOpenSections({ ...openSections, diagnostico: open })}
+                      >
+                        <div className="border rounded-lg">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                            <h3 className="font-semibold text-lg">4. Diagnóstico</h3>
+                            {openSections.diagnostico ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0 space-y-3">
+                              <div>
+                                <Label className="text-sm font-medium">CID-10</Label>
+                                <CID10Autocomplete
+                                  onSelect={(code, description) => {
+                                    setNotes({ ...notes, diagnosis: `${code} - ${description}` });
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-sm font-medium">Diagnóstico Detalhado</Label>
+                                <Textarea
+                                  placeholder="Diagnóstico detalhado..."
+                                  value={notes.diagnosis}
+                                  onChange={(e) => setNotes({ ...notes, diagnosis: e.target.value })}
+                                  className="mt-2 min-h-[120px]"
+                                />
+                              </div>
+                            </div>
+                          </CollapsibleContent>
                         </div>
-                      </TabsContent>
+                      </Collapsible>
 
-                      <TabsContent value="conduta" className="space-y-4">
-                        <div>
-                          <Label>Plano Terapêutico e Conduta</Label>
-                          <Textarea
-                            placeholder="Descreva o plano de tratamento..."
-                            value={notes.treatment_plan}
-                            onChange={(e) => setNotes({ ...notes, treatment_plan: e.target.value })}
-                            className="min-h-[300px] mt-2"
-                          />
+                      {/* Conduta Section */}
+                      <Collapsible
+                        open={openSections.conduta}
+                        onOpenChange={(open) => setOpenSections({ ...openSections, conduta: open })}
+                      >
+                        <div className="border rounded-lg">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
+                            <h3 className="font-semibold text-lg">5. Plano Terapêutico e Conduta</h3>
+                            {openSections.conduta ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0 space-y-3">
+                              <div>
+                                <Label className="text-sm font-medium">Plano de Tratamento</Label>
+                                <Textarea
+                                  placeholder="Descreva o plano de tratamento..."
+                                  value={notes.treatment_plan}
+                                  onChange={(e) => setNotes({ ...notes, treatment_plan: e.target.value })}
+                                  className="mt-2 min-h-[150px]"
+                                />
+                              </div>
+                            </div>
+                          </CollapsibleContent>
                         </div>
-                      </TabsContent>
-                    </ScrollArea>
-                  </Tabs>
+                      </Collapsible>
+
+                      {/* Prescrição Section - Inline */}
+                      <Collapsible
+                        open={openSections.prescricao}
+                        onOpenChange={(open) => setOpenSections({ ...openSections, prescricao: open })}
+                      >
+                        <div className="border rounded-lg border-blue-200 bg-blue-50/50">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-blue-100/50 transition-colors">
+                            <div className="flex items-center gap-2">
+                              <Pill className="h-5 w-5 text-blue-600" />
+                              <h3 className="font-semibold text-lg">6. Prescrição</h3>
+                            </div>
+                            {openSections.prescricao ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0 bg-white">
+                              <Button 
+                                className="w-full" 
+                                onClick={() => setShowPrescriptionModal(true)}
+                              >
+                                <Pill className="h-4 w-4 mr-2" />
+                                Nova Receita
+                              </Button>
+                              <p className="text-sm text-muted-foreground mt-2 text-center">
+                                Clique para criar uma receita médica completa
+                              </p>
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
+
+                      {/* TISS/SADT Section - Inline */}
+                      <Collapsible
+                        open={openSections.tiss}
+                        onOpenChange={(open) => setOpenSections({ ...openSections, tiss: open })}
+                      >
+                        <div className="border rounded-lg border-purple-200 bg-purple-50/50">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-purple-100/50 transition-colors">
+                            <div className="flex items-center gap-2">
+                              <ClipboardList className="h-5 w-5 text-purple-600" />
+                              <h3 className="font-semibold text-lg">7. Guias TISS / SADT</h3>
+                            </div>
+                            {openSections.tiss ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4 pt-0 space-y-2 bg-white">
+                              <Button 
+                                className="w-full" 
+                                variant="outline"
+                                onClick={() => setShowExamModal(true)}
+                              >
+                                <ClipboardList className="h-4 w-4 mr-2" />
+                                Gerar Guia SADT
+                              </Button>
+                              <Button 
+                                className="w-full" 
+                                variant="outline"
+                                onClick={async () => {
+                                  if (!consultationId) return;
+                                  try {
+                                    const response = await apiClient.request("/tiss/generate", {
+                                      method: "POST",
+                                      body: JSON.stringify({
+                                        consultation_id: consultationId,
+                                        guide_type: "consultation"
+                                      })
+                                    });
+                                    toast({
+                                      title: "Guia gerada",
+                                      description: "Guia de consulta TISS criada com sucesso"
+                                    });
+                                  } catch (error) {
+                                    console.error("Error generating TISS guide:", error);
+                                    toast({
+                                      title: "Erro",
+                                      description: "Falha ao gerar guia TISS",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
+                              >
+                                <Shield className="h-4 w-4 mr-2" />
+                                Gerar Guia de Consulta TISS
+                              </Button>
+                              <p className="text-sm text-muted-foreground mt-2 text-center">
+                                Gere guias para convênios e operadoras
+                              </p>
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
+
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </div>
