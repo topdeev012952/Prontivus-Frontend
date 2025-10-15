@@ -1111,10 +1111,10 @@ export default function AtendimentoMedico() {
                         open={openSections.prescricao}
                         onOpenChange={(open) => setOpenSections({ ...openSections, prescricao: open })}
                       >
-                        <div className="border rounded-lg border-blue-200 bg-blue-50/50">
-                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-blue-100/50 transition-colors">
+                        <div className="border rounded-lg border-emerald-200 bg-emerald-50/50">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-emerald-100/50 transition-colors">
                             <div className="flex items-center gap-2">
-                              <Pill className="h-5 w-5 text-blue-600" />
+                              <Pill className="h-5 w-5 text-emerald-600" />
                               <h3 className="font-semibold text-lg">6. Prescrição</h3>
                             </div>
                             {openSections.prescricao ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -1126,7 +1126,7 @@ export default function AtendimentoMedico() {
                                 disabled={!consultationId || !currentPatient}
                                 onClick={() => setShowPrescriptionModal(true)}
                               >
-                                <Pill className="h-4 w-4 mr-2" />
+                                <Pill className="h-4 w-4 mr-2 text-emerald-600" />
                                 Nova Receita
                               </Button>
                               <p className="text-sm text-muted-foreground mt-2 text-center">
@@ -1142,10 +1142,10 @@ export default function AtendimentoMedico() {
                         open={openSections.tiss}
                         onOpenChange={(open) => setOpenSections({ ...openSections, tiss: open })}
                       >
-                        <div className="border rounded-lg border-purple-200 bg-purple-50/50">
-                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-purple-100/50 transition-colors">
+                        <div className="border rounded-lg border-indigo-200 bg-indigo-50/50">
+                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-indigo-100/50 transition-colors">
                             <div className="flex items-center gap-2">
-                              <ClipboardList className="h-5 w-5 text-purple-600" />
+                              <ClipboardList className="h-5 w-5 text-indigo-600" />
                               <h3 className="font-semibold text-lg">7. Guias TISS / SADT</h3>
                             </div>
                             {openSections.tiss ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -1158,7 +1158,7 @@ export default function AtendimentoMedico() {
                                 disabled={!consultationId || !currentPatient}
                                 onClick={() => setShowExamModal(true)}
                               >
-                                <ClipboardList className="h-4 w-4 mr-2" />
+                                <ClipboardList className="h-4 w-4 mr-2 text-indigo-600" />
                                 Gerar Guia SADT
                               </Button>
                               <Button 
@@ -1188,7 +1188,7 @@ export default function AtendimentoMedico() {
                                   }
                                 }}
                               >
-                                <Shield className="h-4 w-4 mr-2" />
+                                <Shield className="h-4 w-4 mr-2 text-indigo-600" />
                                 Gerar Guia de Consulta TISS
                               </Button>
                               <p className="text-sm text-muted-foreground mt-2 text-center">
