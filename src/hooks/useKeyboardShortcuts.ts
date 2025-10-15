@@ -30,14 +30,16 @@ export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
 export const useGlobalShortcuts = () => {
   const navigate = useNavigate();
 
+  // Keyboard shortcuts disabled to prevent accidental navigation
+  // when typing in forms (especially in consultation notes)
   useKeyboardShortcuts([
-    {
-      key: 'n',
-      action: () => navigate('/patients?new=true'),
-    },
-    {
-      key: 'a',
-      action: () => navigate('/appointments?new=true'),
-    },
+    // {
+    //   key: 'n',
+    //   action: () => navigate('/patients?new=true'),
+    // },
+    // {
+    //   key: 'a',
+    //   action: () => navigate('/appointments?new=true'),
+    // },
   ]);
 };
