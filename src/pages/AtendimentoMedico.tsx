@@ -1167,11 +1167,18 @@ export default function AtendimentoMedico() {
                                 onClick={async () => {
                                   if (!consultationId) return;
                                   try {
-                                    const response = await apiClient.request("/tiss/generate", {
+                                    const response = await apiClient.request(`/consultations/${consultationId}/tiss`, {
                                       method: "POST",
                                       body: JSON.stringify({
-                                        consultation_id: consultationId,
-                                        guide_type: "consultation"
+                                        items: [
+                                          {
+                                            procedure_code: "CONS",
+                                            procedure_name: "Consulta médica",
+                                            quantity: 1,
+                                            justification: "Consulta"
+                                          }
+                                        ],
+                                        justification: "Guia de consulta gerada pelo atendimento"
                                       })
                                     });
                                     toast({
