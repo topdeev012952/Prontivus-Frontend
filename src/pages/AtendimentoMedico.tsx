@@ -60,7 +60,11 @@ interface Vitals {
   blood_pressure: string;
   heart_rate: string;
   temperature: string;
+  respiratory_rate: string;
+  oxygen_saturation: string;
   weight: string;
+  height: string;
+  bmi: string;
 }
 
 interface ConsultationNotes {
@@ -95,7 +99,11 @@ export default function AtendimentoMedico() {
     blood_pressure: "",
     heart_rate: "",
     temperature: "",
-    weight: ""
+    respiratory_rate: "",
+    oxygen_saturation: "",
+    weight: "",
+    height: "",
+    bmi: ""
   });
   const [notes, setNotes] = useState<ConsultationNotes>({
     anamnese: "",
@@ -286,7 +294,7 @@ export default function AtendimentoMedico() {
         } catch {}
       }, 50);
 
-        // Load vitals
+        // Load vitals - handle 404 gracefully
         try {
           const vitalsResponse = await apiClient.request<any>(`/consultation-management/vitals/${consultation.id}`);
           if (vitalsResponse) {
@@ -294,11 +302,39 @@ export default function AtendimentoMedico() {
               blood_pressure: vitalsResponse.blood_pressure || "",
               heart_rate: vitalsResponse.heart_rate || "",
               temperature: vitalsResponse.temperature || "",
-              weight: vitalsResponse.weight || ""
+              respiratory_rate: vitalsResponse.respiratory_rate || "",
+              oxygen_saturation: vitalsResponse.oxygen_saturation || "",
+              weight: vitalsResponse.weight || "",
+              height: vitalsResponse.height || "",
+              bmi: vitalsResponse.bmi || ""
             });
           }
-        } catch (e) {
-          console.log("No vitals found");
+        } catch (e: any) {
+          if (e.status === 404) {
+            console.log("No vitals found - initializing empty vitals");
+            setVitals({
+              blood_pressure: "",
+              heart_rate: "",
+              temperature: "",
+              respiratory_rate: "",
+              oxygen_saturation: "",
+              weight: "",
+              height: "",
+              bmi: ""
+            });
+          } else {
+            console.error("Error loading vitals:", e);
+            setVitals({
+              blood_pressure: "",
+              heart_rate: "",
+              temperature: "",
+              respiratory_rate: "",
+              oxygen_saturation: "",
+              weight: "",
+              height: "",
+              bmi: ""
+            });
+          }
         }
         
         // Load notes
@@ -381,14 +417,32 @@ export default function AtendimentoMedico() {
     
     try {
       setSaving(true);
-      await apiClient.request("/consultation-management/vitals", {
-        method: "POST",
-        body: JSON.stringify({
-          consultation_id: consultationId,
-          patient_id: currentPatient.id,
-          ...vitals
-        })
-      });
+      
+      // Try to update existing vitals first
+      try {
+        await apiClient.request(`/consultation-management/vitals/${consultationId}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            consultation_id: consultationId,
+            patient_id: currentPatient.id,
+            ...vitals
+          })
+        });
+      } catch (updateError: any) {
+        // If update fails (404), create new vitals
+        if (updateError.status === 404) {
+          await apiClient.request("/consultation-management/vitals", {
+            method: "POST",
+            body: JSON.stringify({
+              consultation_id: consultationId,
+              patient_id: currentPatient.id,
+              ...vitals
+            })
+          });
+        } else {
+          throw updateError;
+        }
+      }
       
       toast({
         title: "Sinais vitais salvos",
@@ -607,7 +661,11 @@ export default function AtendimentoMedico() {
           blood_pressure: vitalsResponse.blood_pressure || "",
           heart_rate: vitalsResponse.heart_rate || "",
           temperature: vitalsResponse.temperature || "",
-          weight: vitalsResponse.weight || ""
+          respiratory_rate: vitalsResponse.respiratory_rate || "",
+          oxygen_saturation: vitalsResponse.oxygen_saturation || "",
+          weight: vitalsResponse.weight || "",
+          height: vitalsResponse.height || "",
+          bmi: vitalsResponse.bmi || ""
         });
       }
       
@@ -1061,7 +1119,7 @@ export default function AtendimentoMedico() {
                               <div>
                                 <Label className="text-sm font-medium">CID-10</Label>
                                 <CID10Autocomplete
-                                  onSelect={(code, description) => {
+                                  onChange={(code, description) => {
                                     setNotes({ ...notes, diagnosis: `${code} - ${description}` });
                                   }}
                                 />
