@@ -1122,6 +1122,26 @@ export default function AtendimentoMedico() {
                   <CardTitle className="text-lg">Ações Rápidas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
+                  {/* Nova Receita */}
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowPrescriptionModal(true)}>
+                    <Pill className="h-4 w-4 mr-2" />
+                    Nova Receita
+                  </Button>
+                  {/* Atestado */}
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowCertificateModal(true)}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Atestado
+                  </Button>
+                  {/* Solicitar Exame */}
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    Solicitar Exame
+                  </Button>
+                  {/* Encaminhamento */}
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowReferralModal(true)}>
+                    <Send className="h-4 w-4 mr-2" />
+                    Encaminhamento
+                  </Button>
                   {/* Generic Guide SADT */}
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
                     <ClipboardList className="h-4 w-4 mr-2" />
@@ -1152,15 +1172,6 @@ export default function AtendimentoMedico() {
                   }}>
                     <Shield className="h-4 w-4 mr-2" />
                     Guia de Consulta TISS Genérica
-                  </Button>
-                  {/* Keep other quick actions */}
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowCertificateModal(true)}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Atestado
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowReferralModal(true)}>
-                    <Send className="h-4 w-4 mr-2" />
-                    Encaminhamento
                   </Button>
                 </CardContent>
               </Card>
