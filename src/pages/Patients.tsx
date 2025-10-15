@@ -171,6 +171,7 @@ export default function Patients() {
   };
 
   const handleEditPatient = (patient: Patient) => {
+    console.log("🔍 EDIT CLICKED - Patient:", patient.name, "ID:", patient.id, "CPF:", patient.cpf);
     setSelectedPatient(patient);
     setFormData({
       name: patient.name,
@@ -199,14 +200,23 @@ export default function Patients() {
     
     if (!selectedPatient) return;
 
+    console.log("💾 SAVING PATIENT");
+    console.log("Selected Patient ID:", selectedPatient.id);
+    console.log("Selected Patient Name:", selectedPatient.name);
+    console.log("Selected Patient CPF:", selectedPatient.cpf);
+    console.log("Form Data:", formData);
+    console.log("API URL:", `/patients/${selectedPatient.id}`);
+
     try {
       setSaving(true);
       setError("");
 
-      await apiClient.request(`/patients/${selectedPatient.id}`, {
+      const response = await apiClient.request(`/patients/${selectedPatient.id}`, {
         method: "PATCH",
         body: JSON.stringify(formData),
       });
+
+      console.log("✅ UPDATE SUCCESSFUL - Response:", response);
 
       setShowEditDialog(false);
       setSelectedPatient(null);
@@ -227,7 +237,7 @@ export default function Patients() {
       // Reload patients
       await loadPatients();
     } catch (err: any) {
-      console.error("Error updating patient:", err);
+      console.error("❌ Error updating patient:", err);
       setError(err.message || "Falha ao atualizar paciente. Tente novamente.");
     } finally {
       setSaving(false);
