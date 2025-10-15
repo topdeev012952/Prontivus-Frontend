@@ -1106,105 +1106,7 @@ export default function AtendimentoMedico() {
                         </div>
                       </Collapsible>
 
-                      {/* Prescrição Section - Inline */}
-                      <Collapsible
-                        open={openSections.prescricao}
-                        onOpenChange={(open) => setOpenSections({ ...openSections, prescricao: open })}
-                      >
-                        <div className="border rounded-lg border-emerald-200 bg-emerald-50/50">
-                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-emerald-100/50 transition-colors">
-                            <div className="flex items-center gap-2">
-                              <Pill className="h-5 w-5 text-emerald-600" />
-                              <h3 className="font-semibold text-lg">6. Prescrição</h3>
-                            </div>
-                            {openSections.prescricao ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="p-4 pt-0 bg-white">
-                              <Button 
-                                className="w-full" 
-                                disabled={!consultationId || !currentPatient}
-                                onClick={() => setShowPrescriptionModal(true)}
-                              >
-                                <Pill className="h-4 w-4 mr-2 text-emerald-600" />
-                                Nova Receita
-                              </Button>
-                              <p className="text-sm text-muted-foreground mt-2 text-center">
-                                Clique para criar uma receita médica completa
-                              </p>
-                            </div>
-                          </CollapsibleContent>
-                        </div>
-                      </Collapsible>
-
-                      {/* TISS/SADT Section - Inline */}
-                      <Collapsible
-                        open={openSections.tiss}
-                        onOpenChange={(open) => setOpenSections({ ...openSections, tiss: open })}
-                      >
-                        <div className="border rounded-lg border-indigo-200 bg-indigo-50/50">
-                          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-indigo-100/50 transition-colors">
-                            <div className="flex items-center gap-2">
-                              <ClipboardList className="h-5 w-5 text-indigo-600" />
-                              <h3 className="font-semibold text-lg">7. Guias TISS / SADT</h3>
-                            </div>
-                            {openSections.tiss ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="p-4 pt-0 space-y-2 bg-white">
-                              <Button 
-                                className="w-full" 
-                                variant="outline"
-                                disabled={!consultationId || !currentPatient}
-                                onClick={() => setShowExamModal(true)}
-                              >
-                                <ClipboardList className="h-4 w-4 mr-2 text-indigo-600" />
-                                Gerar Guia SADT
-                              </Button>
-                              <Button 
-                                className="w-full" 
-                                variant="outline"
-                                onClick={async () => {
-                                  if (!consultationId) return;
-                                  try {
-                                    const response = await apiClient.request(`/consultations/${consultationId}/tiss`, {
-                                      method: "POST",
-                                      body: JSON.stringify({
-                                        items: [
-                                          {
-                                            procedure_code: "CONS",
-                                            procedure_name: "Consulta médica",
-                                            quantity: 1,
-                                            justification: "Consulta"
-                                          }
-                                        ],
-                                        justification: "Guia de consulta gerada pelo atendimento"
-                                      })
-                                    });
-                                    toast({
-                                      title: "Guia gerada",
-                                      description: "Guia de consulta TISS criada com sucesso"
-                                    });
-                                  } catch (error) {
-                                    console.error("Error generating TISS guide:", error);
-                                    toast({
-                                      title: "Erro",
-                                      description: "Falha ao gerar guia TISS",
-                                      variant: "destructive"
-                                    });
-                                  }
-                                }}
-                              >
-                                <Shield className="h-4 w-4 mr-2 text-indigo-600" />
-                                Gerar Guia de Consulta TISS
-                              </Button>
-                              <p className="text-sm text-muted-foreground mt-2 text-center">
-                                Gere guias para convênios e operadoras
-                              </p>
-                            </div>
-                          </CollapsibleContent>
-                        </div>
-                      </Collapsible>
+                      {/* Sections 6 and 7 removed as requested */}
 
                     </div>
                   </ScrollArea>
@@ -1220,17 +1122,41 @@ export default function AtendimentoMedico() {
                   <CardTitle className="text-lg">Ações Rápidas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowPrescriptionModal(true)}>
-                    <Pill className="h-4 w-4 mr-2" />
-                    Nova Receita
+                  {/* Generic Guide SADT */}
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    Guia SADT Genérica
                   </Button>
+                  {/* Generic Guide de Consulta TISS */}
+                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={async () => {
+                    if (!consultationId) return;
+                    try {
+                      await apiClient.request(`/consultations/${consultationId}/tiss`, {
+                        method: "POST",
+                        body: JSON.stringify({
+                          items: [
+                            {
+                              procedure_code: "CONS",
+                              procedure_name: "Consulta médica",
+                              quantity: 1,
+                              justification: "Consulta"
+                            }
+                          ],
+                          justification: "Guia de consulta TISS genérica"
+                        })
+                      });
+                      toast({ title: "Guia gerada", description: "Guia de consulta TISS (genérica) criada" });
+                    } catch (error) {
+                      toast({ title: "Erro", description: "Falha ao gerar guia TISS", variant: "destructive" });
+                    }
+                  }}>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Guia de Consulta TISS Genérica
+                  </Button>
+                  {/* Keep other quick actions */}
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowCertificateModal(true)}>
                     <FileText className="h-4 w-4 mr-2" />
                     Atestado
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
-                    <ClipboardList className="h-4 w-4 mr-2" />
-                    Solicitar Exame
                   </Button>
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowReferralModal(true)}>
                     <Send className="h-4 w-4 mr-2" />
