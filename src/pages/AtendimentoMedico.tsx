@@ -111,12 +111,12 @@ export default function AtendimentoMedico() {
   // Collapsible sections state
   const [openSections, setOpenSections] = useState({
     anamnese: true,
-    exame: false,
-    evolucao: false,
-    diagnostico: false,
-    conduta: false,
-    prescricao: false,
-    tiss: false
+    exame: true,
+    evolucao: true,
+    diagnostico: true,
+    conduta: true,
+    prescricao: true,
+    tiss: true
   });
   
   // Quick Action Modals
@@ -728,10 +728,19 @@ export default function AtendimentoMedico() {
       <div className="border-b bg-card">
         <div className="container mx-auto p-6">
           <div className="flex items-start justify-between mb-4">
-            <Button variant="ghost" onClick={() => {
-              setCurrentPatient(null);
-              setConsultationId(null);
-              navigate("/app/atendimento");
+            <Button variant="ghost" onClick={async () => {
+              try {
+                if (consultationId) {
+                  await apiClient.request(`/consultation-management/queue/return/${consultationId}`, { method: "POST" });
+                }
+              } catch (e) {
+                // non-blocking
+              } finally {
+                setCurrentPatient(null);
+                setConsultationId(null);
+                await loadQueue();
+                navigate("/app/atendimento");
+              }
             }}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar para Fila
