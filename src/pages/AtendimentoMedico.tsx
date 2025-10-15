@@ -108,6 +108,42 @@ export default function AtendimentoMedico() {
   const [activeTab, setActiveTab] = useState("anamnese");
   const [activeAppointmentId, setActiveAppointmentId] = useState<string | null>(null);
   
+  const ensureActiveAppointmentForPatient = useCallback(async (patientId: string) => {
+    // If we already have it, nothing to do
+    if (activeAppointmentId) return activeAppointmentId;
+    try {
+      // 1) Try to find from current queue
+      try {
+        const queueResponse = await apiClient.request<any[]>(`/consultation-management/queue`);
+        const match = Array.isArray(queueResponse)
+          ? queueResponse.find((q) => q.patient_id === patientId && q.appointment_id)
+          : null;
+        if (match?.appointment_id) {
+          setActiveAppointmentId(match.appointment_id);
+          return match.appointment_id as string;
+        }
+      } catch {}
+
+      // 2) Fallback: fetch today's appointments for this patient (and current doctor, if available)
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+      const params = new URLSearchParams({ page: '1', size: '10', patient_id: patientId, date: dateStr });
+      const appts = await apiClient.request<any>(`/appointments?${params.toString()}`);
+      const apptList = Array.isArray(appts?.items) ? appts.items : Array.isArray(appts) ? appts : [];
+      const first = apptList.find((a: any) => a.status === 'scheduled' || a.status === 'confirmed' || a.status === 'checked_in' || a.status === 'in_progress') || apptList[0];
+      if (first?.id) {
+        setActiveAppointmentId(first.id);
+        return first.id as string;
+      }
+    } catch (e) {
+      // swallow, handled by caller
+    }
+    return null;
+  }, [activeAppointmentId]);
+
   // Collapsible sections state
   const [openSections, setOpenSections] = useState({
     anamnese: true,
@@ -145,9 +181,12 @@ export default function AtendimentoMedico() {
   useEffect(() => {
     const patientId = searchParams.get("patient_id");
     if (patientId) {
-      loadPatientConsultation(patientId);
+      (async () => {
+        await ensureActiveAppointmentForPatient(patientId);
+        await loadPatientConsultation(patientId);
+      })();
     }
-  }, [searchParams]);
+  }, [searchParams, ensureActiveAppointmentForPatient]);
 
   // Auto-save notes every 15 seconds
   useEffect(() => {
@@ -200,11 +239,12 @@ export default function AtendimentoMedico() {
         consultation = consultationResponse[0];
       } else {
         // Create new consultation if none exists
-        // Validate required fields for backend schema
-        if (!activeAppointmentId) {
+        // Validate/resolve required fields for backend schema
+        let appointmentIdToUse = activeAppointmentId || await ensureActiveAppointmentForPatient(patientId);
+        if (!appointmentIdToUse) {
           toast({
             title: "Agendamento não encontrado",
-            description: "Não foi possível identificar o agendamento deste paciente.",
+            description: "Nenhum agendamento válido encontrado para hoje.",
             variant: "destructive"
           });
           throw new Error("Missing activeAppointmentId for consultation creation");
@@ -224,7 +264,7 @@ export default function AtendimentoMedico() {
           method: "POST",
           body: JSON.stringify({
             patient_id: patientId,
-            appointment_id: activeAppointmentId,
+            appointment_id: appointmentIdToUse,
             doctor_id: doctorId,
             chief_complaint: "Consulta em andamento",
             diagnosis: "A ser determinado"
