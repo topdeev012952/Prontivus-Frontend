@@ -249,7 +249,6 @@ export default function AtendimentoMedico() {
           console.log("No attachments found");
           setAttachments([]);
         }
-      }
     } catch (error) {
       console.error("Error loading patient consultation:", error);
       toast({
