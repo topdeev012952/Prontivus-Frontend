@@ -148,9 +148,20 @@ export default function AppointmentRequests() {
     e.preventDefault();
     try {
       setError("");
+      
+      // Prepare request data - doctor_id is optional (patient can request without specific doctor)
+      const requestData = {
+        patient_id: formData.patient_id,
+        doctor_id: formData.doctor_id || null, // Allow null if no doctor selected
+        preferred_date: formData.preferred_date,
+        preferred_time: formData.preferred_time || null,
+        reason: formData.reason,
+        notes: formData.notes || null,
+      };
+      
       await apiClient.request("/appointment-requests", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(requestData),
       });
       setSuccess("Solicitação de consulta criada com sucesso!");
       setShowCreateDialog(false);
