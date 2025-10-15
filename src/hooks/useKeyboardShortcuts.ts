@@ -28,18 +28,11 @@ export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
 };
 
 export const useGlobalShortcuts = () => {
-  const navigate = useNavigate();
-
-  // Keyboard shortcuts disabled to prevent accidental navigation
-  // when typing in forms (especially in consultation notes)
-  useKeyboardShortcuts([
-    // {
-    //   key: 'n',
-    //   action: () => navigate('/patients?new=true'),
-    // },
-    // {
-    //   key: 'a',
-    //   action: () => navigate('/appointments?new=true'),
-    // },
-  ]);
+  // Keyboard shortcuts completely disabled to prevent accidental navigation
+  // when typing in forms, especially in consultation notes (Anamnese, etc.)
+  // Previously: 'n' navigated to /patients, 'a' navigated to /appointments
+  // These caused issues when doctors were typing medical notes
+  
+  // No shortcuts registered - function is now a no-op
+  return;
 };
