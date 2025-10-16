@@ -20,7 +20,7 @@ import {
   User, Clock, Phone, Calendar, Heart, Activity, Thermometer, Weight,
   FileText, Pill, ClipboardList, Send, Upload, Download, Save, 
   CheckCircle, AlertCircle, History, Image as ImageIcon, Mic, StopCircle,
-  Plus, X, Loader2, ArrowLeft, Bell, Shield, ChevronDown, ChevronUp
+  Plus, X, Loader2, ArrowLeft, Bell, Shield, ChevronDown, ChevronUp, Video
 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -170,6 +170,11 @@ export default function AtendimentoMedico() {
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [showExamModal, setShowExamModal] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
+  
+  // Telemedicine
+  const [showTelemedicineModal, setShowTelemedicineModal] = useState(false);
+  const [telemedicineSessionId, setTelemedicineSessionId] = useState<string | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPhotosModal, setShowPhotosModal] = useState(false);
   // Section anchors for tab navigation
@@ -210,6 +215,62 @@ export default function AtendimentoMedico() {
     } catch (error) {
       console.error("Error closing referral modal:", error);
     }
+  };
+
+  // Telemedicine functions
+  const startTelemedicineSession = async () => {
+    if (!consultationId || !currentPatient) return;
+    
+    try {
+      setIsCreatingSession(true);
+      
+      // Create telemedicine session
+      const now = new Date();
+      const endTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+      
+      const sessionData = {
+        appointment_id: activeAppointmentId,
+        doctor_id: user?.id,
+        allow_recording: true,
+        max_duration_minutes: 60,
+        scheduled_start: now.toISOString(),
+        scheduled_end: endTime.toISOString()
+      };
+      
+      const response = await apiClient.request("/telemed/sessions/create", {
+        method: "POST",
+        body: JSON.stringify(sessionData)
+      }) as { session_id: string };
+      
+      setTelemedicineSessionId(response.session_id);
+      setShowTelemedicineModal(true);
+      
+      toast({ 
+        title: "Sessão de Telemedicina", 
+        description: "Sessão criada com sucesso. Aguardando paciente..." 
+      });
+      
+    } catch (error) {
+      console.error("Error creating telemedicine session:", error);
+      toast({ 
+        title: "Erro", 
+        description: "Falha ao criar sessão de telemedicina", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsCreatingSession(false);
+    }
+  };
+
+  const joinTelemedicineSession = () => {
+    if (telemedicineSessionId) {
+      navigate(`/app/telemed/${telemedicineSessionId}`);
+    }
+  };
+
+  const closeTelemedicineModal = () => {
+    setShowTelemedicineModal(false);
+    setTelemedicineSessionId(null);
   };
   
   // Voice Recording
@@ -1195,6 +1256,15 @@ export default function AtendimentoMedico() {
                   <div className="flex items-center justify-between">
                     <CardTitle>Consulta Atual</CardTitle>
                     <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={startTelemedicineSession}
+                        disabled={isCreatingSession || !consultationId || !currentPatient}
+                      >
+                        <Video className="h-4 w-4 mr-2" />
+                        {isCreatingSession ? "Criando..." : "Telemedicina"}
+                      </Button>
                       {!isRecording ? (
                         <Button size="sm" variant="outline" onClick={startVoiceRecording}>
                           <Mic className="h-4 w-4 mr-2" />
@@ -1571,6 +1641,16 @@ export default function AtendimentoMedico() {
                     <Send className="h-4 w-4 mr-2" />
                     Encaminhamento
                   </Button>
+                  {/* Telemedicina */}
+                  <Button 
+                    className="w-full justify-start bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700" 
+                    variant="outline" 
+                    disabled={isCreatingSession || !consultationId || !currentPatient} 
+                    onClick={startTelemedicineSession}
+                  >
+                    <Video className="h-4 w-4 mr-2" />
+                    {isCreatingSession ? "Criando..." : "Iniciar Telemedicina"}
+                  </Button>
                   {/* Generic Guide SADT */}
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
                     <ClipboardList className="h-4 w-4 mr-2" />
@@ -1784,6 +1864,64 @@ export default function AtendimentoMedico() {
                       </div>
                     ))
                 )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Telemedicine Modal */}
+      {showTelemedicineModal && (
+        <Dialog open={showTelemedicineModal} onOpenChange={closeTelemedicineModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-blue-600" />
+                Sessão de Telemedicina
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="text-center p-6 bg-blue-50 rounded-lg">
+                <Video className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Sessão Criada com Sucesso!
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Compartilhe o link abaixo com o paciente para iniciar a consulta por vídeo.
+                </p>
+                
+                <div className="bg-white p-3 rounded border mb-4">
+                  <code className="text-sm break-all">
+                    {window.location.origin}/app/telemed/{telemedicineSessionId}
+                  </code>
+                </div>
+                
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={joinTelemedicineSession} className="bg-blue-600 hover:bg-blue-700">
+                    <Video className="h-4 w-4 mr-2" />
+                    Entrar na Consulta
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/app/telemed/${telemedicineSessionId}`);
+                      toast({ title: "Link copiado!", description: "Link da consulta copiado para a área de transferência" });
+                    }}
+                  >
+                    Copiar Link
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p><strong>Instruções para o paciente:</strong></p>
+                <ul className="list-disc list-inside space-y-1 mt-2">
+                  <li>Clique no link para abrir a consulta</li>
+                  <li>Permita acesso à câmera e microfone</li>
+                  <li>Aguarde o médico entrar na sala</li>
+                  <li>A consulta será gravada com seu consentimento</li>
+                </ul>
               </div>
             </div>
           </DialogContent>
