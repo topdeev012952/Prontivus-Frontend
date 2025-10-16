@@ -48,7 +48,7 @@ export default function CertificateModal({ consultationId, patientId, onClose }:
           patient_id: patientId,
           certificate_type: certificateType,
           content,
-          days_off: daysOff || null, // Send as string, not integer
+          days_off: daysOff ? parseInt(daysOff) : null, // Send as integer
           cid10_code: cid10Code || null
         })
       });
