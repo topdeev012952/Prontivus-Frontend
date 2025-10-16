@@ -28,7 +28,11 @@ class ApiClient {
         headers.set('Authorization', `Bearer ${token}`);
       }
     }
-    headers.set('Content-Type', 'application/json');
+    
+    // Only set Content-Type for JSON requests, let browser handle FormData
+    if (!(fetchConfig.body instanceof FormData)) {
+      headers.set('Content-Type', 'application/json');
+    }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...fetchConfig,

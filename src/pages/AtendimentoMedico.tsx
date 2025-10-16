@@ -636,9 +636,34 @@ export default function AtendimentoMedico() {
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || !consultationId || !currentPatient) return;
+    if (!event.target.files || event.target.files.length === 0) {
+      console.log("No files selected");
+      return;
+    }
+    
+    if (!consultationId) {
+      console.error("No consultation ID available");
+      toast({
+        title: "Erro",
+        description: "Nenhuma consulta ativa encontrada",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!currentPatient) {
+      console.error("No current patient available");
+      toast({
+        title: "Erro",
+        description: "Nenhum paciente selecionado",
+        variant: "destructive"
+      });
+      return;
+    }
     
     const file = event.target.files[0];
+    console.log("Uploading file:", file.name, "for consultation:", consultationId, "patient:", currentPatient.id);
+    
     const formData = new FormData();
     formData.append("file", file);
     formData.append("consultation_id", consultationId);
@@ -649,8 +674,8 @@ export default function AtendimentoMedico() {
       setSaving(true);
       const response = await apiClient.request<Attachment>("/consultation-management/attachments/upload", {
         method: "POST",
-        body: formData,
-        headers: {} // Let browser set Content-Type for FormData
+        body: formData
+        // Don't set headers - let browser handle FormData Content-Type
       });
       
       setAttachments([...attachments, response]);
@@ -668,6 +693,8 @@ export default function AtendimentoMedico() {
       });
     } finally {
       setSaving(false);
+      // Reset the input so the same file can be selected again
+      event.target.value = '';
     }
   };
 
