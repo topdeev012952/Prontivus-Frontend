@@ -53,6 +53,7 @@ interface QueuePatient {
   appointment_id?: string;
   status: "waiting" | "in_progress" | "completed";
   priority: number;
+  insurance_provider?: string;
 }
 
 interface Vitals {
@@ -962,7 +963,18 @@ export default function AtendimentoMedico() {
                       {index + 1}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">{patient.patient_name}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {patient.patient_name}
+                        {patient.insurance_provider && patient.insurance_provider !== "Particular" ? (
+                          <span className="text-sm font-medium ml-2 text-blue-600">
+                            — Convênio: {patient.insurance_provider}
+                          </span>
+                        ) : (
+                          <span className="text-sm font-medium ml-2 text-gray-500">
+                            — Particular
+                          </span>
+                        )}
+                      </h3>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                         <span className="flex items-center gap-1">
                           <User className="h-3 w-3" />
@@ -1015,7 +1027,18 @@ export default function AtendimentoMedico() {
                         <User className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg">{patient.patient_name}</h3>
+                        <h3 className="font-semibold text-lg">
+                          {patient.patient_name}
+                          {patient.insurance_provider && patient.insurance_provider !== "Particular" ? (
+                            <span className="text-sm font-medium ml-2 text-blue-600">
+                              — Convênio: {patient.insurance_provider}
+                            </span>
+                          ) : (
+                            <span className="text-sm font-medium ml-2 text-gray-500">
+                              — Particular
+                            </span>
+                          )}
+                        </h3>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                           <span className="flex items-center gap-1">
                             <User className="h-3 w-3" />
@@ -1135,13 +1158,15 @@ export default function AtendimentoMedico() {
             <div className="col-span-2">
               <h1 className="text-2xl font-bold mb-2">
                 {currentPatient.name}
-                <span className="text-sm font-medium ml-2">
-                  {currentPatient.insurance_provider ? (
-                    <span className="text-blue-600"> — Convênio: {currentPatient.insurance_provider}</span>
-                  ) : (
-                    <span className="text-gray-500"> — Particular</span>
-                  )}
-                </span>
+                {currentPatient.insurance_provider && currentPatient.insurance_provider !== "Particular" ? (
+                  <span className="text-lg font-semibold ml-3 text-blue-600">
+                    — Convênio: {currentPatient.insurance_provider}
+                  </span>
+                ) : (
+                  <span className="text-lg font-semibold ml-3 text-gray-500">
+                    — Particular
+                  </span>
+                )}
               </h1>
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
@@ -1158,7 +1183,9 @@ export default function AtendimentoMedico() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Shield className="h-4 w-4" />
-                  {currentPatient.insurance_provider || "Particular"}
+                  {currentPatient.insurance_provider && currentPatient.insurance_provider !== "Particular" 
+                    ? currentPatient.insurance_provider 
+                    : "Particular"}
                 </span>
               </div>
               
