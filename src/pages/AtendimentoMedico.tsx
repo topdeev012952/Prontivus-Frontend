@@ -237,7 +237,7 @@ export default function AtendimentoMedico() {
         scheduled_end: endTime.toISOString()
       };
       
-      const response = await apiClient.request("/telemed/sessions/create", {
+      const response = await apiClient.request("/telemed/sessions", {
         method: "POST",
         body: JSON.stringify(sessionData)
       }) as { session_id: string };
