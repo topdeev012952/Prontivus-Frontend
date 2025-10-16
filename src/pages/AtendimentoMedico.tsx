@@ -21,7 +21,7 @@ import {
   FileText, Pill, ClipboardList, Send, Upload, Download, Save, 
   CheckCircle, AlertCircle, History, Image as ImageIcon, Mic, StopCircle,
   Plus, X, Loader2, ArrowLeft, Bell, Shield, ChevronDown, ChevronUp, Video,
-  Eye, Trash2, FileImage, File, Maximize2, Minimize2
+  Eye, Trash2, FileImage, File, Maximize2, Minimize2, Printer
 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -182,6 +182,11 @@ export default function AtendimentoMedico() {
   const [showAttachmentViewer, setShowAttachmentViewer] = useState(false);
   const [selectedAttachment, setSelectedAttachment] = useState<Attachment | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Print preview states
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [printContent, setPrintContent] = useState<string>("");
+  const [printTitle, setPrintTitle] = useState<string>("");
   // Section anchors for tab navigation
   const anamneseRef = useRef<HTMLDivElement | null>(null);
   const evolucaoRef = useRef<HTMLDivElement | null>(null);
@@ -979,6 +984,92 @@ export default function AtendimentoMedico() {
     }
   };
 
+  // Print functions
+  const openPrintPreview = (content: string, title: string) => {
+    setPrintContent(content);
+    setPrintTitle(title);
+    setShowPrintPreview(true);
+  };
+
+  const printDocument = () => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      setShowPrintPreview(false);
+    }
+  };
+
+  const generatePrescriptionPrintContent = (prescription: any) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receita Médica - ${currentPatient?.name || "Paciente"}</title>
+        <style>
+          @page { size: A4; margin: 2cm; }
+          body { font-family: 'Times New Roman', serif; font-size: 12px; line-height: 1.4; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+          .clinic-name { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+          .clinic-info { font-size: 10px; color: #666; }
+          .prescription-title { font-size: 16px; font-weight: bold; text-align: center; margin: 30px 0; }
+          .patient-info { margin: 20px 0; }
+          .prescription-items { margin: 20px 0; }
+          .prescription-item { margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+          .medication { font-weight: bold; font-size: 13px; margin-bottom: 5px; }
+          .details { margin-bottom: 5px; }
+          .details span { margin-right: 15px; font-size: 11px; }
+          .signature-area { margin: 40px 0; text-align: center; }
+          .signature-line { border-top: 1px solid #000; width: 300px; margin: 20px auto; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="clinic-name">Prontivus - Clínica Médica</div>
+          <div class="clinic-info">
+            Rua das Flores, 123 - Centro<br>
+            (11) 99999-9999 | contato@prontivus.com
+          </div>
+        </div>
+        
+        <div class="prescription-title">RECEITA MÉDICA</div>
+        
+        <div class="patient-info">
+          <strong>Paciente:</strong> ${currentPatient?.name || "Paciente"}<br>
+          <strong>Data de Nascimento:</strong> ${currentPatient?.date_of_birth ? new Date(currentPatient.date_of_birth).toLocaleDateString('pt-BR') : 'Não informado'}<br>
+          <strong>CPF:</strong> ${currentPatient?.cpf || 'Não informado'}<br>
+          <strong>Cidade:</strong> ${currentPatient?.city || 'Não informado'}
+        </div>
+        
+        <div class="prescription-items">
+          <h3>Medicações Prescritas:</h3>
+          ${prescription.items?.map((item: any, index: number) => `
+            <div class="prescription-item">
+              <div class="medication">${index + 1}. ${item.medication || 'Medicamento'}</div>
+              <div class="details">
+                <span><strong>Dosagem:</strong> ${item.dosage || 'N/A'}</span>
+                <span><strong>Frequência:</strong> ${item.frequency || 'N/A'}</span>
+                <span><strong>Duração:</strong> ${item.duration || 'N/A'}</span>
+              </div>
+              ${item.instructions ? `<div class="notes">Instruções: ${item.instructions}</div>` : ''}
+            </div>
+          `).join('') || '<p>Nenhuma medicação prescrita</p>'}
+        </div>
+        
+        <div class="signature-area">
+          <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+          <div class="signature-line"></div>
+          <p><strong>Dr(a). Médico Responsável</strong><br>
+          CRM: 123456<br>
+          Prontivus - Clínica Médica</p>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -1348,66 +1439,96 @@ export default function AtendimentoMedico() {
                   <TabsTrigger value="exames">Exames</TabsTrigger>
                 </TabsList>
               </Tabs>
-              {/* Vitals */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Sinais Vitais</CardTitle>
+              {/* Vitals - Compact */}
+              <Card className="mb-4">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Sinais Vitais</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-4 gap-4">
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-6 gap-3">
                     <div>
-                      <Label className="text-xs">Pressão</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Activity className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-xs text-muted-foreground">Pressão</Label>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Activity className="h-3 w-3 text-muted-foreground" />
                         <Input
                           placeholder="120/80"
                           value={vitals.blood_pressure}
                           onChange={(e) => setVitals({ ...vitals, blood_pressure: e.target.value })}
-                          className="h-9"
+                          className="h-8 text-xs"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs">Frequência</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Heart className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-xs text-muted-foreground">FC</Label>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Heart className="h-3 w-3 text-muted-foreground" />
                         <Input
-                          placeholder="72 bpm"
+                          placeholder="72"
                           value={vitals.heart_rate}
                           onChange={(e) => setVitals({ ...vitals, heart_rate: e.target.value })}
-                          className="h-9"
+                          className="h-8 text-xs"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs">Temperatura</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Thermometer className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-xs text-muted-foreground">Temp</Label>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Thermometer className="h-3 w-3 text-muted-foreground" />
                         <Input
                           placeholder="36.5°C"
                           value={vitals.temperature}
                           onChange={(e) => setVitals({ ...vitals, temperature: e.target.value })}
-                          className="h-9"
+                          className="h-8 text-xs"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs">Peso</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Weight className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-xs text-muted-foreground">Peso</Label>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Weight className="h-3 w-3 text-muted-foreground" />
                         <Input
-                          placeholder="70 kg"
+                          placeholder="70kg"
                           value={vitals.weight}
                           onChange={(e) => setVitals({ ...vitals, weight: e.target.value })}
-                          className="h-9"
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Altura</Label>
+                      <div className="flex items-center gap-1 mt-1">
+                        <User className="h-3 w-3 text-muted-foreground" />
+                        <Input
+                          placeholder="170cm"
+                          value={vitals.height}
+                          onChange={(e) => setVitals({ ...vitals, height: e.target.value })}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">SpO2</Label>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Activity className="h-3 w-3 text-muted-foreground" />
+                        <Input
+                          placeholder="98%"
+                          value={vitals.oxygen_saturation}
+                          onChange={(e) => setVitals({ ...vitals, oxygen_saturation: e.target.value })}
+                          className="h-8 text-xs"
                         />
                       </div>
                     </div>
                   </div>
-                  <Button size="sm" className="mt-4" onClick={saveVitals} disabled={saving}>
-                    <Save className="h-3 w-3 mr-2" />
-                    Salvar Sinais Vitais
-                  </Button>
+                  <div className="flex justify-between items-center mt-3">
+                    <div className="text-xs text-muted-foreground">
+                      IMC: {vitals.weight && vitals.height ? 
+                        (parseFloat(vitals.weight) / Math.pow(parseFloat(vitals.height) / 100, 2)).toFixed(1) : '--'}
+                    </div>
+                    <Button size="sm" variant="outline" onClick={saveVitals} disabled={saving} className="h-8 text-xs">
+                      <Save className="h-3 w-3 mr-1" />
+                      Salvar
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -1895,76 +2016,79 @@ export default function AtendimentoMedico() {
                                   size="sm"
                                   variant="ghost"
                                   className="h-6 px-2 text-xs"
-                                  onClick={async () => {
-                                    try {
-                                      // Generate consultation PDF (simplified version)
-                                      const consultationData = {
-                                        date: consultation.date,
-                                        chief_complaint: consultation.chief_complaint,
-                                        diagnosis: consultation.diagnosis,
-                                        patient_name: currentPatient?.name || "Paciente",
-                                        doctor_name: "Dr. Médico"
-                                      };
-                                      
-                                      const pdfContent = `
-                                        <!DOCTYPE html>
-                                        <html>
-                                        <head>
-                                          <title>Consulta Médica - ${consultationData.patient_name}</title>
-                                          <style>
-                                            body { font-family: Arial, sans-serif; margin: 20px; }
-                                            .header { background: #f0f0f0; padding: 15px; margin-bottom: 20px; text-align: center; }
-                                            .content { line-height: 1.6; }
-                                            .section { margin: 15px 0; }
-                                            .label { font-weight: bold; color: #333; }
-                                          </style>
-                                        </head>
-                                        <body>
-                                          <div class="header">
-                                            <h1>Consulta Médica</h1>
-                                            <p>Data: ${new Date(consultationData.date).toLocaleDateString('pt-BR')}</p>
+                                  onClick={() => {
+                                    const consultationData = {
+                                      date: consultation.date,
+                                      chief_complaint: consultation.chief_complaint,
+                                      diagnosis: consultation.diagnosis,
+                                      patient_name: currentPatient?.name || "Paciente",
+                                      doctor_name: "Dr. Médico"
+                                    };
+                                    
+                                    const printContent = `
+                                      <!DOCTYPE html>
+                                      <html>
+                                      <head>
+                                        <title>Consulta Médica - ${consultationData.patient_name}</title>
+                                        <style>
+                                          @page { size: A4; margin: 2cm; }
+                                          body { font-family: 'Times New Roman', serif; font-size: 12px; line-height: 1.4; }
+                                          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+                                          .clinic-name { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+                                          .clinic-info { font-size: 10px; color: #666; }
+                                          .consultation-title { font-size: 16px; font-weight: bold; text-align: center; margin: 30px 0; }
+                                          .content { line-height: 1.6; }
+                                          .section { margin: 15px 0; }
+                                          .label { font-weight: bold; color: #333; }
+                                          .signature-area { margin: 40px 0; text-align: center; }
+                                          .signature-line { border-top: 1px solid #000; width: 300px; margin: 20px auto; }
+                                        </style>
+                                      </head>
+                                      <body>
+                                        <div class="header">
+                                          <div class="clinic-name">Prontivus - Clínica Médica</div>
+                                          <div class="clinic-info">
+                                            Rua das Flores, 123 - Centro<br>
+                                            (11) 99999-9999 | contato@prontivus.com
                                           </div>
-                                          <div class="content">
-                                            <div class="section">
-                                              <span class="label">Paciente:</span> ${consultationData.patient_name}
-                                            </div>
-                                            <div class="section">
-                                              <span class="label">Médico:</span> ${consultationData.doctor_name}
-                                            </div>
-                                            <div class="section">
-                                              <span class="label">Motivo da Consulta:</span> ${consultationData.chief_complaint || "Não informado"}
-                                            </div>
-                                            <div class="section">
-                                              <span class="label">Diagnóstico:</span> ${consultationData.diagnosis || "Não informado"}
-                                            </div>
+                                        </div>
+                                        
+                                        <div class="consultation-title">CONSULTA MÉDICA</div>
+                                        
+                                        <div class="content">
+                                          <div class="section">
+                                            <span class="label">Paciente:</span> ${consultationData.patient_name}<br>
+                                            <span class="label">Data de Nascimento:</span> ${currentPatient?.date_of_birth ? new Date(currentPatient.date_of_birth).toLocaleDateString('pt-BR') : 'Não informado'}<br>
+                                            <span class="label">CPF:</span> ${currentPatient?.cpf || 'Não informado'}<br>
+                                            <span class="label">Cidade:</span> ${currentPatient?.city || 'Não informado'}
                                           </div>
-                                        </body>
-                                        </html>
-                                      `;
-                                      
-                                      // Convert HTML to PDF using browser's print functionality
-                                      const printWindow = window.open('', '_blank');
-                                      printWindow.document.write(pdfContent);
-                                      printWindow.document.close();
-                                      printWindow.focus();
-                                      printWindow.print();
-                                      
-                                      toast({
-                                        title: "PDF gerado",
-                                        description: "Consulta baixada com sucesso"
-                                      });
-                                    } catch (error) {
-                                      console.error('Error generating PDF:', error);
-                                      toast({
-                                        title: "Erro",
-                                        description: "Falha ao gerar PDF da consulta",
-                                        variant: "destructive"
-                                      });
-                                    }
+                                          <div class="section">
+                                            <span class="label">Data da Consulta:</span> ${new Date(consultationData.date).toLocaleDateString('pt-BR')}
+                                          </div>
+                                          <div class="section">
+                                            <span class="label">Motivo da Consulta:</span> ${consultationData.chief_complaint || "Não informado"}
+                                          </div>
+                                          <div class="section">
+                                            <span class="label">Diagnóstico:</span> ${consultationData.diagnosis || "Não informado"}
+                                          </div>
+                                        </div>
+                                        
+                                        <div class="signature-area">
+                                          <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                          <div class="signature-line"></div>
+                                          <p><strong>Dr(a). ${consultationData.doctor_name}</strong><br>
+                                          CRM: 123456<br>
+                                          Prontivus - Clínica Médica</p>
+                                        </div>
+                                      </body>
+                                      </html>
+                                    `;
+                                    
+                                    openPrintPreview(printContent, "Consulta Médica");
                                   }}
                                 >
-                                  <Download className="h-3 w-3 mr-1" />
-                                  PDF
+                                  <Printer className="h-3 w-3 mr-1" />
+                                  Imprimir
                                 </Button>
                               </div>
                             </div>
@@ -2485,6 +2609,43 @@ export default function AtendimentoMedico() {
                   </div>
                 </div>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Print Preview Modal */}
+      {showPrintPreview && (
+        <Dialog open={showPrintPreview} onOpenChange={setShowPrintPreview}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle>{printTitle}</DialogTitle>
+              <DialogDescription>
+                Visualização prévia do documento antes da impressão
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="flex-1 overflow-auto px-6 pb-6">
+              <div 
+                className="border rounded-lg p-4 bg-white"
+                dangerouslySetInnerHTML={{ __html: printContent }}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2 px-6 pb-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowPrintPreview(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={printDocument}
+                className="gap-2"
+              >
+                <Printer className="h-4 w-4" />
+                Imprimir
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
