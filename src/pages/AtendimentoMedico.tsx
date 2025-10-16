@@ -277,8 +277,19 @@ export default function AtendimentoMedico() {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   
+  // Interface for consultation history
+  interface ConsultationHistoryItem {
+    id: string;
+    appointment_id?: string;
+    doctor_id?: string;
+    date: string;
+    chief_complaint?: string;
+    diagnosis?: string;
+    summary?: string;
+  }
+
   // Past consultations
-  const [pastConsultations, setPastConsultations] = useState<any[]>([]);
+  const [pastConsultations, setPastConsultations] = useState<ConsultationHistoryItem[]>([]);
   const consultationViewRef = useRef<HTMLDivElement | null>(null);
 
   // Load queue on mount
@@ -486,6 +497,9 @@ export default function AtendimentoMedico() {
           console.log("No attachments found");
           setAttachments([]);
         }
+        
+        // Load patient history for sidebar
+        await loadPatientHistoryForSidebar();
     } catch (error) {
       console.error("Error loading patient consultation:", error);
       toast({
@@ -776,7 +790,7 @@ export default function AtendimentoMedico() {
     if (!currentPatient) return;
     
     try {
-      const history = await apiClient.request<any[]>(`/consultation-management/consultations/history/${currentPatient.id}`);
+      const history = await apiClient.request<ConsultationHistoryItem[]>(`/consultation-management/consultations/history/${currentPatient.id}`);
       setPastConsultations(Array.isArray(history) ? history : []);
       setShowHistoryModal(true);
     } catch (error) {
@@ -786,6 +800,18 @@ export default function AtendimentoMedico() {
         description: "Falha ao carregar histórico",
         variant: "destructive"
       });
+    }
+  };
+
+  const loadPatientHistoryForSidebar = async () => {
+    if (!currentPatient) return;
+    
+    try {
+      const history = await apiClient.request<ConsultationHistoryItem[]>(`/consultation-management/consultations/history/${currentPatient.id}`);
+      setPastConsultations(Array.isArray(history) ? history : []);
+    } catch (error) {
+      console.error("Error loading history for sidebar:", error);
+      // Don't show toast for sidebar loading to avoid spam
     }
   };
 
@@ -1632,6 +1658,93 @@ export default function AtendimentoMedico() {
               {/* Exames Section Anchor */}
               <div ref={examesRef} />
               
+              {/* Medical History Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <History className="h-5 w-5 text-blue-600" />
+                    Histórico de Prontuários
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[300px]">
+                    <div className="space-y-3">
+                      {pastConsultations.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Nenhum histórico encontrado</p>
+                        </div>
+                      ) : (
+                        pastConsultations.map((consultation) => (
+                          <div key={consultation.id} className="border rounded-lg p-3 hover:bg-accent transition-colors">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Calendar className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-sm font-medium">
+                                    {new Date(consultation.date).toLocaleDateString("pt-BR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric"
+                                    })}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-1">
+                                  <strong>Consulta:</strong> {consultation.chief_complaint || "Sem descrição"}
+                                </p>
+                                {consultation.diagnosis && (
+                                  <p className="text-xs text-muted-foreground">
+                                    <strong>Dx:</strong> {consultation.diagnosis}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={() => reopenConsultation(consultation.id)}
+                                >
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Visualizar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={() => {
+                                    // TODO: Implement PDF generation for consultation
+                                    toast({
+                                      title: "Em desenvolvimento",
+                                      description: "Geração de PDF será implementada em breve",
+                                      variant: "destructive"
+                                    });
+                                  }}
+                                >
+                                  <Download className="h-3 w-3 mr-1" />
+                                  PDF
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                  <div className="mt-3 pt-3 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={loadPatientHistory}
+                    >
+                      <History className="h-4 w-4 mr-2" />
+                      Ver Histórico Completo
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
               {/* Quick Actions */}
               <Card>
                 <CardHeader>
@@ -1807,7 +1920,7 @@ export default function AtendimentoMedico() {
                           <div className="flex items-center gap-2 mb-2">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              {new Date(consult.created_at).toLocaleDateString("pt-BR", {
+                              {new Date(consult.date).toLocaleDateString("pt-BR", {
                                 day: "2-digit",
                                 month: "long",
                                 year: "numeric"
