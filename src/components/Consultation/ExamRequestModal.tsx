@@ -46,8 +46,8 @@ export default function ExamRequestModal({ consultationId, patientId, onClose }:
           consultation_id: consultationId,
           patient_id: patientId,
           exam_type: examType,
-          exam_name: examName,
-          clinical_indication: clinicalIndication,
+          exam_name: examName, // Send exam name
+          clinical_indication: clinicalIndication, // Send clinical_indication directly
           urgency
         })
       });
