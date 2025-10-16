@@ -56,6 +56,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
       { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
+      { name: "Cadastro de Pacientes", href: "/app/secretaria", icon: Users },
     ],
   },
   {

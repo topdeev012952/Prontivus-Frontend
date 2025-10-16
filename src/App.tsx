@@ -30,6 +30,7 @@ import ConsultationDetail from "./pages/ConsultationDetail";
 import ConsultationImproved from "./pages/ConsultationImproved";
 import AtendimentoMedico from "./pages/AtendimentoMedico";
 import Billing from "./pages/Billing";
+import Secretaria from "./pages/Secretaria";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ function AppContent() {
           <Route path="prescriptions" element={<DigitalPrescriptions />} />
           <Route path="invoices" element={<Invoices />} />
           <Route path="billing" element={<Billing />} />
+          <Route path="secretaria" element={<Secretaria />} />
           <Route path="tiss" element={<TISSModule />} />
           <Route path="health-plans" element={<HealthPlanIntegration />} />
           <Route path="telemed/:sessionId" element={<TelemedicineRoom />} />

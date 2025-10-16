@@ -776,7 +776,7 @@ export default function AtendimentoMedico() {
     if (!currentPatient) return;
     
     try {
-      const history = await apiClient.request<any[]>(`/consultations?patient_id=${currentPatient.id}`);
+      const history = await apiClient.request<any[]>(`/consultation-management/consultations/history/${currentPatient.id}`);
       setPastConsultations(Array.isArray(history) ? history : []);
       setShowHistoryModal(true);
     } catch (error) {
@@ -1107,7 +1107,16 @@ export default function AtendimentoMedico() {
 
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2">
-              <h1 className="text-2xl font-bold mb-2">{currentPatient.name}</h1>
+              <h1 className="text-2xl font-bold mb-2">
+                {currentPatient.name}
+                <span className="text-sm font-medium ml-2">
+                  {currentPatient.insurance_provider ? (
+                    <span className="text-blue-600"> — Convênio: {currentPatient.insurance_provider}</span>
+                  ) : (
+                    <span className="text-gray-500"> — Particular</span>
+                  )}
+                </span>
+              </h1>
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <User className="h-4 w-4" />
@@ -1123,7 +1132,7 @@ export default function AtendimentoMedico() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Shield className="h-4 w-4" />
-                  {currentPatient.insurance_provider}
+                  {currentPatient.insurance_provider || "Particular"}
                 </span>
               </div>
               
@@ -1496,23 +1505,16 @@ export default function AtendimentoMedico() {
                                 onClick={async () => {
                                   if (!consultationId) return;
                                   try {
-                                    await apiClient.request(`/consultations/${consultationId}/tiss`, {
+                                    await apiClient.request(`/tiss/generate`, {
                                       method: "POST",
                                       body: JSON.stringify({
-                                        items: [
-                                          {
-                                            procedure_code: "CONS",
-                                            procedure_name: "Consulta médica",
-                                            quantity: 1,
-                                            justification: "Consulta"
-                                          }
-                                        ],
-                                        justification: "Guia de consulta TISS"
+                                        consultation_id: consultationId,
+                                        type: "CONSULTA"
                                       })
                                     });
                                     toast({ title: "Guia gerada", description: "Guia TISS criada com sucesso" });
                                   } catch (error) {
-                                    toast({ title: "Erro", description: "Falha ao gerar guia TISS", variant: "destructive" });
+                                    toast({ title: "Erro", description: "Erro ao gerar guia TISS. Verifique as credenciais ou dados do paciente.", variant: "destructive" });
                                   }
                                 }}
                                 disabled={!consultationId || !currentPatient}
@@ -1583,10 +1585,21 @@ export default function AtendimentoMedico() {
                                       <span className="text-sm">{attachment.file_name}</span>
                                     </div>
                                     <div className="flex gap-1">
-                                      <Button size="sm" variant="ghost">
+                                      <Button size="sm" variant="ghost" onClick={() => window.open(attachment.file_url, '_blank')}>
                                         <Download className="h-3 w-3" />
                                       </Button>
-                                      <Button size="sm" variant="ghost">
+                                      <Button size="sm" variant="ghost" onClick={async () => {
+                                        try {
+                                          await apiClient.request(`/consultation-management/attachments/${attachment.id}`, { method: 'DELETE' });
+                                          toast({ title: 'Anexo removido', description: 'O arquivo foi excluído com sucesso.' });
+                                          if (consultationId) {
+                                            const refreshed = await apiClient.request(`/consultation-management/attachments/${consultationId}`);
+                                            setAttachments(refreshed || []);
+                                          }
+                                        } catch (e) {
+                                          toast({ title: 'Erro', description: 'Falha ao excluir anexo.', variant: 'destructive' });
+                                        }
+                                      }}>
                                         <X className="h-3 w-3" />
                                       </Button>
                                     </div>
@@ -1660,23 +1673,16 @@ export default function AtendimentoMedico() {
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={async () => {
                     if (!consultationId) return;
                     try {
-                      await apiClient.request(`/consultations/${consultationId}/tiss`, {
+                      await apiClient.request(`/tiss/generate`, {
                         method: "POST",
                         body: JSON.stringify({
-                          items: [
-                            {
-                              procedure_code: "CONS",
-                              procedure_name: "Consulta médica",
-                              quantity: 1,
-                              justification: "Consulta"
-                            }
-                          ],
-                          justification: "Guia de consulta TISS genérica"
+                          consultation_id: consultationId,
+                          type: "CONSULTA"
                         })
                       });
                       toast({ title: "Guia gerada", description: "Guia de consulta TISS (genérica) criada" });
                     } catch (error) {
-                      toast({ title: "Erro", description: "Falha ao gerar guia TISS", variant: "destructive" });
+                      toast({ title: "Erro", description: "Erro ao gerar guia TISS. Verifique as credenciais ou dados do paciente.", variant: "destructive" });
                     }
                   }}>
                     <Shield className="h-4 w-4 mr-2" />
