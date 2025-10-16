@@ -14,7 +14,10 @@ import {
   Building2,
   Stethoscope,
   DollarSign,
-  BarChart3
+  BarChart3,
+  PhoneCall,
+  Monitor,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ClinicSwitcher } from "@/components/ClinicSwitcher";
@@ -56,6 +59,8 @@ const navigationSections: NavigationSection[] = [
       { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
       { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
       { name: "Pacientes", href: "/app/patients", icon: Users },
+      { name: "Chamar Pacientes", href: "/app/patient-call", icon: PhoneCall },
+      { name: "Monitor Sala", href: "/app/waiting-room-monitor", icon: Monitor },
     ],
   },
   {

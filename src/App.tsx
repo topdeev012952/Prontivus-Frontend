@@ -31,6 +31,8 @@ import ConsultationImproved from "./pages/ConsultationImproved";
 import AtendimentoMedico from "./pages/AtendimentoMedico";
 import Billing from "./pages/Billing";
 import Secretaria from "./pages/Secretaria";
+import PatientCallSystem from "./components/PatientCallSystem";
+import WaitingRoomMonitor from "./components/WaitingRoomMonitor";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +78,8 @@ function AppContent() {
           <Route path="consultations/:id" element={<ConsultationDetail />} />
           <Route path="atendimento" element={<AtendimentoMedico />} />
           <Route path="waiting-queue" element={<WaitingRoom />} />
+          <Route path="patient-call" element={<PatientCallSystem />} />
+          <Route path="waiting-room-monitor" element={<WaitingRoomMonitor />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         
