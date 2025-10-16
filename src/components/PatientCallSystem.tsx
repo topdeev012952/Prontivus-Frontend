@@ -21,7 +21,7 @@ interface PatientCallSystemProps {
   onPatientCalled?: (patient: QueuePatient) => void;
 }
 
-export function PatientCallSystem({ onPatientCalled }: PatientCallSystemProps) {
+function PatientCallSystem({ onPatientCalled }: PatientCallSystemProps) {
   const [queue, setQueue] = useState<QueuePatient[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -251,3 +251,5 @@ export function PatientCallSystem({ onPatientCalled }: PatientCallSystemProps) {
     </div>
   );
 }
+
+export default PatientCallSystem;

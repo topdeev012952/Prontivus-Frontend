@@ -17,7 +17,7 @@ interface QueuePatient {
   insurance_provider?: string;
 }
 
-export function WaitingRoomMonitor() {
+function WaitingRoomMonitor() {
   const [queue, setQueue] = useState<QueuePatient[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -187,3 +187,5 @@ export function WaitingRoomMonitor() {
     </div>
   );
 }
+
+export default WaitingRoomMonitor;
