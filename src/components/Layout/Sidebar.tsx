@@ -46,7 +46,6 @@ const navigationSections: NavigationSection[] = [
     title: "Atendimento Clínico",
     items: [
       { name: "Atendimento Médico", href: "/app/atendimento", icon: Stethoscope },
-      { name: "Pacientes", href: "/app/patients", icon: Users },
       { name: "Prontuários", href: "/app/records", icon: FileText },
       { name: "Prescrições", href: "/app/prescriptions", icon: Pill },
     ],
@@ -56,7 +55,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
       { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
-      { name: "Cadastro de Pacientes", href: "/app/secretaria", icon: Users },
+      { name: "Pacientes", href: "/app/patients", icon: Users },
     ],
   },
   {
