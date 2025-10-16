@@ -670,15 +670,34 @@ export default function AtendimentoMedico() {
     formData.append("patient_id", currentPatient.id);
     formData.append("category", "exam");
     
+    // Debug: Log FormData contents
+    console.log("FormData contents:");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+    
     try {
       setSaving(true);
-      const response = await apiClient.request<Attachment>("/consultation-management/attachments/upload", {
+      
+      // Use fetch directly for FormData uploads to ensure proper handling
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1'}/consultation-management/attachments/upload`, {
         method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Don't set Content-Type - let browser handle FormData
+        },
         body: formData
-        // Don't set headers - let browser handle FormData Content-Type
       });
       
-      setAttachments([...attachments, response]);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        console.error('Upload error response:', errorData);
+        throw new Error(`Upload failed: ${response.status} - ${JSON.stringify(errorData)}`);
+      }
+      
+      const responseData = await response.json();
+      setAttachments([...attachments, responseData]);
       
       toast({
         title: "Arquivo enviado",
