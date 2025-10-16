@@ -1,5 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Video, VideoOff, Mic, MicOff, PhoneOff } from 'lucide-react';
 import { useState } from 'react';
 
@@ -34,13 +36,18 @@ export function TelemedicineModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh]">
+      <DialogContent className="max-w-4xl h-[80vh]" aria-describedby="telemedicine-modal-desc">
         <DialogHeader>
           <DialogTitle>Teleconsultation - {patientName}</DialogTitle>
         </DialogHeader>
+        <DialogDescription id="telemedicine-modal-desc" className="sr-only">
+          Telemedicine session window. Video and audio controls are available below the video.
+        </DialogDescription>
         
         <div className="flex-1 bg-muted rounded-lg overflow-hidden relative">
+          <Label htmlFor="telemed-iframe" className="sr-only">Janela de vídeo da teleconsulta</Label>
           <iframe
+            id="telemed-iframe"
             src={telemedicineLink}
             className="w-full h-full"
             allow="camera; microphone; fullscreen"
