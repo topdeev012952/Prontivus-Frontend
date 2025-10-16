@@ -185,37 +185,37 @@ export default function AtendimentoMedico() {
   const examesRef = useRef<HTMLDivElement | null>(null);
   
   // Safe modal close functions
-  const closePrescriptionModal = () => {
+  const closePrescriptionModal = useCallback(() => {
     try {
       setShowPrescriptionModal(false);
     } catch (error) {
       console.error("Error closing prescription modal:", error);
     }
-  };
+  }, []);
   
-  const closeCertificateModal = () => {
+  const closeCertificateModal = useCallback(() => {
     try {
       setShowCertificateModal(false);
     } catch (error) {
       console.error("Error closing certificate modal:", error);
     }
-  };
+  }, []);
   
-  const closeExamModal = () => {
+  const closeExamModal = useCallback(() => {
     try {
       setShowExamModal(false);
     } catch (error) {
       console.error("Error closing exam modal:", error);
     }
-  };
+  }, []);
   
-  const closeReferralModal = () => {
+  const closeReferralModal = useCallback(() => {
     try {
       setShowReferralModal(false);
     } catch (error) {
       console.error("Error closing referral modal:", error);
     }
-  };
+  }, []);
 
   // Telemedicine functions
   const startTelemedicineSession = async () => {
@@ -1391,9 +1391,13 @@ export default function AtendimentoMedico() {
                               <div>
                                 <Label className="text-sm font-medium">CID-10</Label>
                                 <CID10Autocomplete
-                                  onChange={(code, description) => {
-                                    if (code && description) {
-                                      setNotes(prev => ({ ...prev, diagnosis: `${code} - ${description}` }));
+                                  onChange={(code: string, description: string) => {
+                                    try {
+                                      if (code && description) {
+                                        setNotes(prev => ({ ...prev, diagnosis: `${code} - ${description}` }));
+                                      }
+                                    } catch (error) {
+                                      console.error("Error in CID10Autocomplete onChange:", error);
                                     }
                                   }}
                                 />
@@ -1593,8 +1597,8 @@ export default function AtendimentoMedico() {
                                           await apiClient.request(`/consultation-management/attachments/${attachment.id}`, { method: 'DELETE' });
                                           toast({ title: 'Anexo removido', description: 'O arquivo foi excluído com sucesso.' });
                                           if (consultationId) {
-                                            const refreshed = await apiClient.request(`/consultation-management/attachments/${consultationId}`);
-                                            setAttachments(refreshed || []);
+                                            const refreshed = await apiClient.request<Attachment[]>(`/consultation-management/attachments/${consultationId}`);
+                                            setAttachments(Array.isArray(refreshed) ? refreshed : []);
                                           }
                                         } catch (e) {
                                           toast({ title: 'Erro', description: 'Falha ao excluir anexo.', variant: 'destructive' });

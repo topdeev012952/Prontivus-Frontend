@@ -91,10 +91,16 @@ export function CID10Autocomplete({
   }, [value, selectedLabel]);
 
   const handleSelect = (code: CID10Code) => {
-    onChange(code.code, code.description);
-    setSelectedLabel(`${code.code} - ${code.description}`);
-    setOpen(false);
-    setSearchQuery("");
+    try {
+      if (onChange && typeof onChange === 'function') {
+        onChange(code.code, code.description);
+      }
+      setSelectedLabel(`${code.code} - ${code.description}`);
+      setOpen(false);
+      setSearchQuery("");
+    } catch (error) {
+      console.error("Error in CID10Autocomplete handleSelect:", error);
+    }
   };
 
   return (
