@@ -58,11 +58,30 @@ export default function CertificateModal({ consultationId, patientId, onClose }:
         description: "O atestado foi gerado com sucesso"
       });
 
-      // Generate PDF
+      // Generate and download PDF
       if (response.certificate_id) {
-        await apiClient.request(`/quick-actions/certificates/${response.certificate_id}/generate-pdf`, {
-          method: "POST"
-        });
+        try {
+          // Generate PDF
+          const pdfResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1'}/quick-actions/certificates/${response.certificate_id}/generate-pdf`, {
+            method: "POST",
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+          });
+          
+          if (pdfResponse.ok) {
+            const blob = await pdfResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Atestado_${response.certificate_id}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+          }
+        } catch (pdfError) {
+          console.error("Error generating PDF:", pdfError);
+          // Don't show error to user, PDF generation is optional
+        }
       }
 
       onClose();

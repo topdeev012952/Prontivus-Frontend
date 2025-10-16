@@ -57,11 +57,30 @@ export default function ExamRequestModal({ consultationId, patientId, onClose }:
         description: "A solicitação de exame foi gerada com sucesso"
       });
 
-      // Generate PDF
+      // Generate and download PDF
       if (response.exam_request_id) {
-        await apiClient.request(`/quick-actions/exam-requests/${response.exam_request_id}/generate-pdf`, {
-          method: "POST"
-        });
+        try {
+          // Generate PDF
+          const pdfResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1'}/quick-actions/exam-requests/${response.exam_request_id}/generate-pdf`, {
+            method: "POST",
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+          });
+          
+          if (pdfResponse.ok) {
+            const blob = await pdfResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Solicitacao_Exame_${response.exam_request_id}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+          }
+        } catch (pdfError) {
+          console.error("Error generating PDF:", pdfError);
+          // Don't show error to user, PDF generation is optional
+        }
       }
 
       onClose();

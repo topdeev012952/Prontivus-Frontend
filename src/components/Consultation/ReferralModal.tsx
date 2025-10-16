@@ -59,11 +59,30 @@ export default function ReferralModal({ consultationId, patientId, onClose }: Re
         description: "O encaminhamento foi gerado com sucesso"
       });
 
-      // Generate PDF
+      // Generate and download PDF
       if (response.referral_id) {
-        await apiClient.request(`/quick-actions/referrals/${response.referral_id}/generate-pdf`, {
-          method: "POST"
-        });
+        try {
+          // Generate PDF
+          const pdfResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1'}/quick-actions/referrals/${response.referral_id}/generate-pdf`, {
+            method: "POST",
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+          });
+          
+          if (pdfResponse.ok) {
+            const blob = await pdfResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Encaminhamento_${response.referral_id}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+          }
+        } catch (pdfError) {
+          console.error("Error generating PDF:", pdfError);
+          // Don't show error to user, PDF generation is optional
+        }
       }
 
       onClose();

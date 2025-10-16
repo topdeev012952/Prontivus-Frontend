@@ -92,11 +92,34 @@ export default function PrescriptionModal({ consultationId, patientId, onClose }
         description: "A receita foi gerada com sucesso"
       });
 
-      // Generate PDF
+      // Generate and download PDF
       if (response.prescription_id) {
-        await apiClient.request(`/quick-actions/prescriptions/${response.prescription_id}/generate-pdf`, {
-          method: "POST"
-        });
+        try {
+          // Generate PDF
+          await apiClient.request(`/quick-actions/prescriptions/${response.prescription_id}/generate-pdf`, {
+            method: "POST"
+          });
+          
+          // Download the PDF
+          const pdfResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1'}/prescriptions/${response.prescription_id}/pdf`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+          });
+          
+          if (pdfResponse.ok) {
+            const blob = await pdfResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Prescricao_${response.prescription_id}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+          }
+        } catch (pdfError) {
+          console.error("Error generating PDF:", pdfError);
+          // Don't show error to user, PDF generation is optional
+        }
       }
 
       onClose();
