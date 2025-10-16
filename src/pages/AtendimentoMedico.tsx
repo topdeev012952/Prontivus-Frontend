@@ -20,7 +20,8 @@ import {
   User, Clock, Phone, Calendar, Heart, Activity, Thermometer, Weight,
   FileText, Pill, ClipboardList, Send, Upload, Download, Save, 
   CheckCircle, AlertCircle, History, Image as ImageIcon, Mic, StopCircle,
-  Plus, X, Loader2, ArrowLeft, Bell, Shield, ChevronDown, ChevronUp, Video
+  Plus, X, Loader2, ArrowLeft, Bell, Shield, ChevronDown, ChevronUp, Video,
+  Eye, Trash2, FileImage, File, Maximize2, Minimize2
 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -178,6 +179,9 @@ export default function AtendimentoMedico() {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPhotosModal, setShowPhotosModal] = useState(false);
+  const [showAttachmentViewer, setShowAttachmentViewer] = useState(false);
+  const [selectedAttachment, setSelectedAttachment] = useState<Attachment | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   // Section anchors for tab navigation
   const anamneseRef = useRef<HTMLDivElement | null>(null);
   const evolucaoRef = useRef<HTMLDivElement | null>(null);
@@ -878,6 +882,55 @@ export default function AtendimentoMedico() {
       age--;
     }
     return age;
+  };
+
+  // Helper functions for attachment management
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) return <FileImage className="h-4 w-4 text-green-600" />;
+    if (fileType === 'application/pdf') return <FileText className="h-4 w-4 text-red-600" />;
+    return <File className="h-4 w-4 text-blue-600" />;
+  };
+
+  const getFileTypeLabel = (fileType: string) => {
+    if (fileType.startsWith('image/')) return 'Imagem';
+    if (fileType === 'application/pdf') return 'PDF';
+    if (fileType.includes('word') || fileType.includes('document')) return 'Documento';
+    return 'Arquivo';
+  };
+
+  const openAttachmentViewer = (attachment: Attachment) => {
+    setSelectedAttachment(attachment);
+    setShowAttachmentViewer(true);
+    setIsFullscreen(false);
+  };
+
+  const closeAttachmentViewer = () => {
+    setShowAttachmentViewer(false);
+    setSelectedAttachment(null);
+    setIsFullscreen(false);
+  };
+
+  const deleteAttachment = async (attachmentId: string) => {
+    try {
+      await apiClient.request(`/consultation-management/attachments/${attachmentId}`, { method: 'DELETE' });
+      toast({ 
+        title: 'Anexo removido', 
+        description: 'O arquivo foi excluído com sucesso.' 
+      });
+      
+      // Refresh attachments list
+      if (consultationId) {
+        const refreshed = await apiClient.request<Attachment[]>(`/consultation-management/attachments/${consultationId}`);
+        setAttachments(Array.isArray(refreshed) ? refreshed : []);
+      }
+    } catch (error) {
+      console.error('Error deleting attachment:', error);
+      toast({ 
+        title: 'Erro', 
+        description: 'Falha ao excluir anexo.', 
+        variant: 'destructive' 
+      });
+    }
   };
 
   if (loading) {
@@ -1636,28 +1689,45 @@ export default function AtendimentoMedico() {
                               <div className="space-y-2">
                                 <h4 className="font-medium text-sm">Arquivos Anexados:</h4>
                                 {attachments.map((attachment, index) => (
-                                  <div key={index} className="flex items-center justify-between p-2 border rounded">
-                                    <div className="flex items-center gap-2">
-                                      <FileText className="h-4 w-4" />
-                                      <span className="text-sm">{attachment.file_name}</span>
+                                  <div key={index} className="flex items-center justify-between p-2 border rounded hover:bg-accent/50 transition-colors">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      {getFileIcon(attachment.file_type)}
+                                      <span className="text-sm truncate" title={attachment.file_name}>
+                                        {attachment.file_name}
+                                      </span>
                                     </div>
                                     <div className="flex gap-1">
-                                      <Button size="sm" variant="ghost" onClick={() => window.open(attachment.file_url, '_blank')}>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        onClick={() => openAttachmentViewer(attachment)}
+                                        className="h-6 w-6 p-0"
+                                        title="Visualizar"
+                                      >
+                                        <Eye className="h-3 w-3" />
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        onClick={() => {
+                                          const link = document.createElement('a');
+                                          link.href = attachment.file_url;
+                                          link.download = attachment.file_name;
+                                          link.click();
+                                        }}
+                                        className="h-6 w-6 p-0"
+                                        title="Download"
+                                      >
                                         <Download className="h-3 w-3" />
                                       </Button>
-                                      <Button size="sm" variant="ghost" onClick={async () => {
-                                        try {
-                                          await apiClient.request(`/consultation-management/attachments/${attachment.id}`, { method: 'DELETE' });
-                                          toast({ title: 'Anexo removido', description: 'O arquivo foi excluído com sucesso.' });
-                                          if (consultationId) {
-                                            const refreshed = await apiClient.request<Attachment[]>(`/consultation-management/attachments/${consultationId}`);
-                                            setAttachments(Array.isArray(refreshed) ? refreshed : []);
-                                          }
-                                        } catch (e) {
-                                          toast({ title: 'Erro', description: 'Falha ao excluir anexo.', variant: 'destructive' });
-                                        }
-                                      }}>
-                                        <X className="h-3 w-3" />
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        onClick={() => deleteAttachment(attachment.id)}
+                                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                        title="Excluir"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
                                       </Button>
                                     </div>
                                   </div>
@@ -1838,16 +1908,23 @@ export default function AtendimentoMedico() {
               {/* Attachments */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Anexos</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Anexos</CardTitle>
+                    <Badge variant="secondary" className="text-xs">
+                      {attachments.length} arquivo{attachments.length !== 1 ? 's' : ''}
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                  {/* Upload Area */}
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                     <input
                       type="file"
                       id="file-upload"
                       className="hidden"
                       onChange={handleFileUpload}
                       accept=".pdf,.jpg,.jpeg,.png,.docx"
+                      multiple
                     />
                     <label htmlFor="file-upload" className="cursor-pointer">
                       <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
@@ -1860,36 +1937,79 @@ export default function AtendimentoMedico() {
                     </label>
                   </div>
 
-                  <ScrollArea className="h-[200px]">
-                    <div className="space-y-2">
-                      {attachments.map((attachment) => (
-                        <div key={attachment.id} className="flex items-center justify-between p-2 border rounded">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">{attachment.file_name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(attachment.uploaded_at).toLocaleDateString("pt-BR")}
-                              </p>
+                  {/* Attachments List */}
+                  {attachments.length > 0 ? (
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-2">
+                        {attachments.map((attachment) => (
+                          <div key={attachment.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              {getFileIcon(attachment.file_type)}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate" title={attachment.file_name}>
+                                  {attachment.file_name}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>{getFileTypeLabel(attachment.file_type)}</span>
+                                  <span>•</span>
+                                  <span>
+                                    {new Date(attachment.uploaded_at).toLocaleDateString("pt-BR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit"
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => openAttachmentViewer(attachment)}
+                                className="h-8 w-8 p-0"
+                                title="Visualizar"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => {
+                                  // Download file
+                                  const link = document.createElement('a');
+                                  link.href = attachment.file_url;
+                                  link.download = attachment.file_name;
+                                  link.click();
+                                }}
+                                className="h-8 w-8 p-0"
+                                title="Download"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => deleteAttachment(attachment.id)}
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                title="Excluir"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => {
-                              // Download file
-                              const link = document.createElement('a');
-                              link.href = attachment.file_url;
-                              link.download = attachment.file_name;
-                              link.click();
-                            }}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Nenhum anexo encontrado</p>
+                      <p className="text-xs mt-1">Faça upload de arquivos para visualizá-los aqui</p>
                     </div>
-                  </ScrollArea>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -2080,6 +2200,110 @@ export default function AtendimentoMedico() {
            </DialogContent>
          </Dialog>
        )}
+
+      {/* Attachment Viewer Modal */}
+      {showAttachmentViewer && selectedAttachment && (
+        <Dialog open={showAttachmentViewer} onOpenChange={closeAttachmentViewer}>
+          <DialogContent 
+            className={`${isFullscreen ? 'max-w-[95vw] max-h-[95vh] w-[95vw] h-[95vh]' : 'max-w-4xl max-h-[80vh]'} p-0`}
+            aria-describedby="attachment-viewer-description"
+          >
+            <DialogHeader className="p-6 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {getFileIcon(selectedAttachment.file_type)}
+                  <div>
+                    <DialogTitle className="text-lg">{selectedAttachment.file_name}</DialogTitle>
+                    <p id="attachment-viewer-description" className="text-sm text-muted-foreground">
+                      {getFileTypeLabel(selectedAttachment.file_type)} • 
+                      {new Date(selectedAttachment.uploaded_at).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsFullscreen(!isFullscreen)}
+                    title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+                  >
+                    {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = selectedAttachment.file_url;
+                      link.download = selectedAttachment.file_name;
+                      link.click();
+                    }}
+                    title="Download"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => deleteAttachment(selectedAttachment.id)}
+                    className="text-destructive hover:text-destructive"
+                    title="Excluir"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </DialogHeader>
+            
+            <div className="flex-1 overflow-hidden px-6 pb-6">
+              {selectedAttachment.file_type.startsWith('image/') ? (
+                <div className="w-full h-full flex items-center justify-center bg-muted/20 rounded-lg overflow-hidden">
+                  <img
+                    src={selectedAttachment.file_url}
+                    alt={selectedAttachment.file_name}
+                    className={`max-w-full max-h-full object-contain ${isFullscreen ? 'max-h-[calc(95vh-200px)]' : 'max-h-[60vh]'}`}
+                  />
+                </div>
+              ) : selectedAttachment.file_type === 'application/pdf' ? (
+                <div className="w-full h-full">
+                  <iframe
+                    src={selectedAttachment.file_url}
+                    className={`w-full border-0 rounded-lg ${isFullscreen ? 'h-[calc(95vh-200px)]' : 'h-[60vh]'}`}
+                    title={selectedAttachment.file_name}
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted/20 rounded-lg">
+                  <div className="text-center">
+                    <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Visualização não disponível</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Este tipo de arquivo não pode ser visualizado no navegador.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = selectedAttachment.file_url;
+                        link.download = selectedAttachment.file_name;
+                        link.click();
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar arquivo
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
