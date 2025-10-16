@@ -1661,15 +1661,55 @@ export default function AtendimentoMedico() {
                                 onClick={async () => {
                                   if (!consultationId) return;
                                   try {
-                                    await apiClient.request(`/tiss/generate`, {
+                                    const response = await apiClient.request(`/tiss/generate`, {
                                       method: "POST",
                                       body: JSON.stringify({
                                         consultation_id: consultationId,
                                         type: "CONSULTA"
                                       })
                                     });
-                                    toast({ title: "Guia gerada", description: "Guia TISS criada com sucesso" });
+                                    
+                                    // Generate PDF from XML response
+                                    if ((response as any).xml) {
+                                      const xmlContent = (response as any).xml;
+                                      const pdfContent = `
+                                        <!DOCTYPE html>
+                                        <html>
+                                        <head>
+                                          <title>Guia TISS - Consulta</title>
+                                          <style>
+                                            body { font-family: Arial, sans-serif; margin: 20px; }
+                                            .header { background: #f0f0f0; padding: 10px; margin-bottom: 20px; }
+                                            .xml-content { background: #f9f9f9; padding: 15px; border: 1px solid #ddd; }
+                                            pre { white-space: pre-wrap; font-size: 12px; }
+                                          </style>
+                                        </head>
+                                        <body>
+                                          <div class="header">
+                                            <h2>Guia TISS - Consulta Médica</h2>
+                                            <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                                          </div>
+                                          <div class="xml-content">
+                                            <h3>Conteúdo XML:</h3>
+                                            <pre>${xmlContent}</pre>
+                                          </div>
+                                        </body>
+                                        </html>
+                                      `;
+                                      
+                                      // Convert HTML to PDF using browser's print functionality
+                                      const printWindow = window.open('', '_blank');
+                                      printWindow.document.write(pdfContent);
+                                      printWindow.document.close();
+                                      printWindow.focus();
+                                      printWindow.print();
+                                      
+                                      toast({ title: "Guia gerada", description: "Guia TISS criada com sucesso" });
+                                    } else {
+                                      throw new Error('Resposta inválida do servidor');
+                                    }
                                   } catch (error) {
+                                    console.error("Error generating TISS guide:", error);
                                     toast({ title: "Erro", description: "Erro ao gerar guia TISS. Verifique as credenciais ou dados do paciente.", variant: "destructive" });
                                   }
                                 }}
@@ -1855,13 +1895,72 @@ export default function AtendimentoMedico() {
                                   size="sm"
                                   variant="ghost"
                                   className="h-6 px-2 text-xs"
-                                  onClick={() => {
-                                    // TODO: Implement PDF generation for consultation
-                                    toast({
-                                      title: "Em desenvolvimento",
-                                      description: "Geração de PDF será implementada em breve",
-                                      variant: "destructive"
-                                    });
+                                  onClick={async () => {
+                                    try {
+                                      // Generate consultation PDF (simplified version)
+                                      const consultationData = {
+                                        date: consultation.date,
+                                        chief_complaint: consultation.chief_complaint,
+                                        diagnosis: consultation.diagnosis,
+                                        patient_name: currentPatient?.name || "Paciente",
+                                        doctor_name: "Dr. Médico"
+                                      };
+                                      
+                                      const pdfContent = `
+                                        <!DOCTYPE html>
+                                        <html>
+                                        <head>
+                                          <title>Consulta Médica - ${consultationData.patient_name}</title>
+                                          <style>
+                                            body { font-family: Arial, sans-serif; margin: 20px; }
+                                            .header { background: #f0f0f0; padding: 15px; margin-bottom: 20px; text-align: center; }
+                                            .content { line-height: 1.6; }
+                                            .section { margin: 15px 0; }
+                                            .label { font-weight: bold; color: #333; }
+                                          </style>
+                                        </head>
+                                        <body>
+                                          <div class="header">
+                                            <h1>Consulta Médica</h1>
+                                            <p>Data: ${new Date(consultationData.date).toLocaleDateString('pt-BR')}</p>
+                                          </div>
+                                          <div class="content">
+                                            <div class="section">
+                                              <span class="label">Paciente:</span> ${consultationData.patient_name}
+                                            </div>
+                                            <div class="section">
+                                              <span class="label">Médico:</span> ${consultationData.doctor_name}
+                                            </div>
+                                            <div class="section">
+                                              <span class="label">Motivo da Consulta:</span> ${consultationData.chief_complaint || "Não informado"}
+                                            </div>
+                                            <div class="section">
+                                              <span class="label">Diagnóstico:</span> ${consultationData.diagnosis || "Não informado"}
+                                            </div>
+                                          </div>
+                                        </body>
+                                        </html>
+                                      `;
+                                      
+                                      // Convert HTML to PDF using browser's print functionality
+                                      const printWindow = window.open('', '_blank');
+                                      printWindow.document.write(pdfContent);
+                                      printWindow.document.close();
+                                      printWindow.focus();
+                                      printWindow.print();
+                                      
+                                      toast({
+                                        title: "PDF gerado",
+                                        description: "Consulta baixada com sucesso"
+                                      });
+                                    } catch (error) {
+                                      console.error('Error generating PDF:', error);
+                                      toast({
+                                        title: "Erro",
+                                        description: "Falha ao gerar PDF da consulta",
+                                        variant: "destructive"
+                                      });
+                                    }
                                   }}
                                 >
                                   <Download className="h-3 w-3 mr-1" />
@@ -1933,15 +2032,55 @@ export default function AtendimentoMedico() {
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={async () => {
                     if (!consultationId) return;
                     try {
-                      await apiClient.request(`/tiss/generate`, {
+                      const response = await apiClient.request(`/tiss/generate`, {
                         method: "POST",
                         body: JSON.stringify({
                           consultation_id: consultationId,
                           type: "CONSULTA"
                         })
                       });
-                      toast({ title: "Guia gerada", description: "Guia de consulta TISS (genérica) criada" });
+                      
+                      // Generate PDF from XML response
+                      if ((response as any).xml) {
+                        const xmlContent = (response as any).xml;
+                        const pdfContent = `
+                          <!DOCTYPE html>
+                          <html>
+                          <head>
+                            <title>Guia TISS - Consulta Genérica</title>
+                            <style>
+                              body { font-family: Arial, sans-serif; margin: 20px; }
+                              .header { background: #f0f0f0; padding: 10px; margin-bottom: 20px; }
+                              .xml-content { background: #f9f9f9; padding: 15px; border: 1px solid #ddd; }
+                              pre { white-space: pre-wrap; font-size: 12px; }
+                            </style>
+                          </head>
+                          <body>
+                            <div class="header">
+                              <h2>Guia TISS - Consulta Genérica</h2>
+                              <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                            </div>
+                            <div class="xml-content">
+                              <h3>Conteúdo XML:</h3>
+                              <pre>${xmlContent}</pre>
+                            </div>
+                          </body>
+                          </html>
+                        `;
+                        
+                        // Convert HTML to PDF using browser's print functionality
+                        const printWindow = window.open('', '_blank');
+                        printWindow.document.write(pdfContent);
+                        printWindow.document.close();
+                        printWindow.focus();
+                        printWindow.print();
+                        
+                        toast({ title: "Guia gerada", description: "Guia de consulta TISS (genérica) criada" });
+                      } else {
+                        throw new Error('Resposta inválida do servidor');
+                      }
                     } catch (error) {
+                      console.error("Error generating TISS guide:", error);
                       toast({ title: "Erro", description: "Erro ao gerar guia TISS. Verifique as credenciais ou dados do paciente.", variant: "destructive" });
                     }
                   }}>
