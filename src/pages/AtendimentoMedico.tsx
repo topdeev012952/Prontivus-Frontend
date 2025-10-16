@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   User, Clock, Phone, Calendar, Heart, Activity, Thermometer, Weight,
   FileText, Pill, ClipboardList, Send, Upload, Download, Save, 
@@ -1873,13 +1873,16 @@ export default function AtendimentoMedico() {
       {/* Telemedicine Modal */}
       {showTelemedicineModal && (
         <Dialog open={showTelemedicineModal} onOpenChange={closeTelemedicineModal}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl" aria-describedby="telemed-desc">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Video className="h-5 w-5 text-blue-600" />
                 Sessão de Telemedicina
               </DialogTitle>
             </DialogHeader>
+            <DialogDescription id="telemed-desc" className="sr-only">
+              Sessão de telemedicina criada. Compartilhe o link com o paciente e entre na sala quando estiver pronto.
+            </DialogDescription>
             
             <div className="space-y-4">
               <div className="text-center p-6 bg-blue-50 rounded-lg">
@@ -1924,9 +1927,9 @@ export default function AtendimentoMedico() {
                 </ul>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+           </DialogContent>
+         </Dialog>
+       )}
     </div>
   );
 }
