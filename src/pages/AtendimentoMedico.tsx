@@ -28,8 +28,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { CID10Autocomplete } from "@/components/CID10Autocomplete";
 
-// Quick Action Modals
-import PrescriptionModal from "@/components/Consultation/PrescriptionModal";
+// Quick Action Modals (PrescriptionModal removed - handled in main consultation form)
 import CertificateModal from "@/components/Consultation/CertificateModal";
 import ExamRequestModal from "@/components/Consultation/ExamRequestModal";
 import ReferralModal from "@/components/Consultation/ReferralModal";
@@ -167,8 +166,7 @@ export default function AtendimentoMedico() {
     exames: true
   });
   
-  // Quick Action Modals
-  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  // Quick Action Modals (PrescriptionModal removed - handled in main consultation form)
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [showExamModal, setShowExamModal] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
@@ -194,14 +192,7 @@ export default function AtendimentoMedico() {
   const tissRef = useRef<HTMLDivElement | null>(null);
   const examesRef = useRef<HTMLDivElement | null>(null);
   
-  // Safe modal close functions
-  const closePrescriptionModal = useCallback(() => {
-    try {
-      setShowPrescriptionModal(false);
-    } catch (error) {
-      console.error("Error closing prescription modal:", error);
-    }
-  }, []);
+  // Safe modal close functions (PrescriptionModal removed)
   
   const closeCertificateModal = useCallback(() => {
     try {
@@ -1728,14 +1719,7 @@ export default function AtendimentoMedico() {
                         <CollapsibleContent>
                           <div className="p-4 pt-0 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                              <Button 
-                                className="w-full" 
-                                onClick={() => setShowPrescriptionModal(true)}
-                                disabled={!consultationId || !currentPatient}
-                              >
-                                <Pill className="h-4 w-4 mr-2" />
-                                Nova Receita
-                              </Button>
+                              {/* Nova Receita button removed - handled in main consultation form */}
                               <Button 
                                 variant="outline" 
                                 className="w-full"
@@ -2117,11 +2101,7 @@ export default function AtendimentoMedico() {
                   <CardTitle className="text-lg">Ações Rápidas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {/* Nova Receita */}
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowPrescriptionModal(true)}>
-                    <Pill className="h-4 w-4 mr-2" />
-                    Nova Receita
-                  </Button>
+                  {/* Nova Receita removed - handled in main consultation form */}
                   {/* Atestado */}
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowCertificateModal(true)}>
                     <FileText className="h-4 w-4 mr-2" />
@@ -2326,14 +2306,7 @@ export default function AtendimentoMedico() {
         </div>
       </div>
 
-      {/* Quick Action Modals */}
-      {showPrescriptionModal && consultationId && currentPatient && (
-        <PrescriptionModal
-          consultationId={consultationId}
-          patientId={currentPatient.id}
-          onClose={closePrescriptionModal}
-        />
-      )}
+      {/* Quick Action Modals (PrescriptionModal removed - handled in main consultation form) */}
       {showCertificateModal && consultationId && currentPatient && (
         <CertificateModal
           consultationId={consultationId}

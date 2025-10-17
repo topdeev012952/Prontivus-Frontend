@@ -47,6 +47,7 @@ import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { CID10Autocomplete } from "@/components/CID10Autocomplete";
+import { MedicalHistoryTimeline } from "@/components/MedicalHistoryTimeline";
 import { formatDate, formatTime } from "@/lib/utils";
 
 interface WaitingPatient {
@@ -177,6 +178,8 @@ export default function ConsultationImproved() {
   // Attachments state
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [consultationHistory, setConsultationHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   
   // UI state
   const [saving, setSaving] = useState(false);
@@ -197,6 +200,19 @@ export default function ConsultationImproved() {
       return () => clearInterval(interval);
     }
   }, [user]);
+
+  const loadConsultationHistory = async (patientId: string) => {
+    try {
+      setLoadingHistory(true);
+      const response = await apiClient.request(`/consultations/history/${patientId}`);
+      setConsultationHistory(response || []);
+    } catch (err: any) {
+      console.error("Error loading consultation history:", err);
+      setConsultationHistory([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   const loadWaitingPatients = async () => {
     // Don't attempt if user is not authenticated
@@ -319,6 +335,9 @@ export default function ConsultationImproved() {
       // Open consultation area
       setCurrentPatient({ ...patient, status: 'in_progress' });
       
+      // Load consultation history for this patient
+      await loadConsultationHistory(patient.patient_id);
+      
       // Reload queue
       await loadWaitingPatients();
       
@@ -406,6 +425,11 @@ export default function ConsultationImproved() {
       // Reset and reload
       resetConsultationState();
       await loadWaitingPatients();
+      
+      // Reload consultation history for the current patient
+      if (currentPatient) {
+        await loadConsultationHistory(currentPatient.patient_id);
+      }
 
       // Auto-call next patient if enabled
       if (autoCallNext && waitingPatients.length > 0) {
@@ -1662,6 +1686,23 @@ export default function ConsultationImproved() {
                   </div>
                 )}
               </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Medical History Timeline */}
+          <Card className="flex flex-col h-full">
+            <CardContent className="flex-1 p-6">
+              <MedicalHistoryTimeline
+                consultations={consultationHistory}
+                onViewDetails={(consultation) => {
+                  // Handle viewing consultation details
+                  console.log("View details for:", consultation);
+                }}
+                onPrintHistory={() => {
+                  // Handle printing history
+                  console.log("Print history");
+                }}
+              />
             </CardContent>
           </Card>
         </div>

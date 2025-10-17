@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Plus, Search, Loader2, User, Calendar, Stethoscope, Edit, Trash2, Eye, Lock, Unlock, Upload, Paperclip, X } from "lucide-react";
+import { FileText, Search, Loader2, User, Calendar, Stethoscope, Eye, Lock, Unlock, Upload, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -108,7 +108,7 @@ export default function MedicalRecordsAdvanced() {
   
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  // Removed edit functionality - this is now read-only
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showLockDialog, setShowLockDialog] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
@@ -328,45 +328,7 @@ export default function MedicalRecordsAdvanced() {
     }
   };
 
-  const handleEditRecord = (record: MedicalRecord) => {
-    setSelectedRecord(record);
-    
-    // Parse the concatenated fields back into form structure
-    // This is a simplified version - you may need to improve parsing logic
-    setFormData({
-      appointment_id: record.appointment_id || "",
-      chief_complaint: "",
-      present_illness: "",
-      anamnesis: record.anamnesis || "",
-      past_medical_history: "",
-      family_history: "",
-      social_history: "",
-      allergies: "",
-      current_medications: "",
-      physical_exam: record.physical_exam || "",
-      temperature: "",
-      bp_systolic: "",
-      bp_diastolic: "",
-      heart_rate: "",
-      respiratory_rate: "",
-      oxygen_saturation: "",
-      weight: "",
-      height: "",
-      cardiovascular: "",
-      respiratory: "",
-      gastrointestinal: "",
-      neurological: "",
-      musculoskeletal: "",
-      evolution_notes: record.evolution_notes || "",
-      diagnosis: record.diagnosis || "",
-      icd_code: record.icd_code || "",
-      treatment_plan: record.treatment_plan || "",
-      prescriptions: record.prescriptions || "",
-    });
-    
-    setSelectedPatient(record.patient_id);
-    setShowEditDialog(true);
-  };
+  // Removed edit functionality - this is now read-only
 
   const handleUpdateRecord = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -594,15 +556,12 @@ export default function MedicalRecordsAdvanced() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Medical Records</h1>
+          <h1 className="text-3xl font-bold">Prontuário Médico</h1>
           <p className="text-muted-foreground">
-            {total > 0 ? `Manage ${total.toLocaleString()} medical records` : "Manage medical records"}
+            {total > 0 ? `Visualizar ${total.toLocaleString()} registros médicos` : "Visualizar registros médicos (somente leitura)"}
           </p>
         </div>
-        <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4" />
-          New Record
-        </Button>
+        {/* New Record button removed - this is now read-only */}
       </div>
 
       {error && (
@@ -675,14 +634,7 @@ export default function MedicalRecordsAdvanced() {
                       </Button>
                       {!record.is_locked && (
                         <>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditRecord(record)}
-                            title="Edit Record"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          {/* Edit button removed - this is now read-only */}
                           <Button 
                             variant="ghost" 
                             size="sm"
@@ -745,14 +697,11 @@ export default function MedicalRecordsAdvanced() {
         <Card className="shadow-card">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No medical records found</h3>
+            <h3 className="text-lg font-semibold mb-2">Nenhum registro médico encontrado</h3>
             <p className="text-muted-foreground mb-4">
-              Create your first comprehensive medical record
+              Visualize os registros médicos dos pacientes aqui
             </p>
-            <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
-              <Plus className="h-4 w-4" />
-              New Record
-            </Button>
+            {/* New Record button removed - this is now read-only */}
           </CardContent>
         </Card>
       )}
@@ -1271,160 +1220,7 @@ export default function MedicalRecordsAdvanced() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Medical Record Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Editar Prontuário</DialogTitle>
-            <DialogDescription>
-              Atualize as informações do prontuário médico
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleUpdateRecord}>
-            {/* Patient Selection (disabled in edit mode) */}
-            <div className="mb-4">
-              <Label htmlFor="patient">Paciente</Label>
-              <Select value={selectedPatient} onValueChange={setSelectedPatient} disabled>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o paciente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {patients.map((patient) => (
-                    <SelectItem key={patient.id} value={patient.id}>
-                      {patient.name} {patient.cpf && `(CPF: ${patient.cpf})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Tabbed Interface */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="historia">História Clínica</TabsTrigger>
-                <TabsTrigger value="exame">Exame Físico</TabsTrigger>
-                <TabsTrigger value="evolucao">Evolução</TabsTrigger>
-                <TabsTrigger value="conduta">Conduta</TabsTrigger>
-              </TabsList>
-
-              {/* Tab 1: História Clínica */}
-              <TabsContent value="historia" className="space-y-4 mt-4">
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="edit_anamnesis">Anamnese</Label>
-                    <Textarea
-                      id="edit_anamnesis"
-                      placeholder="História clínica do paciente..."
-                      value={formData.anamnesis}
-                      onChange={(e) => setFormData({ ...formData, anamnesis: e.target.value })}
-                      rows={10}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* Tab 2: Exame Físico */}
-              <TabsContent value="exame" className="space-y-4 mt-4">
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="edit_physical_exam">Exame Físico</Label>
-                    <Textarea
-                      id="edit_physical_exam"
-                      placeholder="Achados do exame físico..."
-                      value={formData.physical_exam}
-                      onChange={(e) => setFormData({ ...formData, physical_exam: e.target.value })}
-                      rows={10}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* Tab 3: Evolução */}
-              <TabsContent value="evolucao" className="space-y-4 mt-4">
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="edit_evolution_notes">Notas de Evolução</Label>
-                    <Textarea
-                      id="edit_evolution_notes"
-                      placeholder="Progresso do paciente, resposta ao tratamento..."
-                      value={formData.evolution_notes}
-                      onChange={(e) => setFormData({ ...formData, evolution_notes: e.target.value })}
-                      rows={10}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* Tab 4: Conduta */}
-              <TabsContent value="conduta" className="space-y-4 mt-4">
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="edit_diagnosis">Diagnóstico</Label>
-                    <Textarea
-                      id="edit_diagnosis"
-                      placeholder="Diagnóstico médico..."
-                      value={formData.diagnosis}
-                      onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-                      rows={3}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="edit_icd_code">Código CID-10</Label>
-                    <CID10Autocomplete
-                      value={formData.icd_code}
-                      onChange={(code, description) => {
-                        setFormData({ 
-                          ...formData, 
-                          icd_code: code,
-                          diagnosis: formData.diagnosis || description
-                        });
-                      }}
-                      placeholder="Buscar código CID-10..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="edit_treatment_plan">Plano de Tratamento</Label>
-                    <Textarea
-                      id="edit_treatment_plan"
-                      placeholder="Plano de tratamento, procedimentos..."
-                      value={formData.treatment_plan}
-                      onChange={(e) => setFormData({ ...formData, treatment_plan: e.target.value })}
-                      rows={6}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            <DialogFooter className="mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowEditDialog(false);
-                  resetForm();
-                }}
-                disabled={saving}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={saving || !selectedPatient}>
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  "Salvar Alterações"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Edit dialog removed - this is now read-only */}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
