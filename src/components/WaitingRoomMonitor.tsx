@@ -89,12 +89,21 @@ function WaitingRoomMonitor() {
     try {
       setIsCreatingSession(true);
       
-      // Create telemedicine session
+      // Get current user info for doctor_id
+      const userResponse = await apiClient.request("/users/me");
+      const doctorId = userResponse.id;
+      
+      // Create telemedicine session with required fields
+      const now = new Date();
+      const endTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+      
       const sessionData = {
-        patient_id: selectedPatient.patient_id,
-        patient_name: selectedPatient.patient_name,
-        session_type: "consultation",
-        duration_minutes: 60
+        appointment_id: selectedPatient.appointment_id || "00000000-0000-0000-0000-000000000000", // Fallback UUID
+        doctor_id: doctorId,
+        allow_recording: false,
+        max_duration_minutes: 60,
+        scheduled_start: now.toISOString(),
+        scheduled_end: endTime.toISOString()
       };
       
       const response = await apiClient.request("/telemed/sessions", {
