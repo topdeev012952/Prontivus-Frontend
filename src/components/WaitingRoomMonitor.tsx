@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { User, Clock, Volume2, VolumeX, RefreshCw } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { User, Clock, Volume2, VolumeX, RefreshCw, Video, Phone, Copy } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface QueuePatient {
   id: string;
@@ -18,10 +20,17 @@ interface QueuePatient {
 }
 
 function WaitingRoomMonitor() {
+  const navigate = useNavigate();
   const [queue, setQueue] = useState<QueuePatient[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  
+  // Telemedicine states
+  const [showTelemedicineModal, setShowTelemedicineModal] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<QueuePatient | null>(null);
+  const [telemedicineSessionId, setTelemedicineSessionId] = useState<string | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
 
   const fetchQueue = async () => {
     try {
@@ -66,6 +75,66 @@ function WaitingRoomMonitor() {
       case "attended": return "Atendido";
       case "cancelled": return "Cancelado";
       default: return "Desconhecido";
+    }
+  };
+
+  const startVideoCall = (patient: QueuePatient) => {
+    setSelectedPatient(patient);
+    setShowTelemedicineModal(true);
+  };
+
+  const createTelemedicineSession = async () => {
+    if (!selectedPatient) return;
+    
+    try {
+      setIsCreatingSession(true);
+      
+      // Create telemedicine session
+      const sessionData = {
+        patient_id: selectedPatient.patient_id,
+        patient_name: selectedPatient.patient_name,
+        session_type: "consultation",
+        duration_minutes: 60
+      };
+      
+      const response = await apiClient.request("/telemed/sessions", {
+        method: "POST",
+        data: sessionData
+      });
+      
+      setTelemedicineSessionId(response.session_id);
+      
+      toast({
+        title: "Sessão Criada",
+        description: "Sessão de telemedicina criada com sucesso!",
+      });
+      
+    } catch (error) {
+      console.error("Error creating telemedicine session:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao criar sessão de telemedicina",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingSession(false);
+    }
+  };
+
+  const joinVideoCall = () => {
+    if (telemedicineSessionId) {
+      navigate(`/app/telemed/${telemedicineSessionId}`);
+    }
+  };
+
+  const copyVideoCallLink = () => {
+    if (telemedicineSessionId) {
+      const link = `${window.location.origin}/app/telemed/${telemedicineSessionId}`;
+      navigator.clipboard.writeText(link);
+      toast({
+        title: "Link Copiado",
+        description: "Link da consulta copiado para a área de transferência",
+      });
     }
   };
 
@@ -166,16 +235,28 @@ function WaitingRoomMonitor() {
                           </p>
                         </div>
                       </div>
-                      <Badge 
-                        variant={getStatusBadgeVariant(patient.status)}
-                        className={`text-xl px-4 py-2 ${
-                          patient.status === "called" 
-                            ? "bg-yellow-500 text-white" 
-                            : ""
-                        }`}
-                      >
-                        {getStatusText(patient.status)}
-                      </Badge>
+                      <div className="flex items-center space-x-4">
+                        <Badge 
+                          variant={getStatusBadgeVariant(patient.status)}
+                          className={`text-xl px-4 py-2 ${
+                            patient.status === "called" 
+                              ? "bg-yellow-500 text-white" 
+                              : ""
+                          }`}
+                        >
+                          {getStatusText(patient.status)}
+                        </Badge>
+                        {(patient.status === "waiting" || patient.status === "called") && (
+                          <Button
+                            onClick={() => startVideoCall(patient)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
+                            size="sm"
+                          >
+                            <Video className="h-4 w-4 mr-2" />
+                            Video Call
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -184,6 +265,82 @@ function WaitingRoomMonitor() {
           )}
         </CardContent>
       </Card>
+
+      {/* Telemedicine Modal */}
+      <Dialog open={showTelemedicineModal} onOpenChange={setShowTelemedicineModal}>
+        <DialogContent className="max-w-2xl" aria-describedby="telemed-desc">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5 text-blue-600" />
+              Iniciar Video Call - {selectedPatient?.patient_name}
+            </DialogTitle>
+            <DialogDescription id="telemed-desc">
+              Criar uma sessão de telemedicina para consulta com o paciente.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {!telemedicineSessionId ? (
+              <div className="text-center p-6 bg-blue-50 rounded-lg">
+                <Video className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Criar Sessão de Video Call
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Clique no botão abaixo para criar uma sessão de telemedicina com {selectedPatient?.patient_name}.
+                </p>
+                <Button 
+                  onClick={createTelemedicineSession}
+                  disabled={isCreatingSession}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isCreatingSession ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Criando Sessão...
+                    </>
+                  ) : (
+                    <>
+                      <Video className="h-4 w-4 mr-2" />
+                      Criar Sessão
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center p-6 bg-green-50 rounded-lg">
+                <Video className="h-12 w-12 mx-auto mb-4 text-green-600" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Sessão Criada com Sucesso!
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  A sessão de telemedicina foi criada. Compartilhe o link com o paciente ou entre diretamente na consulta.
+                </p>
+                
+                <div className="bg-white p-3 rounded border mb-4">
+                  <code className="text-sm break-all">
+                    {window.location.origin}/app/telemed/{telemedicineSessionId}
+                  </code>
+                </div>
+                
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={joinVideoCall} className="bg-green-600 hover:bg-green-700">
+                    <Video className="h-4 w-4 mr-2" />
+                    Entrar na Consulta
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={copyVideoCallLink}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar Link
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
