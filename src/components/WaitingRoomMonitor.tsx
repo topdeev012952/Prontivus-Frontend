@@ -106,10 +106,14 @@ function WaitingRoomMonitor() {
         scheduled_end: endTime.toISOString()
       };
       
+      console.log("Sending telemedicine session data:", sessionData);
+      
       const response = await apiClient.request("/telemed/sessions", {
         method: "POST",
         data: sessionData
       });
+      
+      console.log("Telemedicine session response:", response);
       
       setTelemedicineSessionId(response.session_id);
       
