@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Loader2, Users as UsersIcon, X, Edit, Trash2, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Search, Filter, Loader2, Users as UsersIcon, X, Edit, Trash2, Eye, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +49,7 @@ interface PaginatedResponse {
 }
 
 export default function Patients() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,7 +152,15 @@ export default function Patients() {
         email: "",
         insurance_number: "",
         insurance_provider: "",
-        address: {},
+        address: {
+          street: "",
+          number: "",
+          complement: "",
+          neighborhood: "",
+          city: "",
+          state: "",
+          zip_code: ""
+        },
       });
       
       setShowAddDialog(false);
@@ -231,7 +241,15 @@ export default function Patients() {
         email: "",
         insurance_number: "",
         insurance_provider: "",
-        address: {},
+        address: {
+          street: "",
+          number: "",
+          complement: "",
+          neighborhood: "",
+          city: "",
+          state: "",
+          zip_code: ""
+        },
       });
       
       // Reload patients
@@ -401,6 +419,17 @@ export default function Patients() {
                           title="Editar Paciente"
                         >
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/app/prontuario/${patient.id}`);
+                          }}
+                          title="Ver Prontuário"
+                        >
+                          <FileText className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"

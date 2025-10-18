@@ -27,10 +27,10 @@ import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { CID10Autocomplete } from "@/components/CID10Autocomplete";
+import MedicalHistoryTimeline from "@/components/MedicalHistoryTimeline";
 
 // Quick Action Modals (PrescriptionModal removed - handled in main consultation form)
 import CertificateModal from "@/components/Consultation/CertificateModal";
-import ExamRequestModal from "@/components/Consultation/ExamRequestModal";
 import ReferralModal from "@/components/Consultation/ReferralModal";
 interface Patient {
   id: string;
@@ -42,6 +42,8 @@ interface Patient {
   last_consultation: string;
   allergies: string[];
   chronic_conditions: string[];
+  date_of_birth?: string;
+  city?: string;
 }
 
 interface QueuePatient {
@@ -72,6 +74,7 @@ interface ConsultationNotes {
   physical_exam: string;
   evolution: string;
   diagnosis: string;
+  diagnosis_code: string;
   treatment_plan: string;
 }
 
@@ -110,6 +113,7 @@ export default function AtendimentoMedico() {
     physical_exam: "",
     evolution: "",
     diagnosis: "",
+    diagnosis_code: "",
     treatment_plan: ""
   });
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -117,6 +121,10 @@ export default function AtendimentoMedico() {
   const [activeAppointmentId, setActiveAppointmentId] = useState<string | null>(null);
   const [isCallingPatientId, setIsCallingPatientId] = useState<string | null>(null);
   const [isReturningToQueue, setIsReturningToQueue] = useState(false);
+  
+  // Medical history timeline state
+  const [patientHistory, setPatientHistory] = useState<any>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   
   const ensureActiveAppointmentForPatient = useCallback(async (patientId: string) => {
     // If we already have it, nothing to do
@@ -217,6 +225,55 @@ export default function AtendimentoMedico() {
       console.error("Error closing referral modal:", error);
     }
   }, []);
+
+  // Load patient medical history
+  const loadPatientHistory = useCallback(async (patientId: string) => {
+    if (!patientId) return;
+    
+    try {
+      setIsLoadingHistory(true);
+      const response = await apiClient.request(`/consultations/history/${patientId}/timeline`);
+      setPatientHistory(response);
+    } catch (error) {
+      console.error("Error loading patient history:", error);
+      setPatientHistory(null);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  // Print patient history
+  const handlePrintHistory = useCallback(async () => {
+    if (!currentPatient) return;
+    
+    try {
+      const response = await fetch(`/api/v1/consultations/history/${currentPatient.id}/print`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `historico_${currentPatient.name}_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    } catch (error) {
+      console.error("Error printing history:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao imprimir histórico do paciente",
+        variant: "destructive"
+      });
+    }
+  }, [currentPatient, toast]);
 
   // Telemedicine functions
   const startTelemedicineSession = async () => {
@@ -346,6 +403,13 @@ export default function AtendimentoMedico() {
       setIsCallingPatientId(null);
     };
   }, []);
+
+  // Load patient history when current patient changes
+  useEffect(() => {
+    if (currentPatient?.id) {
+      loadPatientHistory(currentPatient.id);
+    }
+  }, [currentPatient?.id, loadPatientHistory]);
 
   const loadQueue = async () => {
     try {
@@ -483,6 +547,7 @@ export default function AtendimentoMedico() {
               physical_exam: notesResponse.physical_exam || "",
               evolution: notesResponse.evolution || "",
               diagnosis: notesResponse.diagnosis || "",
+              diagnosis_code: notesResponse.diagnosis_code || "",
               treatment_plan: notesResponse.treatment_plan || ""
             });
           }
@@ -788,14 +853,21 @@ export default function AtendimentoMedico() {
       await saveConsultationNotes();
       await saveVitals();
       
-      // Finalize consultation
-      await apiClient.request(`/consultation-management/queue/finalize/${consultationId}`, {
-        method: "POST"
+      // Finalize consultation with automatic history generation
+      const finalizationData = {
+        final_notes: notes.evolution || notes.treatment_plan || "Consulta finalizada",
+        diagnosis_code: notes.diagnosis_code || "",
+        treatment_summary: notes.treatment_plan || ""
+      };
+      
+      const response = await apiClient.request(`/consultations/finalize/${consultationId}`, {
+        method: "POST",
+        body: JSON.stringify(finalizationData)
       });
       
       toast({
         title: "Atendimento finalizado",
-        description: "O paciente foi marcado como atendido"
+        description: "Consulta finalizada e histórico gerado automaticamente"
       });
       
       // Clear current patient and reload queue
@@ -833,22 +905,6 @@ export default function AtendimentoMedico() {
     }
   };
 
-  const loadPatientHistory = async () => {
-    if (!currentPatient) return;
-    
-    try {
-      const history = await apiClient.request<ConsultationHistoryItem[]>(`/consultation-management/consultations/history/${currentPatient.id}`);
-      setPastConsultations(Array.isArray(history) ? history : []);
-      setShowHistoryModal(true);
-    } catch (error) {
-      console.error("Error loading history:", error);
-      toast({
-        title: "Erro",
-        description: "Falha ao carregar histórico",
-        variant: "destructive"
-      });
-    }
-  };
 
   const loadPatientHistoryForSidebar = async () => {
     if (!currentPatient) return;
@@ -891,6 +947,7 @@ export default function AtendimentoMedico() {
           physical_exam: notesResponse.physical_exam || "",
           evolution: notesResponse.evolution || "",
           diagnosis: notesResponse.diagnosis || "",
+          diagnosis_code: notesResponse.diagnosis_code || "",
           treatment_plan: notesResponse.treatment_plan || ""
         });
       }
@@ -1391,7 +1448,7 @@ export default function AtendimentoMedico() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={loadPatientHistory}>
+              <Button variant="outline" size="sm" onClick={() => loadPatientHistory(currentPatient?.id || '')}>
                 <History className="h-4 w-4 mr-2" />
                 Histórico
               </Button>
@@ -1706,132 +1763,9 @@ export default function AtendimentoMedico() {
                         </div>
                       </Collapsible>
 
-                      {/* Prescrição Section */}
-                      <div ref={prescricaoRef} />
-                      <Collapsible
-                        open={openSections.prescricao}
-                        onOpenChange={(open) => setOpenSections(prev => ({ ...prev, prescricao: open }))}
-                      >
-                        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
-                          <h3 className="font-semibold text-lg">4. Prescrição Médica</h3>
-                          {openSections.prescricao ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="p-4 pt-0 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              {/* Nova Receita button removed - handled in main consultation form */}
-                              <Button 
-                                variant="outline" 
-                                className="w-full"
-                                onClick={() => setShowCertificateModal(true)}
-                                disabled={!consultationId || !currentPatient}
-                              >
-                                <FileText className="h-4 w-4 mr-2" />
-                                Atestado Médico
-                              </Button>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              <p>• Clique em "Nova Receita" para criar prescrições com medicamentos</p>
-                              <p>• Use "Atestado Médico" para gerar atestados e declarações</p>
-                              <p>• Todas as prescrições são vinculadas a esta consulta</p>
-                            </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      {/* Note: Prescrição section removed - handled in Quick Actions panel */}
 
-                      {/* TISS/SADT Section */}
-                      <div ref={tissRef} />
-                      <Collapsible
-                        open={openSections.tiss}
-                        onOpenChange={(open) => setOpenSections(prev => ({ ...prev, tiss: open }))}
-                      >
-                        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent transition-colors">
-                          <h3 className="font-semibold text-lg">5. Guias SADT / TISS</h3>
-                          {openSections.tiss ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="p-4 pt-0 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <Button 
-                                className="w-full" 
-                                onClick={() => setShowExamModal(true)}
-                                disabled={!consultationId || !currentPatient}
-                              >
-                                <ClipboardList className="h-4 w-4 mr-2" />
-                                Guia SADT
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                className="w-full"
-                                onClick={async () => {
-                                  if (!consultationId) return;
-                                  try {
-                                    const response = await apiClient.request(`/tiss/generate`, {
-                                      method: "POST",
-                                      body: JSON.stringify({
-                                        consultation_id: consultationId,
-                                        type: "CONSULTA"
-                                      })
-                                    });
-                                    
-                                    // Generate PDF from XML response
-                                    if ((response as any).xml) {
-                                      const xmlContent = (response as any).xml;
-                                      const pdfContent = `
-                                        <!DOCTYPE html>
-                                        <html>
-                                        <head>
-                                          <title>Guia TISS - Consulta</title>
-                                          <style>
-                                            body { font-family: Arial, sans-serif; margin: 20px; }
-                                            .header { background: #f0f0f0; padding: 10px; margin-bottom: 20px; }
-                                            .xml-content { background: #f9f9f9; padding: 15px; border: 1px solid #ddd; }
-                                            pre { white-space: pre-wrap; font-size: 12px; }
-                                          </style>
-                                        </head>
-                                        <body>
-                                          <div class="header">
-                                            <h2>Guia TISS - Consulta Médica</h2>
-                                            <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-                                          </div>
-                                          <div class="xml-content">
-                                            <h3>Conteúdo XML:</h3>
-                                            <pre>${xmlContent}</pre>
-                                          </div>
-                                        </body>
-                                        </html>
-                                      `;
-                                      
-                                      // Convert HTML to PDF using browser's print functionality
-                                      const printWindow = window.open('', '_blank');
-                                      printWindow.document.write(pdfContent);
-                                      printWindow.document.close();
-                                      printWindow.focus();
-                                      printWindow.print();
-                                      
-                                      toast({ title: "Guia gerada", description: "Guia TISS criada com sucesso" });
-                                    } else {
-                                      throw new Error('Resposta inválida do servidor');
-                                    }
-                                  } catch (error) {
-                                    console.error("Error generating TISS guide:", error);
-                                    toast({ title: "Erro", description: "Erro ao gerar guia TISS. Verifique as credenciais ou dados do paciente.", variant: "destructive" });
-                                  }
-                                }}
-                                disabled={!consultationId || !currentPatient}
-                              >
-                                <Shield className="h-4 w-4 mr-2" />
-                                Guia TISS
-                              </Button>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              <p>• Guia SADT para procedimentos e exames</p>
-                              <p>• Guia TISS para consultas e procedimentos</p>
-                              <p>• XMLs são gerados automaticamente e vinculados à consulta</p>
-                            </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                      {/* Note: TISS/SADT section removed - handled in Quick Actions panel */}
 
                       {/* Exames Section */}
                       <div ref={examesRef} />
@@ -2086,7 +2020,7 @@ export default function AtendimentoMedico() {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={loadPatientHistory}
+                      onClick={() => loadPatientHistory(currentPatient?.id || '')}
                     >
                       <History className="h-4 w-4 mr-2" />
                       Ver Histórico Completo
@@ -2191,6 +2125,46 @@ export default function AtendimentoMedico() {
                     <Shield className="h-4 w-4 mr-2" />
                     Guia de Consulta TISS Genérica
                   </Button>
+                  
+                  {/* Print Buttons */}
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Impressão</p>
+                    <Button 
+                      className="w-full justify-start bg-green-50 hover:bg-green-100 border-green-200 text-green-700" 
+                      variant="outline" 
+                      disabled={!consultationId || !currentPatient}
+                      onClick={async () => {
+                        if (!consultationId) return;
+                        try {
+                          const response = await fetch(`/api/v1/print/consolidated/${consultationId}?output_type=pdf`, {
+                            headers: {
+                              'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                          });
+                          
+                          if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `consulta_${currentPatient?.name}_${new Date().toISOString().split('T')[0]}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                            
+                            toast({ title: "Documentos gerados", description: "Todos os documentos da consulta foram gerados" });
+                          }
+                        } catch (error) {
+                          console.error("Error printing consolidated documents:", error);
+                          toast({ title: "Erro", description: "Erro ao gerar documentos", variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      🗂️ Imprimir Tudo
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -2301,6 +2275,40 @@ export default function AtendimentoMedico() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Medical History Timeline */}
+              {currentPatient && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Histórico Médico</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingHistory ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                        <span>Carregando histórico...</span>
+                      </div>
+                    ) : patientHistory ? (
+                      <MedicalHistoryTimeline
+                        patientName={patientHistory.patient_name}
+                        timeline={patientHistory.timeline || []}
+                        totalConsultations={patientHistory.total_consultations || 0}
+                        onPrintHistory={handlePrintHistory}
+                        onViewDetails={(item) => {
+                          // Handle view details - could open a modal or navigate
+                          console.log("View details for:", item);
+                        }}
+                      />
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Nenhum histórico encontrado</p>
+                        <p className="text-xs mt-1">O histórico aparecerá aqui após as consultas serem finalizadas</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
@@ -2314,13 +2322,7 @@ export default function AtendimentoMedico() {
           onClose={closeCertificateModal}
         />
       )}
-      {showExamModal && consultationId && currentPatient && (
-        <ExamRequestModal
-          consultationId={consultationId}
-          patientId={currentPatient.id}
-          onClose={closeExamModal}
-        />
-      )}
+      {/* ExamRequestModal removed - functionality handled elsewhere */}
       {showReferralModal && consultationId && currentPatient && (
         <ReferralModal
           consultationId={consultationId}

@@ -47,7 +47,7 @@ import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { CID10Autocomplete } from "@/components/CID10Autocomplete";
-import { MedicalHistoryTimeline } from "@/components/MedicalHistoryTimeline";
+import MedicalHistoryTimeline from "@/components/MedicalHistoryTimeline";
 import { formatDate, formatTime } from "@/lib/utils";
 
 interface WaitingPatient {

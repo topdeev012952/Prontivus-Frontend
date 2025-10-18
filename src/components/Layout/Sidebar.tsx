@@ -76,6 +76,7 @@ const navigationSections: NavigationSection[] = [
     title: "Sistema",
     items: [
       { name: "Dashboard BI", href: "/app/bi-dashboard", icon: BarChart3 },
+      { name: "Gerenciar Equipe", href: "/app/team-management", icon: Users },
       { name: "Configurações", href: "/app/settings", icon: Settings },
     ],
   },

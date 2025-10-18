@@ -33,6 +33,8 @@ import Billing from "./pages/Billing";
 import Secretaria from "./pages/Secretaria";
 import PatientCallSystem from "./components/PatientCallSystem";
 import WaitingRoomMonitor from "./components/WaitingRoomMonitor";
+import AdminTeamManager from "./pages/AdminTeamManager";
+import ProntuarioMedico from "./pages/ProntuarioMedico";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +82,8 @@ function AppContent() {
           <Route path="waiting-queue" element={<WaitingRoom />} />
           <Route path="patient-call" element={<PatientCallSystem />} />
           <Route path="waiting-room-monitor" element={<WaitingRoomMonitor />} />
+          <Route path="team-management" element={<AdminTeamManager />} />
+          <Route path="prontuario/:patientId" element={<ProntuarioMedico />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         
