@@ -132,7 +132,7 @@ export default function AtendimentoMedico() {
     try {
       // 1) Try to find from current queue
       try {
-        const queueResponse = await apiClient.request<any[]>(`/consultation-management/queue`);
+        const queueResponse = await apiClient.request<any[]>(`/consultation-mgmt/queue`);
         const match = Array.isArray(queueResponse)
           ? queueResponse.find((q) => q.patient_id === patientId && q.appointment_id)
           : null;
@@ -413,7 +413,7 @@ export default function AtendimentoMedico() {
 
   const loadQueue = async () => {
     try {
-      const response = await apiClient.request<QueuePatient[]>("/consultation-management/queue");
+      const response = await apiClient.request<QueuePatient[]>("/consultation-mgmt/queue");
       const queueData = Array.isArray(response) ? response : [];
       setQueue(queueData);
     } catch (error) {
@@ -497,7 +497,7 @@ export default function AtendimentoMedico() {
 
         // Load vitals - handle 404 gracefully
         try {
-          const vitalsResponse = await apiClient.request<any>(`/consultation-management/vitals/${consultation.id}`);
+          const vitalsResponse = await apiClient.request<any>(`/consultation-mgmt/vitals/${consultation.id}`);
           if (vitalsResponse) {
             setVitals({
               blood_pressure: vitalsResponse.blood_pressure || "",
@@ -540,7 +540,7 @@ export default function AtendimentoMedico() {
         
         // Load notes
         try {
-          const notesResponse = await apiClient.request<any>(`/consultation-management/notes/${consultation.id}`);
+          const notesResponse = await apiClient.request<any>(`/consultation-mgmt/notes/${consultation.id}`);
           if (notesResponse) {
             setNotes({
               anamnese: notesResponse.anamnese || "",
@@ -557,7 +557,7 @@ export default function AtendimentoMedico() {
         
         // Load attachments
         try {
-          const attachmentsResponse = await apiClient.request<Attachment[]>(`/consultation-management/attachments/${consultation.id}`);
+          const attachmentsResponse = await apiClient.request<Attachment[]>(`/consultation-mgmt/attachments/${consultation.id}`);
           setAttachments(Array.isArray(attachmentsResponse) ? attachmentsResponse : []);
         } catch (e) {
           console.log("No attachments found");
@@ -581,7 +581,7 @@ export default function AtendimentoMedico() {
   const callPatient = async (queueItem: QueuePatient) => {
     try {
       setIsCallingPatientId(queueItem.patient_id);
-      await apiClient.request(`/consultation-management/queue/call/${queueItem.patient_id}`, {
+      await apiClient.request(`/consultation-mgmt/queue/call/${queueItem.patient_id}`, {
         method: "POST"
       });
       
@@ -625,7 +625,7 @@ export default function AtendimentoMedico() {
       
       // Try to update existing vitals first
       try {
-        await apiClient.request(`/consultation-management/vitals/${consultationId}`, {
+        await apiClient.request(`/consultation-mgmt/vitals/${consultationId}`, {
           method: "PUT",
           body: JSON.stringify({
             consultation_id: consultationId,
@@ -636,7 +636,7 @@ export default function AtendimentoMedico() {
       } catch (updateError: any) {
         // If update fails (404), create new vitals
         if (updateError.status === 404) {
-          await apiClient.request("/consultation-management/vitals", {
+          await apiClient.request("/consultation-mgmt/vitals", {
             method: "POST",
             body: JSON.stringify({
               consultation_id: consultationId,
@@ -671,7 +671,7 @@ export default function AtendimentoMedico() {
     try {
       if (!isAutoSave) setSaving(true);
       
-      await apiClient.request(`/consultation-management/notes/${consultationId}`, {
+      await apiClient.request(`/consultation-mgmt/notes/${consultationId}`, {
         method: "POST",
         body: JSON.stringify(notes)
       });
@@ -742,7 +742,7 @@ export default function AtendimentoMedico() {
       
       // Use fetch directly for FormData uploads to ensure proper handling
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1'}/consultation-management/attachments/upload`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://prontivus-backend-wnw2.onrender.com/api/v1'}/consultation-mgmt/attachments/upload`, {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -823,7 +823,7 @@ export default function AtendimentoMedico() {
     formData.append("note_type", activeTab);
     
     try {
-      await apiClient.request("/consultation-management/voice-notes/upload", {
+      await apiClient.request("/consultation-mgmt/voice-notes/upload", {
         method: "POST",
         body: formData,
         headers: {}
@@ -910,7 +910,7 @@ export default function AtendimentoMedico() {
     if (!currentPatient) return;
     
     try {
-      const history = await apiClient.request<ConsultationHistoryItem[]>(`/consultation-management/consultations/history/${currentPatient.id}`);
+      const history = await apiClient.request<ConsultationHistoryItem[]>(`/consultation-mgmt/consultations/history/${currentPatient.id}`);
       setPastConsultations(Array.isArray(history) ? history : []);
     } catch (error) {
       console.error("Error loading history for sidebar:", error);
@@ -926,7 +926,7 @@ export default function AtendimentoMedico() {
       setConsultationId(consultation.id);
       
       // Load all data for this consultation
-      const vitalsResponse = await apiClient.request<any>(`/consultation-management/vitals/${consultation.id}`);
+      const vitalsResponse = await apiClient.request<any>(`/consultation-mgmt/vitals/${consultation.id}`);
       if (vitalsResponse) {
         setVitals({
           blood_pressure: vitalsResponse.blood_pressure || "",
@@ -940,7 +940,7 @@ export default function AtendimentoMedico() {
         });
       }
       
-      const notesResponse = await apiClient.request<any>(`/consultation-management/notes/${consultation.id}`);
+      const notesResponse = await apiClient.request<any>(`/consultation-mgmt/notes/${consultation.id}`);
       if (notesResponse) {
         setNotes({
           anamnese: notesResponse.anamnese || "",
@@ -952,7 +952,7 @@ export default function AtendimentoMedico() {
         });
       }
       
-      const attachmentsResponse = await apiClient.request<Attachment[]>(`/consultation-management/attachments/${consultation.id}`);
+      const attachmentsResponse = await apiClient.request<Attachment[]>(`/consultation-mgmt/attachments/${consultation.id}`);
       setAttachments(Array.isArray(attachmentsResponse) ? attachmentsResponse : []);
       
       setShowHistoryModal(false);
@@ -1011,7 +1011,7 @@ export default function AtendimentoMedico() {
 
   const deleteAttachment = async (attachmentId: string) => {
     try {
-      await apiClient.request(`/consultation-management/attachments/${attachmentId}`, { method: 'DELETE' });
+      await apiClient.request(`/consultation-mgmt/attachments/${attachmentId}`, { method: 'DELETE' });
       toast({ 
         title: 'Anexo removido', 
         description: 'O arquivo foi excluído com sucesso.' 
@@ -1019,7 +1019,7 @@ export default function AtendimentoMedico() {
       
       // Refresh attachments list
       if (consultationId) {
-        const refreshed = await apiClient.request<Attachment[]>(`/consultation-management/attachments/${consultationId}`);
+        const refreshed = await apiClient.request<Attachment[]>(`/consultation-mgmt/attachments/${consultationId}`);
         setAttachments(Array.isArray(refreshed) ? refreshed : []);
       }
     } catch (error) {
@@ -1364,7 +1364,7 @@ export default function AtendimentoMedico() {
               try {
                 setIsReturningToQueue(true);
                 if (consultationId) {
-                  await apiClient.request(`/consultation-management/queue/return/${consultationId}`, { method: "POST" });
+                  await apiClient.request(`/consultation-mgmt/queue/return/${consultationId}`, { method: "POST" });
                 }
               } catch (e) {
                 // non-blocking
