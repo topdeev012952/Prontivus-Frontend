@@ -24,6 +24,8 @@ import { ClinicSwitcher } from "@/components/ClinicSwitcher";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PERMISSIONS, type Permission } from "@/lib/permissions";
 
 interface NavigationSection {
   title: string;
@@ -36,48 +38,136 @@ interface NavigationItem {
   icon: any;
   badge?: string;
   isNew?: boolean;
+  requiredPermissions?: Permission[];
 }
 
 const navigationSections: NavigationSection[] = [
   {
     title: "Principal",
     items: [
-      { name: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+      { 
+        name: "Dashboard", 
+        href: "/app/dashboard", 
+        icon: LayoutDashboard,
+        requiredPermissions: [] // Everyone can access dashboard
+      },
+      { 
+        name: "RBAC Demo", 
+        href: "/app/rbac-demo", 
+        icon: Shield,
+        requiredPermissions: [], // Available to all for testing
+        badge: "Demo"
+      },
     ],
   },
   {
     title: "Atendimento Clínico",
     items: [
-      { name: "Atendimento Médico", href: "/app/atendimento", icon: Stethoscope },
-      { name: "Prontuários", href: "/app/records", icon: FileText },
-      { name: "Prescrições", href: "/app/prescriptions", icon: Pill },
+      { 
+        name: "Atendimento Médico", 
+        href: "/app/atendimento", 
+        icon: Stethoscope,
+        requiredPermissions: [PERMISSIONS.CONSULTATIONS_CREATE, PERMISSIONS.CONSULTATIONS_READ]
+      },
+      { 
+        name: "Prontuários", 
+        href: "/app/records", 
+        icon: FileText,
+        requiredPermissions: [PERMISSIONS.MEDICAL_RECORDS_READ]
+      },
+      { 
+        name: "Prescrições", 
+        href: "/app/prescriptions", 
+        icon: Pill,
+        requiredPermissions: [PERMISSIONS.PRESCRIPTIONS_READ]
+      },
     ],
   },
   {
     title: "Secretaria",
     items: [
-      { name: "Agendamentos", href: "/app/appointments", icon: Calendar },
-      { name: "Solicitações", href: "/app/appointment-requests", icon: CalendarCheck },
-      { name: "Pacientes", href: "/app/patients", icon: Users },
-      { name: "Chamar Pacientes", href: "/app/patient-call", icon: PhoneCall },
-      { name: "Monitor Sala", href: "/app/waiting-room-monitor", icon: Monitor },
+      { 
+        name: "Agendamentos", 
+        href: "/app/appointments", 
+        icon: Calendar,
+        requiredPermissions: [PERMISSIONS.APPOINTMENTS_READ]
+      },
+      { 
+        name: "Solicitações", 
+        href: "/app/appointment-requests", 
+        icon: CalendarCheck,
+        requiredPermissions: [PERMISSIONS.APPOINTMENTS_READ]
+      },
+      { 
+        name: "Pacientes", 
+        href: "/app/patients", 
+        icon: Users,
+        requiredPermissions: [PERMISSIONS.PATIENTS_READ]
+      },
+      { 
+        name: "Chamar Pacientes", 
+        href: "/app/patient-call", 
+        icon: PhoneCall,
+        requiredPermissions: [PERMISSIONS.APPOINTMENTS_READ]
+      },
+      { 
+        name: "Monitor Sala", 
+        href: "/app/waiting-room-monitor", 
+        icon: Monitor,
+        requiredPermissions: [PERMISSIONS.APPOINTMENTS_READ]
+      },
     ],
   },
   {
     title: "Financeiro",
     items: [
-      { name: "Faturamento", href: "/app/billing", icon: DollarSign },
-      { name: "Faturas", href: "/app/invoices", icon: Receipt },
-      { name: "Planos de Saúde", href: "/app/health-plans", icon: Building2 },
-      { name: "Módulo TISS", href: "/app/tiss", icon: Shield },
+      { 
+        name: "Faturamento", 
+        href: "/app/billing", 
+        icon: DollarSign,
+        requiredPermissions: [PERMISSIONS.BILLING_READ]
+      },
+      { 
+        name: "Faturas", 
+        href: "/app/invoices", 
+        icon: Receipt,
+        requiredPermissions: [PERMISSIONS.INVOICES_READ]
+      },
+      { 
+        name: "Planos de Saúde", 
+        href: "/app/health-plans", 
+        icon: Building2,
+        requiredPermissions: [PERMISSIONS.BILLING_READ]
+      },
+      { 
+        name: "Módulo TISS", 
+        href: "/app/tiss", 
+        icon: Shield,
+        requiredPermissions: [PERMISSIONS.BILLING_READ]
+      },
     ],
   },
   {
     title: "Sistema",
     items: [
-      { name: "Dashboard BI", href: "/app/bi-dashboard", icon: BarChart3 },
-      { name: "Gerenciar Equipe", href: "/app/team-management", icon: Users },
-      { name: "Configurações", href: "/app/settings", icon: Settings },
+      { 
+        name: "Dashboard BI", 
+        href: "/app/bi-dashboard", 
+        icon: BarChart3,
+        requiredPermissions: [PERMISSIONS.REPORTS_READ]
+      },
+      { 
+        name: "Gerenciar Equipe", 
+        href: "/app/team-management", 
+        icon: Users,
+        requiredPermissions: [PERMISSIONS.TEAM_MANAGEMENT_READ]
+      },
+      { 
+        name: "Configurações", 
+        href: "/app/settings", 
+        icon: Settings,
+        requiredPermissions: [PERMISSIONS.SYSTEM_ADMIN]
+      },
     ],
   },
 ];
@@ -85,11 +175,27 @@ const navigationSections: NavigationSection[] = [
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user, logout } = useAuth();
+  const { canAccessRoute } = usePermissions();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  // Filter navigation sections based on user permissions
+  const getFilteredNavigationSections = () => {
+    return navigationSections.map(section => ({
+      ...section,
+      items: section.items.filter(item => {
+        // If no permissions required, show to everyone
+        if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
+          return true;
+        }
+        // Check if user has required permissions
+        return canAccessRoute(item.requiredPermissions);
+      })
+    })).filter(section => section.items.length > 0); // Only show sections with visible items
   };
 
   // Get user initials for avatar
@@ -134,7 +240,7 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-6 px-3 py-4 overflow-y-auto">
-          {navigationSections.map((section) => (
+          {getFilteredNavigationSections().map((section) => (
             <div key={section.title} className="space-y-1">
               {/* Section Header */}
               <h3 className="px-3 mb-2 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider">

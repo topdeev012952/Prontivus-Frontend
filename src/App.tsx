@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { initIndexedDB } from "@/lib/indexedDB";
 import { useClinicStore } from "@/stores/clinicStore";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PERMISSIONS } from "@/lib/permissions";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
@@ -35,6 +37,7 @@ import PatientCallSystem from "./components/PatientCallSystem";
 import WaitingRoomMonitor from "./components/WaitingRoomMonitor";
 import AdminTeamManager from "./pages/AdminTeamManager";
 import ProntuarioMedico from "./pages/ProntuarioMedico";
+import { RoleDemo } from "./components/RoleDemo";
 
 const queryClient = new QueryClient();
 
@@ -63,28 +66,131 @@ function AppContent() {
         <Route path="/app" element={<Index />}>
           <Route index element={<Navigate to="/app/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="patients" element={<Patients />} />
-          <Route path="appointments" element={<Appointments />} />
-          <Route path="appointment-requests" element={<AppointmentRequests />} />
-            <Route path="records" element={<MedicalRecordsAdvanced />} />
-          <Route path="prescriptions" element={<DigitalPrescriptions />} />
-          <Route path="invoices" element={<Invoices />} />
-          <Route path="billing" element={<Billing />} />
-          <Route path="secretaria" element={<Secretaria />} />
-          <Route path="tiss" element={<TISSModule />} />
-          <Route path="health-plans" element={<HealthPlanIntegration />} />
-          <Route path="telemed/:sessionId" element={<TelemedicineRoom />} />
+          
+          {/* Patient Management */}
+          <Route path="patients" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.PATIENTS_READ]}>
+              <Patients />
+            </ProtectedRoute>
+          } />
+          
+          {/* Appointment Management */}
+          <Route path="appointments" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.APPOINTMENTS_READ]}>
+              <Appointments />
+            </ProtectedRoute>
+          } />
+          <Route path="appointment-requests" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.APPOINTMENTS_READ]}>
+              <AppointmentRequests />
+            </ProtectedRoute>
+          } />
+          
+          {/* Medical Records */}
+          <Route path="records" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.MEDICAL_RECORDS_READ]}>
+              <MedicalRecordsAdvanced />
+            </ProtectedRoute>
+          } />
+          
+          {/* Prescriptions */}
+          <Route path="prescriptions" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.PRESCRIPTIONS_READ]}>
+              <DigitalPrescriptions />
+            </ProtectedRoute>
+          } />
+          
+          {/* Billing & Financial */}
+          <Route path="invoices" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.INVOICES_READ]}>
+              <Invoices />
+            </ProtectedRoute>
+          } />
+          <Route path="billing" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.BILLING_READ]}>
+              <Billing />
+            </ProtectedRoute>
+          } />
+          <Route path="tiss" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.BILLING_READ]}>
+              <TISSModule />
+            </ProtectedRoute>
+          } />
+          <Route path="health-plans" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.BILLING_READ]}>
+              <HealthPlanIntegration />
+            </ProtectedRoute>
+          } />
+          
+          {/* Reception */}
+          <Route path="secretaria" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.APPOINTMENTS_READ]}>
+              <Secretaria />
+            </ProtectedRoute>
+          } />
+          <Route path="patient-call" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.APPOINTMENTS_READ]}>
+              <PatientCallSystem />
+            </ProtectedRoute>
+          } />
+          <Route path="waiting-room-monitor" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.APPOINTMENTS_READ]}>
+              <WaitingRoomMonitor />
+            </ProtectedRoute>
+          } />
+          
+          {/* Consultation Management */}
+          <Route path="consultations" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.CONSULTATIONS_READ]}>
+              <ConsultationImproved />
+            </ProtectedRoute>
+          } />
+          <Route path="consultations/:id" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.CONSULTATIONS_READ]}>
+              <ConsultationDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="atendimento" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.CONSULTATIONS_CREATE, PERMISSIONS.CONSULTATIONS_READ]}>
+              <AtendimentoMedico />
+            </ProtectedRoute>
+          } />
+          
+          {/* Waiting Room */}
           <Route path="waiting-room" element={<WaitingRoom />} />
-          <Route path="bi-dashboard" element={<BIDashboard />} />
-          <Route path="consultations" element={<ConsultationImproved />} />
-          <Route path="consultations/:id" element={<ConsultationDetail />} />
-          <Route path="atendimento" element={<AtendimentoMedico />} />
           <Route path="waiting-queue" element={<WaitingRoom />} />
-          <Route path="patient-call" element={<PatientCallSystem />} />
-          <Route path="waiting-room-monitor" element={<WaitingRoomMonitor />} />
-          <Route path="team-management" element={<AdminTeamManager />} />
-          <Route path="prontuario/:patientId" element={<ProntuarioMedico />} />
-          <Route path="settings" element={<Settings />} />
+          
+          {/* Telemedicine */}
+          <Route path="telemed/:sessionId" element={<TelemedicineRoom />} />
+          
+          {/* Reports & BI */}
+          <Route path="bi-dashboard" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.REPORTS_READ]}>
+              <BIDashboard />
+            </ProtectedRoute>
+          } />
+          
+          {/* Medical Records - Patient View */}
+          <Route path="prontuario/:patientId" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.MEDICAL_RECORDS_READ]}>
+              <ProntuarioMedico />
+            </ProtectedRoute>
+          } />
+          
+          {/* System Administration */}
+          <Route path="team-management" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.TEAM_MANAGEMENT_READ]}>
+              <AdminTeamManager />
+            </ProtectedRoute>
+          } />
+          <Route path="settings" element={
+            <ProtectedRoute requiredPermissions={[PERMISSIONS.SYSTEM_ADMIN]}>
+              <Settings />
+            </ProtectedRoute>
+          } />
+          
+          {/* RBAC Demo - Available to all authenticated users */}
+          <Route path="rbac-demo" element={<RoleDemo />} />
         </Route>
         
         {/* Backward compatibility - redirect old routes */}
