@@ -139,7 +139,7 @@ export default function Invoices() {
 
   const loadPatients = async () => {
     try {
-      const data = await apiClient.request<PaginatedResponse>("/patients?page=1&size=100");
+      const data = await apiClient.request<PaginatedResponse>("/patients/list?page=1&size=100");
       setPatients(data.items as any);
     } catch (err) {
       console.error("Error loading patients:", err);

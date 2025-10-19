@@ -180,7 +180,7 @@ export default function MedicalRecordsAdvanced() {
       });
 
       const data = await apiClient.request<PaginatedResponse>(
-        `/medical_records?${params.toString()}`
+        `/medical_records/list?${params.toString()}`
       );
 
       setRecords(data.items);
@@ -196,7 +196,7 @@ export default function MedicalRecordsAdvanced() {
 
   const loadPatients = async () => {
     try {
-      const data = await apiClient.request<PaginatedResponse>("/patients?page=1&size=100");
+      const data = await apiClient.request<PaginatedResponse>("/patients/list?page=1&size=100");
       setPatients(data.items as any);
     } catch (err) {
       console.error("Error loading patients:", err);

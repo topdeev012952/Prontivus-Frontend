@@ -27,7 +27,7 @@ export default function PatientPortal() {
       
       // Load patient-specific data
       const [recordsData, prescriptionsData, appointmentsData] = await Promise.all([
-        apiClient.request<any>("/medical_records?page=1&size=10").catch(() => ({ items: [] })),
+        apiClient.request<any>("/medical_records/list?page=1&size=10").catch(() => ({ items: [] })),
         apiClient.request<any>("/prescriptions?page=1&size=10").catch(() => ({ items: [] })),
         apiClient.request<any>("/appointments?page=1&size=10").catch(() => ({ items: [] })),
       ]);

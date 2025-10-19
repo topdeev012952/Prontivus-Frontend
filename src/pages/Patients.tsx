@@ -116,7 +116,7 @@ export default function Patients() {
       }
 
       const data = await apiClient.request<PaginatedResponse>(
-        `/patients?${params.toString()}`
+        `/patients/list?${params.toString()}`
       );
 
       setPatients(data.items);
@@ -137,7 +137,7 @@ export default function Patients() {
       setSaving(true);
       setError("");
 
-      await apiClient.request("/patients", {
+      await apiClient.request("/patients/create", {
         method: "POST",
         body: JSON.stringify(formData),
       });
