@@ -1,4 +1,4 @@
-import { Search, User, LogOut, Settings } from "lucide-react";
+import { Search, User, LogOut, Settings, Shield, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { NotificationBell } from "@/components/Notifications/NotificationBell";
@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -60,6 +60,15 @@ export function Header() {
           <OfflineIndicator />
           <ThemeToggle />
           <NotificationBell />
+          
+          {/* Auth Status Indicator */}
+          <div className="flex items-center gap-1">
+            {isAuthenticated ? (
+              <Shield className="h-4 w-4 text-green-500" title="Autenticado" />
+            ) : (
+              <AlertTriangle className="h-4 w-4 text-red-500" title="Não autenticado" />
+            )}
+          </div>
           
           {/* User Dropdown Menu */}
           <DropdownMenu>

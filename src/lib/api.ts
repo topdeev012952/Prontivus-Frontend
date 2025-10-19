@@ -26,6 +26,9 @@ class ApiClient {
       const token = this.getAuthToken();
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        // If auth is required but no token, throw error immediately
+        throw new Error('No authentication token available');
       }
     }
     
@@ -45,7 +48,18 @@ class ApiClient {
       if (refreshed) {
         return this.request(endpoint, config);
       }
-      throw new Error('Autenticação necessária');
+      // Clear invalid tokens
+      this.removeAuthToken();
+      localStorage.removeItem('refresh_token');
+      throw new Error('Sessão expirada. Por favor, faça login novamente.');
+    }
+
+    if (response.status === 403) {
+      throw new Error('Acesso negado. Você não tem permissão para acessar este recurso.');
+    }
+
+    if (response.status === 405) {
+      throw new Error('Método não permitido. Verifique se você está logado corretamente.');
     }
 
     if (!response.ok) {

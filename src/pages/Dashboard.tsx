@@ -5,6 +5,8 @@ import DoctorDashboard from "./dashboards/DoctorDashboard";
 import SecretaryDashboard from "./dashboards/SecretaryDashboard";
 import FinanceDashboard from "./dashboards/FinanceDashboard";
 import PatientPortal from "./dashboards/PatientPortal";
+import { AuthDebug } from "@/components/AuthDebug";
+import { ApiTest } from "@/components/ApiTest";
 
 /**
  * Main Dashboard - Routes to role-specific dashboard
@@ -35,32 +37,80 @@ export default function Dashboard() {
   switch (userRole) {
     case 'admin':
     case 'superadmin':
-      return <AdminDashboard />;
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-end gap-4">
+            <ApiTest />
+            <AuthDebug />
+          </div>
+          <AdminDashboard />
+        </div>
+      );
     
     case 'doctor':
     case 'médico':
     case 'dr':
-      return <DoctorDashboard />;
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-end gap-4">
+            <ApiTest />
+            <AuthDebug />
+          </div>
+          <DoctorDashboard />
+        </div>
+      );
     
     case 'secretary':
     case 'secretária':
     case 'receptionist':
     case 'recepcionista':
-      return <SecretaryDashboard />;
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-end gap-4">
+            <ApiTest />
+            <AuthDebug />
+          </div>
+          <SecretaryDashboard />
+        </div>
+      );
     
     case 'finance':
     case 'financeiro':
     case 'billing':
     case 'faturamento':
-      return <FinanceDashboard />;
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-end gap-4">
+            <ApiTest />
+            <AuthDebug />
+          </div>
+          <FinanceDashboard />
+        </div>
+      );
     
     case 'patient':
     case 'paciente':
-      return <PatientPortal />;
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-end gap-4">
+            <ApiTest />
+            <AuthDebug />
+          </div>
+          <PatientPortal />
+        </div>
+      );
     
     default:
       // Default to doctor dashboard for unknown roles
       console.warn(`Unknown role: ${user.role}, defaulting to doctor dashboard`);
-      return <DoctorDashboard />;
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-end gap-4">
+            <ApiTest />
+            <AuthDebug />
+          </div>
+          <DoctorDashboard />
+        </div>
+      );
   }
 }

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { initIndexedDB } from "@/lib/indexedDB";
 import { useClinicStore } from "@/stores/clinicStore";
+import "@/utils/authTest"; // Import auth test utility
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PERMISSIONS } from "@/lib/permissions";
 import Index from "./pages/Index";
