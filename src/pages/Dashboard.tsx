@@ -7,6 +7,7 @@ import FinanceDashboard from "./dashboards/FinanceDashboard";
 import PatientPortal from "./dashboards/PatientPortal";
 import { AuthDebug } from "@/components/AuthDebug";
 import { ApiTest } from "@/components/ApiTest";
+import { DebugPermissions } from "@/components/DebugPermissions";
 
 /**
  * Main Dashboard - Routes to role-specific dashboard
@@ -43,6 +44,7 @@ export default function Dashboard() {
             <ApiTest />
             <AuthDebug />
           </div>
+          <DebugPermissions />
           <AdminDashboard />
         </div>
       );
