@@ -48,7 +48,7 @@ export default function DoctorDashboard() {
       
       // Load queue from consultations endpoint
       try {
-        const queueData = await apiClient.request<any>("/consultations/queue?status=waiting");
+        const queueData = await apiClient.request<any>("/consultation-mgmt/queue?status=waiting");
         setQueuePatients(queueData || []);
       } catch (queueErr) {
         console.log("Queue not available:", queueErr);

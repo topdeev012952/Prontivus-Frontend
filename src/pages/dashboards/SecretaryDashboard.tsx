@@ -34,7 +34,7 @@ export default function SecretaryDashboard() {
       
       // Load queue from consultations endpoint
       try {
-        const queueData = await apiClient.request<any>("/consultations/queue");
+        const queueData = await apiClient.request<any>("/consultation-mgmt/queue");
         setQueuePatients(queueData || []);
       } catch (queueErr) {
         console.log("Queue not available:", queueErr);

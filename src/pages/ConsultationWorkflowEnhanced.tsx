@@ -195,7 +195,7 @@ export default function ConsultationWorkflowEnhanced() {
       setError(""); // Clear any previous errors
       
       // Load from consultations/queue endpoint for accurate data
-      const queueResponse = await apiClient.request(`/consultations/queue`);
+      const queueResponse = await apiClient.request(`/consultation-mgmt/queue`);
       
       const waiting = queueResponse
         .filter((patient: any) => patient.status === 'waiting')
@@ -450,7 +450,7 @@ export default function ConsultationWorkflowEnhanced() {
     try {
       // Load the consultation for this appointment
       const consultation = await apiClient.request(
-        `/consultations?appointment_id=${patient.appointment_id}`
+        `/consultations/list?appointment_id=${patient.appointment_id}`
       );
       
       if (consultation && consultation.items && consultation.items.length > 0) {
