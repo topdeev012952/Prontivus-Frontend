@@ -101,7 +101,7 @@ export default function DigitalPrescriptions() {
       setError("");
 
       const data = await apiClient.request<{ items: Prescription[]; total: number }>(
-        `/prescriptions?page=1&size=50`
+        `/prescriptions/list?page=1&size=50`
       );
 
       setPrescriptions(data?.items || []);

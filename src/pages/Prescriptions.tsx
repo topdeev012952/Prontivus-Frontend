@@ -104,12 +104,12 @@ export default function Prescriptions() {
       setError("");
 
       // Load prescriptions
-      const prescriptionsData = await apiClient.request<Prescription[]>("/prescriptions");
+      const prescriptionsData = await apiClient.request<{ items: Prescription[] }>("/prescriptions/list");
       
       // Load patients for the dropdown
-      const patientsData = await apiClient.request<{ items: Patient[] }>("/patients?page=1&size=1000");
+      const patientsData = await apiClient.request<{ items: Patient[] }>("/patients/list?page=1&size=1000");
       
-      setPrescriptions(prescriptionsData || []);
+      setPrescriptions(prescriptionsData?.items || []);
       setPatients(patientsData?.items || []);
     } catch (err: any) {
       console.error("Error loading data:", err);
@@ -127,10 +127,10 @@ export default function Prescriptions() {
 
     try {
       setSearching(true);
-      const results = await apiClient.request<Prescription[]>(
-        `/prescriptions?search=${encodeURIComponent(searchQuery)}`
+      const results = await apiClient.request<{ items: Prescription[] }>(
+        `/prescriptions/list?search=${encodeURIComponent(searchQuery)}`
       );
-      setPrescriptions(results || []);
+      setPrescriptions(results?.items || []);
     } catch (err: any) {
       console.error("Error searching:", err);
       setError("Search failed. Please try again.");
