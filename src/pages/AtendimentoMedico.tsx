@@ -2063,7 +2063,7 @@ export default function AtendimentoMedico() {
                   <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={async () => {
                     if (!consultationId) return;
                     try {
-                      const response = await apiClient.request(`/tiss/generate`, {
+                      const response = await apiClient.request(`/tiss_advanced/generate`, {
                         method: "POST",
                         body: JSON.stringify({
                           consultation_id: consultationId,
