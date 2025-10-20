@@ -120,11 +120,11 @@ export default function Appointments() {
   const loadPatientsAndDoctors = async () => {
     try {
       // Load patients
-      const patientsData = await apiClient.request<PaginatedResponse>("/patients?page=1&size=100");
+      const patientsData = await apiClient.request<PaginatedResponse>("/patients/list?page=1&size=100");
       setPatients(patientsData.items as any);
 
       // Load doctors (users with doctor role)
-      const usersData = await apiClient.request<any>("/users?page=1&size=100");
+      const usersData = await apiClient.request<any>("/users/list?page=1&size=100");
       const doctorsList = usersData.items?.filter((u: any) => 
         ['DOCTOR', 'doctor', 'ADMIN', 'admin'].includes(u.role)
       ) || [];

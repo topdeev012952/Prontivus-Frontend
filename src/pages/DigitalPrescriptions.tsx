@@ -117,7 +117,7 @@ export default function DigitalPrescriptions() {
   const loadPatients = async () => {
     try {
       const data = await apiClient.request<{ items: any[]; total: number }>(
-        "/patients?page=1&size=100"
+        "/patients/list?page=1&size=100"
       );
       setPatients(data?.items || []);
     } catch (err) {
