@@ -154,7 +154,7 @@ export default function Appointments() {
         status: formData.status
       };
 
-      await apiClient.request("/appointments", {
+      await apiClient.request("/appointments/create", {
         method: "POST",
         body: JSON.stringify(appointmentData),
       });
