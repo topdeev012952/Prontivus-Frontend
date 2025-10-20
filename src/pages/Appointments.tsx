@@ -104,7 +104,7 @@ export default function Appointments() {
       });
 
       const data = await apiClient.request<PaginatedResponse>(
-        `/appointments?${params.toString()}`
+        `/appointments/list?${params.toString()}`
       );
 
       setAppointments(data.items);
