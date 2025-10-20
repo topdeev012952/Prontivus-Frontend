@@ -102,8 +102,8 @@ export default function AppointmentRequests() {
     try {
       setLoading(true);
       const url = filterStatus === "all" 
-        ? "/appointment-requests" 
-        : `/appointment-requests?status_filter=${filterStatus}`;
+        ? "/appointment_requests" 
+        : `/appointment_requests?status_filter=${filterStatus}`;
       const data = await apiClient.request<AppointmentRequest[]>(url);
       setRequests(data);
     } catch (err: any) {
@@ -116,7 +116,7 @@ export default function AppointmentRequests() {
 
   const loadPatients = async () => {
     try {
-      const data = await apiClient.request<any>("/patients?page=1&size=100");
+      const data = await apiClient.request<any>("/patients/list?page=1&size=100");
       setPatients(data.items || []);
     } catch (err) {
       console.error("Error loading patients:", err);
@@ -125,7 +125,7 @@ export default function AppointmentRequests() {
 
   const loadDoctors = async () => {
     try {
-      const data = await apiClient.request<any>("/users?page=1&size=100");
+      const data = await apiClient.request<any>("/users/list?page=1&size=100");
       const doctorList = (data.items || []).filter((u: any) => 
         u.role === "doctor" || u.role === "admin"
       );
@@ -137,7 +137,7 @@ export default function AppointmentRequests() {
 
   const loadStats = async () => {
     try {
-      const data = await apiClient.request<AppointmentRequestStats>("/appointment-requests/stats");
+      const data = await apiClient.request<AppointmentRequestStats>("/appointment_requests/stats");
       setStats(data);
     } catch (err) {
       console.error("Error loading stats:", err);
@@ -159,7 +159,7 @@ export default function AppointmentRequests() {
         notes: formData.notes || null,
       };
       
-      await apiClient.request("/appointment-requests", {
+      await apiClient.request("/appointment_requests", {
         method: "POST",
         body: JSON.stringify(requestData),
       });

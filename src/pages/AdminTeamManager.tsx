@@ -75,11 +75,11 @@ export default function AdminTeamManager() {
       setLoading(true);
       
       // Load team members
-      const membersResponse = await apiClient.request<TeamMember[]>('/team/');
+      const membersResponse = await apiClient.request<TeamMember[]>('/team_management/');
       setTeamMembers(membersResponse);
       
       // Load available roles
-      const rolesResponse = await apiClient.request<Record<string, Role>>('/team/roles');
+      const rolesResponse = await apiClient.request<Record<string, Role>>('/team_management/roles');
       setRoles(rolesResponse);
       
     } catch (error) {
@@ -98,7 +98,7 @@ export default function AdminTeamManager() {
     try {
       setSaving(true);
       
-      const response = await apiClient.request('/team/', {
+      const response = await apiClient.request('/team_management/', {
         method: 'POST',
         body: JSON.stringify(formData)
       });
@@ -133,7 +133,7 @@ export default function AdminTeamManager() {
       const updateData = { ...formData };
       delete updateData.password; // Don't update password if empty
       
-      await apiClient.request(`/team/${editingMember.id}`, {
+      await apiClient.request(`/team_management/${editingMember.id}`, {
         method: 'PATCH',
         body: JSON.stringify(updateData)
       });
@@ -166,7 +166,7 @@ export default function AdminTeamManager() {
     try {
       setSaving(true);
       
-      await apiClient.request(`/team/${memberId}`, {
+      await apiClient.request(`/team_management/${memberId}`, {
         method: 'DELETE'
       });
       

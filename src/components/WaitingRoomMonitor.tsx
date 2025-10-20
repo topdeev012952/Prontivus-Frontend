@@ -35,7 +35,7 @@ function WaitingRoomMonitor() {
   const fetchQueue = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.request<QueuePatient[]>("/patient-call/queue");
+      const response = await apiClient.request<QueuePatient[]>("/patient_call/queue");
       setQueue(Array.isArray(response) ? response : []);
       setLastUpdate(new Date());
     } catch (error) {

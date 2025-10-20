@@ -68,7 +68,7 @@ export default function PatientCallSystem() {
   const loadQueue = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.request<QueuePatient[]>("/patient-call/queue");
+      const response = await apiClient.request<QueuePatient[]>("/patient_call/queue");
       setQueue(response);
     } catch (error) {
       console.error("Error loading queue:", error);

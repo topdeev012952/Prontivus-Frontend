@@ -25,7 +25,7 @@ export default function FinanceDashboard() {
       
       const [statsData, invoicesData] = await Promise.all([
         apiClient.request<any>("/dashboard/stats"),
-        apiClient.request<any>("/invoices?page=1&size=50").catch(() => ({ items: [] })),
+        apiClient.request<any>("/invoices/list?page=1&size=50").catch(() => ({ items: [] })),
       ]);
 
       setStats(statsData);

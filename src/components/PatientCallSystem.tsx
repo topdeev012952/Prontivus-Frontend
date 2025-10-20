@@ -29,7 +29,7 @@ function PatientCallSystem({ onPatientCalled }: PatientCallSystemProps) {
   const fetchQueue = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.request<QueuePatient[]>("/patient-call/queue");
+      const response = await apiClient.request<QueuePatient[]>("/patient_call/queue");
       setQueue(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Erro ao carregar fila:", error);

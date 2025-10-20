@@ -47,7 +47,7 @@ export default function Secretaria() {
   const loadPatients = async () => {
     try {
       setLoading(true);
-      const resp = await apiClient.request<any>(`/patients?page=1&size=50`);
+      const resp = await apiClient.request<any>(`/patients/list?page=1&size=50`);
       setPatients(resp?.items || Array.isArray(resp) ? resp.items ?? resp : []);
     } catch (e) {
       toast({ title: "Erro", description: "Falha ao carregar pacientes", variant: "destructive" });

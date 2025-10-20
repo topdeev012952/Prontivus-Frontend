@@ -187,7 +187,7 @@ export default function Billing() {
 
   const loadPatients = async () => {
     try {
-      const response = await apiClient.request<any>("/patients?page=1&size=100");
+      const response = await apiClient.request<any>("/patients/list?page=1&size=100");
       // Handle both array and object responses
       if (Array.isArray(response)) {
         setPatients(response);
@@ -209,7 +209,7 @@ export default function Billing() {
     try {
       // Get recent appointments
       const today = new Date().toISOString().split('T')[0];
-      const response = await apiClient.request<any>(`/appointments?status=completed,scheduled&limit=100`);
+      const response = await apiClient.request<any>(`/appointments/list?status=completed,scheduled&limit=100`);
       // Handle both array and object responses
       if (Array.isArray(response)) {
         setAppointments(response);
