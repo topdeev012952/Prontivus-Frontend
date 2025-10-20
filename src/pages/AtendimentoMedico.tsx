@@ -149,7 +149,7 @@ export default function AtendimentoMedico() {
       const dd = String(today.getDate()).padStart(2, '0');
       const dateStr = `${yyyy}-${mm}-${dd}`;
       const params = new URLSearchParams({ page: '1', size: '10', patient_id: patientId, date: dateStr });
-      const appts = await apiClient.request<any>(`/appointments?${params.toString()}`);
+      const appts = await apiClient.request<any>(`/appointments/list?${params.toString()}`);
       const apptList = Array.isArray(appts?.items) ? appts.items : Array.isArray(appts) ? appts : [];
       const first = apptList.find((a: any) => a.status === 'scheduled' || a.status === 'confirmed' || a.status === 'checked_in' || a.status === 'in_progress') || apptList[0];
       if (first?.id) {
@@ -443,7 +443,7 @@ export default function AtendimentoMedico() {
       });
       
       // Get or create consultation
-      let consultationResponse = await apiClient.request<any>(`/consultations?patient_id=${patientId}`);
+      let consultationResponse = await apiClient.request<any>(`/consultations/list?patient_id=${patientId}`);
       
       let consultation;
       if (Array.isArray(consultationResponse) && consultationResponse.length > 0) {
@@ -1329,7 +1329,7 @@ export default function AtendimentoMedico() {
                           onClick={async () => {
                             // Find consultation for this appointment
                             try {
-                              const consultations = await apiClient.request<any[]>(`/consultations?appointment_id=${patient.appointment_id}`);
+                              const consultations = await apiClient.request<any[]>(`/consultations/list?appointment_id=${patient.appointment_id}`);
                               if (consultations && consultations.length > 0) {
                                 await reopenConsultation(consultations[0].id);
                               }
