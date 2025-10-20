@@ -54,7 +54,7 @@ export default function TelemedicineRoom() {
   const loadSession = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.request(`/telemed/sessions/${sessionId}`);
+      const data = await apiClient.request(`/telemedicine/sessions/${sessionId}`);
       setSession(data);
     } catch (err: any) {
       setError("Failed to load telemedicine session");
@@ -66,7 +66,7 @@ export default function TelemedicineRoom() {
   const handleConsentAccept = async () => {
     try {
       // Save consent to backend
-      await apiClient.request(`/telemed/sessions/${sessionId}/consent`, {
+      await apiClient.request(`/telemedicine/sessions/${sessionId}/consent`, {
         method: "POST",
         body: JSON.stringify({
           user_id: user?.id,
@@ -213,7 +213,7 @@ export default function TelemedicineRoom() {
 
   const handleEndCall = async () => {
     try {
-      await apiClient.request(`/telemed/sessions/${sessionId}/end`, {
+      await apiClient.request(`/telemedicine/sessions/${sessionId}/end`, {
         method: "POST",
         body: JSON.stringify({
           ended_by: user?.id,

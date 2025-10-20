@@ -51,7 +51,7 @@ function PatientCallSystem({ onPatientCalled }: PatientCallSystemProps) {
 
   const handleCallPatient = async (patient: QueuePatient) => {
     try {
-      await apiClient.request(`/patient-call/call/${patient.patient_id}`, {
+      await apiClient.request(`/patient_call/call/${patient.patient_id}`, {
         method: "POST",
       });
 

@@ -108,7 +108,7 @@ function WaitingRoomMonitor() {
       
       console.log("Sending telemedicine session data:", sessionData);
       
-      const response = await apiClient.request("/telemed/sessions", {
+      const response = await apiClient.request("/telemedicine/sessions", {
         method: "POST",
         data: sessionData
       });

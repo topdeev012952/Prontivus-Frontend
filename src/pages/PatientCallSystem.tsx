@@ -129,7 +129,7 @@ export default function PatientCallSystem() {
     try {
       setCalling(patientId);
       
-      const response = await apiClient.request(`/patient-call/call/${patientId}`, {
+      const response = await apiClient.request(`/patient_call/call/${patientId}`, {
         method: "POST"
       });
       
