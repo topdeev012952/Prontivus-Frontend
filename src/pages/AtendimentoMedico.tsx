@@ -1583,7 +1583,7 @@ export default function AtendimentoMedico() {
                         size="sm" 
                         variant="outline" 
                         onClick={startTelemedicineSession}
-                        disabled={isCreatingSession || !consultationId || !currentPatient}
+                        disabled={isCreatingSession || !currentPatient}
                       >
                         <Video className="h-4 w-4 mr-2" />
                         {isCreatingSession ? "Criando..." : "Telemedicina"}
@@ -1776,7 +1776,7 @@ export default function AtendimentoMedico() {
                               <Button 
                                 className="w-full" 
                                 onClick={() => setShowExamModal(true)}
-                                disabled={!consultationId || !currentPatient}
+                                disabled={!currentPatient}
                               >
                                 <ClipboardList className="h-4 w-4 mr-2" />
                                 Solicitar Exame
@@ -1785,7 +1785,7 @@ export default function AtendimentoMedico() {
                                 variant="outline" 
                                 className="w-full"
                                 onClick={() => setShowReferralModal(true)}
-                                disabled={!consultationId || !currentPatient}
+                                disabled={!currentPatient}
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Encaminhamento
@@ -2030,17 +2030,17 @@ export default function AtendimentoMedico() {
                 <CardContent className="space-y-2">
                   {/* Nova Receita removed - handled in main consultation form */}
                   {/* Atestado */}
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowCertificateModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!currentPatient} onClick={() => setShowCertificateModal(true)}>
                     <FileText className="h-4 w-4 mr-2" />
                     Atestado
                   </Button>
                   {/* Solicitar Exame */}
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!currentPatient} onClick={() => setShowExamModal(true)}>
                     <ClipboardList className="h-4 w-4 mr-2" />
                     Solicitar Exame
                   </Button>
                   {/* Encaminhamento */}
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowReferralModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!currentPatient} onClick={() => setShowReferralModal(true)}>
                     <Send className="h-4 w-4 mr-2" />
                     Encaminhamento
                   </Button>
@@ -2048,14 +2048,14 @@ export default function AtendimentoMedico() {
                   <Button 
                     className="w-full justify-start bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700" 
                     variant="outline" 
-                    disabled={isCreatingSession || !consultationId || !currentPatient} 
+                    disabled={isCreatingSession || !currentPatient} 
                     onClick={startTelemedicineSession}
                   >
                     <Video className="h-4 w-4 mr-2" />
                     {isCreatingSession ? "Criando..." : "Iniciar Telemedicina"}
                   </Button>
                   {/* Generic Guide SADT */}
-                  <Button className="w-full justify-start" variant="outline" disabled={!consultationId || !currentPatient} onClick={() => setShowExamModal(true)}>
+                  <Button className="w-full justify-start" variant="outline" disabled={!currentPatient} onClick={() => setShowExamModal(true)}>
                     <ClipboardList className="h-4 w-4 mr-2" />
                     Guia SADT Genérica
                   </Button>
@@ -2125,7 +2125,7 @@ export default function AtendimentoMedico() {
                     <Button 
                       className="w-full justify-start bg-green-50 hover:bg-green-100 border-green-200 text-green-700" 
                       variant="outline" 
-                      disabled={!consultationId || !currentPatient}
+                      disabled={!currentPatient}
                       onClick={async () => {
                         if (!consultationId) return;
                         try {
