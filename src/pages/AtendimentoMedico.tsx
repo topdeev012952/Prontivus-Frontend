@@ -453,14 +453,7 @@ export default function AtendimentoMedico() {
         // Create new consultation if none exists
         // Validate/resolve required fields for backend schema
         let appointmentIdToUse = activeAppointmentId || await ensureActiveAppointmentForPatient(patientId);
-        if (!appointmentIdToUse) {
-          toast({
-            title: "Agendamento não encontrado",
-            description: "Nenhum agendamento válido encontrado para hoje.",
-            variant: "destructive"
-          });
-          throw new Error("Missing activeAppointmentId for consultation creation");
-        }
+        // Note: appointment_id is now optional in the backend, so we can proceed without it
 
         const doctorId = user?.id;
         if (!doctorId) {
@@ -476,7 +469,7 @@ export default function AtendimentoMedico() {
           method: "POST",
           body: JSON.stringify({
             patient_id: patientId,
-            appointment_id: appointmentIdToUse,
+            appointment_id: appointmentIdToUse || null,
             doctor_id: doctorId,
             chief_complaint: "Consulta em andamento",
             diagnosis: "A ser determinado"
