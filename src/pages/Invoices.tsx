@@ -123,7 +123,7 @@ export default function Invoices() {
       });
 
       const data = await apiClient.request<PaginatedResponse>(
-        `/invoices?${params.toString()}`
+        `/invoices/list?${params.toString()}`
       );
 
       setInvoices(data.items);

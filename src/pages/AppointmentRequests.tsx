@@ -102,8 +102,8 @@ export default function AppointmentRequests() {
     try {
       setLoading(true);
       const url = filterStatus === "all" 
-        ? "/appointment_requests" 
-        : `/appointment_requests?status_filter=${filterStatus}`;
+        ? "/appointment_requests/list" 
+        : `/appointment_requests/list?status_filter=${filterStatus}`;
       const data = await apiClient.request<AppointmentRequest[]>(url);
       setRequests(data);
     } catch (err: any) {
