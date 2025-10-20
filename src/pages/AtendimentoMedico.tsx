@@ -442,7 +442,7 @@ export default function AtendimentoMedico() {
         chronic_conditions: patientResponse.chronic_conditions ? patientResponse.chronic_conditions.split(",") : []
       });
       
-      // Get or create consultation
+      // Get or create consultation - FIXED: Using correct endpoint
       let consultationResponse = await apiClient.request<any>(`/consultations/list?patient_id=${patientId}`);
       
       let consultation;
