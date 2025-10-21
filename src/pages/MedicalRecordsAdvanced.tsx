@@ -444,7 +444,7 @@ export default function MedicalRecordsAdvanced() {
       setLocking(true);
       setError("");
 
-      await apiClient.request(`/medical_records/${record.id}/lock`, {
+      await apiClient.request(`/medical_records_lock/${record.id}/lock`, {
         method: "POST",
         body: JSON.stringify({
           reason: "Record finalized by doctor"
