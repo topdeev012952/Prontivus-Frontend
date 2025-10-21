@@ -61,7 +61,7 @@ export default function ConsultationFinalization({
     setIsFinalizing(true);
     
     try {
-      const response = await apiClient.request(`/consultations/finalize/${consultationId}`, {
+      const response = await apiClient.request(`/consultation_finalization/finalize/${consultationId}`, {
         method: 'POST',
         body: JSON.stringify(formData)
       });

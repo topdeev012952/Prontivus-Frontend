@@ -413,7 +413,7 @@ export default function ConsultationImproved() {
     try {
       setSaving(true);
 
-      await apiClient.request(`/consultations/${consultationData.id}/finalize`, {
+      await apiClient.request(`/consultation_finalization/finalize/${consultationData.id}`, {
         method: "POST",
       });
 

@@ -853,7 +853,7 @@ export default function AtendimentoMedico() {
         treatment_summary: notes.treatment_plan || ""
       };
       
-      const response = await apiClient.request(`/consultations/finalize/${consultationId}`, {
+      const response = await apiClient.request(`/consultation_finalization/finalize/${consultationId}`, {
         method: "POST",
         body: JSON.stringify(finalizationData)
       });
