@@ -848,9 +848,12 @@ export default function AtendimentoMedico() {
       
       // Finalize consultation with automatic history generation
       const finalizationData = {
-        final_notes: notes.evolution || notes.treatment_plan || "Consulta finalizada",
-        diagnosis_code: notes.diagnosis_code || "",
-        treatment_summary: notes.treatment_plan || ""
+        anamnesis: notes.anamnese || "Anamnese não registrada",
+        diagnosis: notes.diagnosis || "Diagnóstico a ser determinado",
+        observations: notes.physical_exam || "",
+        finalization_notes: notes.evolution || notes.treatment_plan || "Consulta finalizada",
+        exams: [],
+        prescriptions: []
       };
       
       const response = await apiClient.request(`/consultation_finalization/finalize/${consultationId}`, {
