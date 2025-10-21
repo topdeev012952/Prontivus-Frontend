@@ -863,7 +863,16 @@ export default function AtendimentoMedico() {
       
       toast({
         title: "Atendimento finalizado",
-        description: "Consulta finalizada e histórico gerado automaticamente"
+        description: "Consulta finalizada e histórico gerado automaticamente. O prontuário foi salvo no banco de dados.",
+        action: (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate("/app/records")}
+          >
+            Ver Prontuários
+          </Button>
+        )
       });
       
       // Clear current patient and reload queue
