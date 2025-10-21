@@ -1,6 +1,7 @@
 /**
  * Atendimento Médico - Complete Consultation Module
  * Integrated consultation screen with patient queue, vitals, quick actions, attachments
+ * Version 0.0.9 - Medical records notification fix - 2025-10-21
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
