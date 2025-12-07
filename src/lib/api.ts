@@ -117,7 +117,7 @@ class ApiClient {
   }
 
   async refreshToken(): Promise<boolean> {
-    try {
+     try {
       const refreshToken = localStorage.getItem('refresh_token');
       if (!refreshToken) return false;
 
@@ -168,7 +168,7 @@ class ApiClient {
   // File upload with presigned URL
   async uploadFile(file: File, path: string) {
     const { presigned_url, file_key } = await this.request<{ presigned_url: string; file_key: string }>(
-      '/files/presigned-url',
+       '/files/presigned-url',
       {
         method: 'POST',
         body: JSON.stringify({ filename: file.name, path }),
@@ -176,9 +176,11 @@ class ApiClient {
     );
 
     await fetch(presigned_url, {
+
       method: 'PUT',
       body: file,
       headers: { 'Content-Type': file.type },
+
     });
 
     await this.request('/files/confirm', {
